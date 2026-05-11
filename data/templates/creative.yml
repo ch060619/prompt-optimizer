@@ -1,0 +1,76 @@
+templates:
+  - id: creative-story
+    name: 故事创作
+    category: creative
+    description: 创作有角色、冲突和节奏的故事。
+    tags: ["故事", "写作", "创意"]
+    variables: ["genre", "theme"]
+    template: |
+      请创作一篇 {genre} 故事。
+      主题：{theme}
+      要求：包含主角、冲突、转折和结尾，语言有画面感。
+    best_practices:
+      - 指定体裁和读者年龄。
+      - 明确长度和风格。
+  - id: creative-ad-copy
+    name: 广告文案
+    category: creative
+    description: 生成多版本营销文案。
+    tags: ["广告", "文案", "营销"]
+    variables: ["product", "audience"]
+    template: |
+      请为 {product} 面向 {audience} 写 5 条广告文案。
+      输出：标题、正文、行动号召，并说明适用渠道。
+    best_practices:
+      - 明确渠道和受众。
+      - 避免空泛形容词。
+  - id: creative-role
+    name: 角色设定
+    category: creative
+    description: 构建角色背景、性格和行为动机。
+    tags: ["角色", "设定", "创作"]
+    variables: ["setting", "role_type"]
+    template: |
+      请在 {setting} 中设计一个 {role_type}。
+      输出：姓名、背景、目标、弱点、口头禅、关系网络。
+    best_practices:
+      - 明确世界观。
+      - 让动机和冲突一致。
+  - id: creative-video-script
+    name: 短视频脚本
+    category: creative
+    description: 生成镜头、旁白和节奏安排。
+    tags: ["视频", "脚本", "内容"]
+    variables: ["topic", "duration"]
+    template: |
+      请为 {topic} 写一个 {duration} 短视频脚本。
+      输出：镜头编号、画面、旁白、字幕和节奏说明。
+    best_practices:
+      - 明确时长和平台。
+      - 前 3 秒设置钩子。
+  - id: creative-brand-name
+    name: 品牌命名
+    category: creative
+    description: 生成品牌名并解释含义。
+    tags: ["品牌", "命名", "创意"]
+    variables: ["industry", "positioning"]
+    template: |
+      请为 {industry} 行业、定位为 {positioning} 的品牌生成 20 个名字。
+      输出：名称、含义、风格、适合人群。
+    best_practices:
+      - 指定语言偏好。
+      - 避免难读难记。
+  - id: creative-visual
+    name: 视觉描述
+    category: creative
+    description: 生成图像或设计说明提示词。
+    tags: ["视觉", "设计", "图像"]
+    variables: ["subject", "style"]
+    template: |
+      请为 {subject} 编写视觉提示词。
+      风格：{style}
+      包含构图、光线、色彩、材质、主体细节和负面限制。
+    best_practices:
+      - 指定画幅和风格。
+      - 避免互相冲突的描述。
+

@@ -1,0 +1,92 @@
+templates:
+  - id: tech-code-generation
+    name: 代码生成
+    category: tech
+    description: 生成可维护、可测试的代码实现。
+    tags: ["代码", "开发", "实现"]
+    variables: ["language", "feature", "constraints"]
+    template: |
+      你是一名资深 {language} 工程师。请实现 {feature}。
+      背景：说明现有系统、输入输出和调用场景。
+      约束：{constraints}
+      输出格式：先给实现方案，再给完整代码，最后给测试用例。
+    best_practices:
+      - 明确语言、框架和版本。
+      - 描述输入输出、异常和测试要求。
+  - id: tech-code-review
+    name: 代码审查
+    category: tech
+    description: 审查代码中的缺陷、风险和测试缺口。
+    tags: ["代码审查", "质量", "测试"]
+    variables: ["language", "focus"]
+    template: |
+      你是一名严谨的 {language} 代码审查者。
+      请重点审查：{focus}
+      输出格式：按严重程度列出问题，包含文件/位置、原因、影响和修复建议。
+    best_practices:
+      - 指定审查重点。
+      - 要求按风险排序。
+  - id: tech-bug-debugging
+    name: Bug 定位
+    category: tech
+    description: 系统化分析故障原因并给出排查路径。
+    tags: ["调试", "Bug", "排查"]
+    variables: ["symptom", "environment"]
+    template: |
+      你是一名故障排查专家。现象：{symptom}
+      环境：{environment}
+      请按可能性排序给出原因、验证方法和修复方案。
+    best_practices:
+      - 补充错误日志和复现步骤。
+      - 区分假设和已确认事实。
+  - id: tech-architecture
+    name: 架构设计
+    category: tech
+    description: 设计模块边界、数据流和技术方案。
+    tags: ["架构", "设计", "系统"]
+    variables: ["system", "requirements"]
+    template: |
+      你是一名软件架构师。请为 {system} 设计架构。
+      需求：{requirements}
+      输出：模块划分、数据流、接口、风险、演进计划。
+    best_practices:
+      - 明确非功能需求。
+      - 写出权衡与替代方案。
+  - id: tech-test-cases
+    name: 测试用例
+    category: tech
+    description: 生成单元测试、集成测试和边界场景。
+    tags: ["测试", "质量", "用例"]
+    variables: ["feature", "framework"]
+    template: |
+      请为 {feature} 编写 {framework} 测试计划和测试用例。
+      覆盖正常路径、边界条件、异常输入和回归风险。
+    best_practices:
+      - 明确测试框架。
+      - 覆盖失败场景。
+  - id: tech-sql-query
+    name: SQL 查询
+    category: tech
+    description: 生成可读、可优化的 SQL。
+    tags: ["SQL", "数据库", "查询"]
+    variables: ["schema", "question"]
+    template: |
+      你是一名数据库专家。表结构：{schema}
+      查询目标：{question}
+      请输出 SQL、索引建议和性能注意事项。
+    best_practices:
+      - 提供表结构和样例数据。
+      - 说明数据库类型。
+  - id: tech-api-docs
+    name: API 文档
+    category: tech
+    description: 生成接口文档和调用示例。
+    tags: ["API", "文档", "接口"]
+    variables: ["endpoint", "method"]
+    template: |
+      请为 {method} {endpoint} 编写 API 文档。
+      包含用途、请求参数、响应结构、错误码和调用示例。
+    best_practices:
+      - 明确认证方式。
+      - 提供请求和响应示例。
+

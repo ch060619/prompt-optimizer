@@ -1,0 +1,77 @@
+templates:
+  - id: business-email
+    name: 商务邮件
+    category: business
+    description: 生成清晰、得体、目标明确的商务邮件。
+    tags: ["邮件", "沟通", "商务"]
+    variables: ["recipient", "goal", "tone"]
+    template: |
+      请写一封发给 {recipient} 的商务邮件。
+      目标：{goal}
+      语气：{tone}
+      输出：主题、正文、行动请求。
+    best_practices:
+      - 明确收件人与行动请求。
+      - 控制语气和篇幅。
+  - id: business-meeting-minutes
+    name: 会议纪要
+    category: business
+    description: 将会议内容整理为决策、行动项和风险。
+    tags: ["会议", "纪要", "协作"]
+    variables: ["notes"]
+    template: |
+      请将以下会议记录整理为纪要：{notes}
+      输出：会议结论、待办事项、负责人、截止时间、风险。
+    best_practices:
+      - 区分事实、决定和待办。
+      - 为行动项添加负责人。
+  - id: business-competitor
+    name: 竞品分析
+    category: business
+    description: 对比产品能力、定位和机会点。
+    tags: ["竞品", "市场", "分析"]
+    variables: ["product", "competitors"]
+    template: |
+      请为 {product} 分析竞品：{competitors}
+      输出：定位、核心功能、价格、优势、弱点、机会建议。
+    best_practices:
+      - 指定竞品名单。
+      - 要求给出可行动建议。
+  - id: business-plan
+    name: 商业计划
+    category: business
+    description: 生成结构化商业计划草案。
+    tags: ["计划", "商业", "战略"]
+    variables: ["idea", "market"]
+    template: |
+      请为 {idea} 编写商业计划。
+      市场：{market}
+      输出：目标客户、价值主张、收入模式、成本、风险和里程碑。
+    best_practices:
+      - 明确市场和目标客户。
+      - 量化关键假设。
+  - id: business-sales-script
+    name: 销售话术
+    category: business
+    description: 构建销售开场、异议处理和成交推进。
+    tags: ["销售", "话术", "客户"]
+    variables: ["product", "customer"]
+    template: |
+      请为 {product} 面向 {customer} 设计销售话术。
+      输出：开场、痛点确认、价值说明、异议处理、下一步行动。
+    best_practices:
+      - 明确客户画像。
+      - 避免夸大承诺。
+  - id: business-okr
+    name: OKR 制定
+    category: business
+    description: 生成目标和关键结果。
+    tags: ["OKR", "管理", "目标"]
+    variables: ["team", "period"]
+    template: |
+      请为 {team} 制定 {period} OKR。
+      输出：3 个目标，每个目标包含 3-4 个可量化关键结果。
+    best_practices:
+      - 关键结果必须可衡量。
+      - 控制目标数量。
+

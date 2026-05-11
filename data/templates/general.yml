@@ -1,0 +1,64 @@
+templates:
+  - id: general-summary
+    name: 总结
+    category: general
+    description: 将长内容提炼为结构化摘要。
+    tags: ["总结", "摘要", "整理"]
+    variables: ["content", "audience"]
+    template: |
+      请为 {audience} 总结以下内容：{content}
+      输出：核心结论、关键依据、行动建议和待确认问题。
+    best_practices:
+      - 指定摘要对象。
+      - 保留关键数字和结论。
+  - id: general-translation
+    name: 翻译
+    category: general
+    description: 控制语气和术语一致性的翻译。
+    tags: ["翻译", "语言", "本地化"]
+    variables: ["language", "text"]
+    template: |
+      请将以下文本翻译为 {language}：{text}
+      要求：术语一致，语气自然，保留原文格式。
+    best_practices:
+      - 指定目标语言和地区。
+      - 给出术语表。
+  - id: general-rewrite
+    name: 改写
+    category: general
+    description: 保留含义并调整风格。
+    tags: ["改写", "润色", "写作"]
+    variables: ["style", "text"]
+    template: |
+      请按 {style} 风格改写以下内容：{text}
+      输出：改写版本和主要改动说明。
+    best_practices:
+      - 明确风格和读者。
+      - 说明不可改变的信息。
+  - id: general-structured-output
+    name: 结构化输出
+    category: general
+    description: 将非结构内容转为固定字段。
+    tags: ["JSON", "结构化", "抽取"]
+    variables: ["schema", "content"]
+    template: |
+      请从以下内容抽取信息：{content}
+      输出格式必须符合：{schema}
+      无法确定的字段填 null。
+    best_practices:
+      - 给出字段 schema。
+      - 说明缺失值处理方式。
+  - id: general-decision
+    name: 决策分析
+    category: general
+    description: 对多个选项进行权衡。
+    tags: ["决策", "分析", "比较"]
+    variables: ["decision", "options"]
+    template: |
+      请帮助分析决策：{decision}
+      选项：{options}
+      输出：评价标准、对比表、风险、推荐方案和适用条件。
+    best_practices:
+      - 明确评价标准权重。
+      - 区分短期和长期影响。
+

@@ -1,0 +1,50 @@
+templates:
+  - id: education-course
+    name: 课程设计
+    category: education
+    description: 设计课程大纲和教学活动。
+    tags: ["课程", "教学", "大纲"]
+    variables: ["topic", "level"]
+    template: |
+      请为 {level} 学习者设计 {topic} 课程。
+      输出：学习目标、课时安排、活动、作业和评估方式。
+    best_practices:
+      - 明确学习者水平。
+      - 目标可观察可评估。
+  - id: education-explain
+    name: 知识点解释
+    category: education
+    description: 用通俗语言解释复杂概念。
+    tags: ["解释", "学习", "知识"]
+    variables: ["concept", "audience"]
+    template: |
+      请向 {audience} 解释 {concept}。
+      输出：一句话定义、类比、例子、常见误解和小练习。
+    best_practices:
+      - 指定受众基础。
+      - 使用例子验证理解。
+  - id: education-exercises
+    name: 练习题生成
+    category: education
+    description: 生成分层练习和答案解析。
+    tags: ["练习", "题目", "评估"]
+    variables: ["topic", "difficulty"]
+    template: |
+      请围绕 {topic} 生成 {difficulty} 难度练习题。
+      输出：题目、答案、解析和评分标准。
+    best_practices:
+      - 明确题型和数量。
+      - 解析要说明思路。
+  - id: education-plan
+    name: 学习计划
+    category: education
+    description: 规划阶段目标、资源和检查点。
+    tags: ["学习", "计划", "目标"]
+    variables: ["goal", "time"]
+    template: |
+      请为目标 {goal} 制定 {time} 学习计划。
+      输出：阶段目标、每日安排、资源、练习和复盘方式。
+    best_practices:
+      - 明确可投入时间。
+      - 设置检查点。
+

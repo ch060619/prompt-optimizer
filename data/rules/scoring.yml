@@ -1,0 +1,74 @@
+dimensions:
+  - id: clarity
+    label: 清晰度
+    weight: 1.2
+    keywords: ["目标", "任务", "请", "需要", "明确", "说明"]
+    min_length: 60
+    suggestion:
+      title: 明确任务目标
+      detail: 说明希望模型完成什么任务，以及最终结果用于什么场景。
+      example: "目标：为产品经理生成一份面向研发团队的需求说明。"
+  - id: specificity
+    label: 具体性
+    weight: 1.1
+    keywords: ["具体", "包含", "必须", "至少", "步骤", "示例"]
+    min_length: 80
+    suggestion:
+      title: 增加具体约束
+      detail: 添加数量、范围、受众、边界和必须覆盖的内容。
+      example: "必须包含 3 个方案、优缺点对比和推荐结论。"
+  - id: context
+    label: 上下文完整度
+    weight: 1.0
+    keywords: ["背景", "上下文", "受众", "场景", "行业", "现状"]
+    min_length: 90
+    suggestion:
+      title: 补充背景信息
+      detail: 提供业务背景、用户画像、已有材料或限制条件。
+      example: "背景：目标用户是没有编程经验的运营人员。"
+  - id: output_format
+    label: 输出格式
+    weight: 1.0
+    keywords: ["格式", "表格", "json", "markdown", "列表", "结构"]
+    min_length: 70
+    suggestion:
+      title: 指定输出格式
+      detail: 明确要求模型使用 Markdown、JSON、表格或固定字段输出。
+      example: "输出格式：使用 Markdown 表格，列为问题、原因、建议。"
+  - id: constraints
+    label: 约束条件
+    weight: 0.9
+    keywords: ["限制", "不要", "避免", "不能", "约束", "字数"]
+    min_length: 80
+    suggestion:
+      title: 添加限制条件
+      detail: 写清哪些内容不能出现、字数范围、语气和合规要求。
+      example: "限制：不超过 800 字，不使用夸张营销语。"
+  - id: role
+    label: 角色设定
+    weight: 0.8
+    keywords: ["你是", "扮演", "专家", "顾问", "工程师", "老师"]
+    min_length: 50
+    suggestion:
+      title: 设置专业角色
+      detail: 指定模型以哪个角色、经验水平和工作方式响应。
+      example: "你是一名资深后端架构师，关注可维护性和性能。"
+  - id: examples
+    label: 示例质量
+    weight: 0.8
+    keywords: ["例如", "示例", "样例", "参考", "输入", "输出"]
+    min_length: 100
+    suggestion:
+      title: 提供输入输出示例
+      detail: 给出至少一个期望风格或格式的样例，降低理解偏差。
+      example: "示例输出：问题 -> 影响 -> 修复建议。"
+  - id: actionability
+    label: 可执行性
+    weight: 1.2
+    keywords: ["步骤", "检查", "生成", "输出", "给出", "评估", "改进"]
+    min_length: 90
+    suggestion:
+      title: 强化可执行步骤
+      detail: 将笼统要求拆成可操作步骤，并说明验收标准。
+      example: "请先列出问题，再给出修改后的完整版本，最后说明改动理由。"
+
