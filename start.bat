@@ -3,12 +3,21 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 cd /d "%~dp0"
 
+set "APP_HOST=127.0.0.1"
+set "APP_PORT=8000"
+set "FRONTEND_PORT=5173"
+
 for /f "tokens=2,*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul ^| findstr /i "Path"') do set "MACHINE_PATH=%%B"
 for /f "tokens=2,*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul ^| findstr /i "Path"') do set "USER_PATH=%%B"
 if defined MACHINE_PATH set "PATH=%MACHINE_PATH%;%PATH%"
 if defined USER_PATH set "PATH=%USER_PATH%;%PATH%"
 
-echo [1/6] Checking Python...
+echo [1/7] Stopping old local app processes...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(%APP_PORT%,%FRONTEND_PORT%); $ownerPids=Get-NetTCPConnection -LocalPort $ports -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($ownerPid in $ownerPids) { if ($ownerPid -and $ownerPid -ne $PID) { $proc=Get-Process -Id $ownerPid -ErrorAction SilentlyContinue; if ($proc) { Write-Host ('Stopping PID {0} ({1}) on app port' -f $ownerPid,$proc.ProcessName); Stop-Process -Id $ownerPid -Force -ErrorAction SilentlyContinue } } }"
+if errorlevel 1 (
+  echo WARN: Could not inspect or stop old port processes. Continuing...
+)
+echo [2/7] Checking Python...
 where python >nul 2>nul
 if errorlevel 1 (
   echo ERROR: Python 3.12+ is required but was not found in PATH.
@@ -24,7 +33,7 @@ if errorlevel 1 (
 )
 python --version
 
-echo [2/6] Checking Node.js...
+echo [3/7] Checking Node.js...
 where node >nul 2>nul
 if errorlevel 1 (
   echo ERROR: Node.js 18+ is required but was not found in PATH.
@@ -40,7 +49,7 @@ if %NODE_MAJOR% LSS 18 (
 )
 node --version
 
-echo [3/6] Preparing Python virtual environment...
+echo [4/7] Preparing Python virtual environment...
 if not exist ".venv\Scripts\python.exe" (
   python -m venv .venv
   if errorlevel 1 (
@@ -58,7 +67,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [4/6] Installing frontend dependencies...
+echo [5/7] Installing frontend dependencies...
 cd frontend
 if not exist "node_modules" (
   call npm.cmd install
@@ -69,7 +78,7 @@ if not exist "node_modules" (
   )
 )
 
-echo [5/6] Building frontend...
+echo [6/7] Building frontend...
 call npm.cmd run build
 if errorlevel 1 (
   echo ERROR: Failed to build frontend.
@@ -78,8 +87,8 @@ if errorlevel 1 (
 )
 cd ..
 
-echo [6/6] Starting Prompt Optimizer...
-echo Open http://127.0.0.1:8000 in your browser.
-python -m prompt_optimizer.cli serve --host 127.0.0.1 --port 8000
+echo [7/7] Starting Prompt Optimizer...
+echo Open http://%APP_HOST%:%APP_PORT% in your browser.
+python -m prompt_optimizer.cli serve --host %APP_HOST% --port %APP_PORT%
 
 endlocal
