@@ -29,8 +29,9 @@ export function App() {
   const visibleTemplates = useMemo(() => templates, [templates]);
 
   useEffect(() => {
-    void loadTemplates(category);
-    void loadHistory();
+    void withLoading(async () => {
+      await Promise.all([loadTemplates(category), loadHistory()]);
+    });
   }, [category]);
 
   async function loadTemplates(nextCategory: string) {
@@ -213,4 +214,3 @@ export function App() {
     </main>
   );
 }
-

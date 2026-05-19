@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from prompt_optimizer.api.app import create_app
-from prompt_optimizer.core.models import ExportFormat
+from prompt_optimizer.core.models import ExportFormat, PromptAnalysis
 from prompt_optimizer.services import AppServices
 
 app = typer.Typer(help="离线提示词分析、优化、模板管理和版本对比工具。")
@@ -141,8 +141,8 @@ def serve(
     uvicorn.run(create_app(), host=host, port=port)
 
 
-def _print_analysis(analysis: object) -> None:
-    score = analysis.score  # type: ignore[attr-defined]
+def _print_analysis(analysis: PromptAnalysis) -> None:
+    score = analysis.score
     console.print(f"[bold]总分：{score.total_score}/100[/bold]")
     table = Table(title="评分维度")
     table.add_column("维度")
@@ -152,5 +152,5 @@ def _print_analysis(analysis: object) -> None:
         table.add_row(dimension.label, str(dimension.score), dimension.reason)
     console.print(table)
     console.print("\n[bold]优化建议[/bold]")
-    for suggestion in analysis.suggestions:  # type: ignore[attr-defined]
+    for suggestion in analysis.suggestions:
         console.print(f"- [{suggestion.priority}] {suggestion.title}: {suggestion.detail}")

@@ -48,9 +48,9 @@ export const api = {
       body: JSON.stringify({ version_id: versionId, format })
     });
     if (!response.ok) {
-      throw new Error("导出失败");
+      const payload = await response.json().catch(() => ({ detail: "导出失败" }));
+      throw new Error(payload.detail ?? "导出失败");
     }
     return response.text();
   }
 };
-
