@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "prompt-optimizer"
-version = "0.1.0"
+version = "2.0.0"
 description = "离线优先的提示词分析、优化、模板管理与版本对比工具"
 readme = "../README.md"
 requires-python = ">=3.12"

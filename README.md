@@ -2,6 +2,18 @@
 
 Prompt Optimizer 是一个离线优先的提示词分析、优化、模板管理、版本对比与导出工具。项目包含 Python 后端核心库、命令行界面、本地 FastAPI 服务和 React Web 工作台，不依赖外部 AI API，适合本地使用和开源二次开发。
 
+## V2.0 版本状态
+
+V2.0 聚焦 AI 工程化能力补强：模型 Provider 抽象、SSE 流式优化、多用户归属、后台任务、评测集、结构化日志、Docker 构建和 CI 检查。
+
+本次发布保留旧版本在 `main` 分支，V2.0 使用 `release/v2.0` 分支保存发布线，并用 `v2.0` Git tag 标记可复现的版本快照。GitHub Release 基于 `v2.0` tag 创建，而不是只依赖分支。
+
+已在本机完成的真实验证：
+
+- 后端测试覆盖率：`81%`，来自 `pytest --cov=prompt_optimizer --cov-report=term-missing`。
+- 评测集：`55` 条样本，报告由 CLI 生成在 [docs/evaluation-report.md](docs/evaluation-report.md)。
+- Docker：已通过 `docker build -t prompt-optimizer:local .` 构建，并完成容器内 `/docs`、`/openapi.json`、`/api/templates`、`/api/analyze`、`/api/auth/register`、`/api/auth/login`、`/api/optimize` 冒烟验证。
+
 ## 核心功能
 
 - 提示词分析与评分：按清晰度、具体性、上下文、输出格式、约束、角色、示例、可执行性评分。
@@ -19,16 +31,26 @@ Prompt Optimizer 是一个离线优先的提示词分析、优化、模板管理
 - Python 3.12+
 - Node.js 18+（仅开发或构建前端时需要）
 - Git
+- Docker Desktop（可选，仅 Docker 启动或镜像构建时需要）
 
 ## 一键启动
 
-Windows 用户可以直接双击 `start.bat`。脚本会自动检查 Python、Node.js 18+ 和 npm，创建 `.venv`，安装后端依赖，安装/构建前端，并启动本地 Web 服务。
+Windows 用户可以直接双击 `start.bat`。脚本默认使用本地 Python/Node.js 模式：检查 Python、Node.js 18+ 和 npm，创建 `.venv`，安装后端依赖，安装/构建前端，并启动本地 Web 服务。
 
 启动后访问：
 
 ```text
 http://127.0.0.1:8000
 ```
+
+也可以显式选择启动模式：
+
+```bat
+start.bat local
+start.bat docker
+```
+
+`start.bat docker` 会检查 Docker Desktop 是否运行，构建 `prompt-optimizer:v2.0` 和 `prompt-optimizer:local` 镜像，并以前台容器方式启动服务。
 
 ## 安装步骤
 
@@ -87,6 +109,8 @@ data/templates/           内置提示词模板
 data/evaluation/          提示词评测集
 docs/                     架构、计划、规范和贡献文档
 .github/workflows/ci.yml  自动化测试与质量检查
+Dockerfile                多阶段 Docker 构建
+.dockerignore             Docker 构建上下文排除规则
 ```
 
 ## 评测集
@@ -126,6 +150,13 @@ cd ../frontend
 npm test
 npm run lint
 npm run build
+```
+
+Docker 验证：
+
+```bash
+docker build -t prompt-optimizer:local .
+docker run --rm --name prompt-optimizer-smoke -p 8000:8000 prompt-optimizer:local
 ```
 
 ## 贡献指南
