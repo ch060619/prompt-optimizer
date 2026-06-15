@@ -144,6 +144,18 @@ textarea {
   margin-top: 16px;
 }
 
+.stream-panel {
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.stream-panel pre {
+  margin-bottom: 0;
+}
+
 .score-head {
   align-items: baseline;
   display: flex;
@@ -253,4 +265,3 @@ pre {
     border-width: 0 0 1px;
   }
 }
-

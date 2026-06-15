@@ -2,7 +2,13 @@ import { Download, GitCompare, History, Library, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { api } from "./api";
-import type { DiffResult, PromptAnalysis, PromptTemplate, VersionSummary } from "./types";
+import type {
+  DiffResult,
+  OptimizeResponse,
+  PromptAnalysis,
+  PromptTemplate,
+  VersionSummary
+} from "./types";
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
@@ -25,6 +31,8 @@ export function App() {
   const [activeVersion, setActiveVersion] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [streamStatus, setStreamStatus] = useState<string | null>(null);
+  const [streamText, setStreamText] = useState("");
 
   const visibleTemplates = useMemo(() => templates, [templates]);
 
@@ -54,11 +62,53 @@ export function App() {
   async function runOptimize() {
     await withLoading(async () => {
       const result = await api.optimize(prompt, selectedTemplate);
-      setAnalysis(result.analysis);
-      setActiveVersion(result.version_id);
+      applyOptimizeResult(result);
       setDiff(null);
       await loadHistory();
     });
+  }
+
+  async function runStreamOptimize() {
+    await withLoading(async () => {
+      setStreamText("");
+      setStreamStatus("准备优化");
+      await api.streamOptimize(prompt, selectedTemplate, "offline", (event) => {
+        if (event.event === "started") {
+          setStreamStatus("开始优化");
+        }
+        if (event.event === "analysis") {
+          setStreamStatus("完成初始分析");
+          setAnalysis(event.data as PromptAnalysis);
+        }
+        if (event.event === "chunk") {
+          const payload = event.data as { text: string };
+          setStreamStatus("生成优化文本");
+          setStreamText((current) => current + payload.text);
+        }
+        if (event.event === "fallback") {
+          setStreamStatus("模型失败，已降级到离线规则");
+        }
+        if (event.event === "saved") {
+          const payload = event.data as { version_id: number };
+          setActiveVersion(payload.version_id);
+        }
+        if (event.event === "completed") {
+          applyOptimizeResult(event.data as OptimizeResponse);
+          setStreamStatus("优化完成");
+        }
+        if (event.event === "error") {
+          const payload = event.data as { detail: string };
+          throw new Error(payload.detail);
+        }
+      });
+      setDiff(null);
+      await loadHistory();
+    });
+  }
+
+  function applyOptimizeResult(result: OptimizeResponse) {
+    setAnalysis(result.analysis);
+    setActiveVersion(result.version_id);
   }
 
   async function runDiff(targetId: number) {
@@ -142,6 +192,7 @@ export function App() {
         <div className="toolbar">
           <button onClick={runAnalyze} disabled={loading}>分析</button>
           <button className="primary" onClick={runOptimize} disabled={loading}>优化并保存</button>
+          <button onClick={() => void runStreamOptimize()} disabled={loading}>流式优化</button>
           {["md", "json", "txt", "csv"].map((format) => (
             <button key={format} onClick={() => void runExport(format)} title={`导出 ${format}`}>
               <Download size={15} />
@@ -151,6 +202,12 @@ export function App() {
         </div>
         {error ? <div className="error">{error}</div> : null}
         <textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} />
+        {streamStatus ? (
+          <section className="stream-panel">
+            <strong>{streamStatus}</strong>
+            {streamText ? <pre>{streamText}</pre> : null}
+          </section>
+        ) : null}
         {analysis ? (
           <section className="result-panel">
             <div className="score-head">

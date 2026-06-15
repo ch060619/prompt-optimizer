@@ -80,6 +80,22 @@ def test_api_optimize_falls_back_to_offline_provider(tmp_path: Path) -> None:
     assert "boom" in metadata["error_summary"]
 
 
+def test_api_optimize_stream_emits_sse_events(client: TestClient) -> None:
+    with client.stream(
+        "POST",
+        "/api/optimize/stream",
+        json={"prompt": "帮我写销售话术", "provider": "offline"},
+    ) as response:
+        body = "".join(response.iter_text())
+
+    assert response.status_code == 200
+    assert "event: started" in body
+    assert "event: analysis" in body
+    assert "event: chunk" in body
+    assert "event: saved" in body
+    assert "event: completed" in body
+
+
 class FailingProvider:
     name = "openai"
 

@@ -53,6 +53,20 @@ export interface OptimizeResponse {
   };
 }
 
+export type StreamEventName =
+  | "started"
+  | "analysis"
+  | "chunk"
+  | "fallback"
+  | "saved"
+  | "completed"
+  | "error";
+
+export interface StreamEvent {
+  event: StreamEventName;
+  data: unknown;
+}
+
 export interface VersionSummary {
   id: number;
   original_preview: string;

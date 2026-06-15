@@ -1,12 +1,20 @@
 from __future__ import annotations
 
+import json
+from collections.abc import Iterator
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from prompt_optimizer.core.models import AnalyzeRequest, ExportRequest, OptimizeRequest
+from prompt_optimizer.core.models import (
+    AnalyzeRequest,
+    ExportRequest,
+    OptimizeRequest,
+    PromptTemplate,
+)
 from prompt_optimizer.paths import PROJECT_ROOT
 from prompt_optimizer.services import AppServices
 
@@ -34,15 +42,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
     @app.post("/api/optimize")
     def optimize(request: OptimizeRequest) -> object:
         try:
-            template = (
-                current_services.templates.get(request.template_id)
-                if request.template_id
-                else None
-            )
-            prompt = request.prompt
-            if request.template_id and request.variables:
-                rendered = current_services.templates.render(request.template_id, request.variables)
-                prompt = f"{rendered}\n\n用户补充：{request.prompt}"
+            prompt, template = _prepare_prompt(current_services, request)
             return current_services.optimize_and_save(
                 original_prompt=request.prompt,
                 prompt=prompt,
@@ -53,6 +53,38 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/optimize/stream")
+    def optimize_stream(request: OptimizeRequest) -> StreamingResponse:
+        def events() -> Iterator[str]:
+            try:
+                yield _sse("started", {"provider": request.provider})
+                prompt, template = _prepare_prompt(current_services, request)
+                preview = current_services.analyzer.analyze(prompt)
+                yield _sse("analysis", preview.model_dump(mode="json"))
+                result = current_services.optimize_and_save(
+                    original_prompt=request.prompt,
+                    prompt=prompt,
+                    template=template,
+                    provider_name=request.provider,
+                )
+                if result.metadata.fallback_used:
+                    yield _sse("fallback", result.metadata.model_dump(mode="json"))
+                optimized = result.analysis.optimized_prompt or ""
+                for chunk in _chunks(optimized):
+                    yield _sse("chunk", {"text": chunk})
+                yield _sse(
+                    "saved",
+                    {
+                        "version_id": result.version_id,
+                        "metadata": result.metadata.model_dump(mode="json"),
+                    },
+                )
+                yield _sse("completed", result.model_dump(mode="json"))
+            except (KeyError, ValueError) as exc:
+                yield _sse("error", {"detail": str(exc)})
+
+        return StreamingResponse(events(), media_type="text/event-stream")
 
     @app.get("/api/templates")
     def templates(category: str | None = None) -> object:
@@ -105,6 +137,30 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         app.mount("/", StaticFiles(directory=static_dir, html=True), name="web")
 
     return app
+
+
+def _prepare_prompt(
+    current_services: AppServices,
+    request: OptimizeRequest,
+) -> tuple[str, PromptTemplate | None]:
+    template = current_services.templates.get(request.template_id) if request.template_id else None
+    prompt = request.prompt
+    if request.template_id and request.variables:
+        rendered = current_services.templates.render(request.template_id, request.variables)
+        prompt = f"{rendered}\n\n用户补充：{request.prompt}"
+    return prompt, template
+
+
+def _sse(event: str, payload: object) -> str:
+    data = json.dumps(payload, ensure_ascii=False)
+    return f"event: {event}\ndata: {data}\n\n"
+
+
+def _chunks(text: str, size: int = 120) -> Iterator[str]:
+    if not text:
+        return
+    for start in range(0, len(text), size):
+        yield text[start : start + size]
 
 
 app = create_app()
