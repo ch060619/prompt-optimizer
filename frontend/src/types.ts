@@ -79,6 +79,22 @@ export interface StreamEvent {
   data: unknown;
 }
 
+export interface TaskCreateResponse {
+  task_id: string;
+  status: "queued" | "running" | "succeeded" | "failed";
+}
+
+export interface TaskRecord {
+  id: string;
+  owner_id: number;
+  kind: "optimize" | "export" | "evaluate";
+  status: "queued" | "running" | "succeeded" | "failed";
+  result_json?: unknown;
+  error?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface VersionSummary {
   id: number;
   original_preview: string;

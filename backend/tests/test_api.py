@@ -124,6 +124,68 @@ def test_api_rejects_invalid_auth_header(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def test_api_optimize_task_succeeds(client: TestClient) -> None:
+    token = client.post(
+        "/api/auth/register",
+        json={"username": "worker", "password": "secret123"},
+    ).json()["access_token"]
+    response = client.post(
+        "/api/tasks/optimize",
+        json={"prompt": "帮我写销售话术"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    task_id = response.json()["task_id"]
+
+    task_response = client.get(
+        f"/api/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    result_response = client.get(
+        f"/api/tasks/{task_id}/result",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert task_response.json()["status"] == "succeeded"
+    assert result_response.json()["version_id"] >= 1
+
+
+def test_api_export_task_requires_finished_task(client: TestClient) -> None:
+    response = client.post("/api/tasks/export", json={"version_id": 999, "format": "md"})
+    assert response.status_code == 200
+    task_id = response.json()["task_id"]
+
+    result_response = client.get(f"/api/tasks/{task_id}/result")
+
+    assert result_response.status_code == 409
+
+
+def test_api_evaluate_task_is_user_scoped(client: TestClient) -> None:
+    alice_token = client.post(
+        "/api/auth/register",
+        json={"username": "alice2", "password": "secret123"},
+    ).json()["access_token"]
+    bob_token = client.post(
+        "/api/auth/register",
+        json={"username": "bob2", "password": "secret123"},
+    ).json()["access_token"]
+    response = client.post(
+        "/api/tasks/evaluate",
+        json={"prompts": ["帮我写销售话术"], "provider": "offline"},
+        headers={"Authorization": f"Bearer {alice_token}"},
+    )
+    task_id = response.json()["task_id"]
+
+    alice_task = client.get(
+        f"/api/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {alice_token}"},
+    )
+    bob_task = client.get(f"/api/tasks/{task_id}", headers={"Authorization": f"Bearer {bob_token}"})
+
+    assert alice_task.json()["status"] == "succeeded"
+    assert bob_task.status_code == 404
+
+
 def test_api_optimize_falls_back_to_offline_provider(tmp_path: Path) -> None:
     services = AppServices()
     services.versions = VersionService(StorageService(tmp_path / "fallback.sqlite3"))

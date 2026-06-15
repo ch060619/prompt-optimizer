@@ -158,4 +158,66 @@ describe("App", () => {
     expect(await screen.findByText("demo-user")).toBeInTheDocument();
     expect(sawAuthHeader).toBe(true);
   });
+
+  it("runs an optimize background task", async () => {
+    const analysis = {
+      prompt: "帮我写销售话术",
+      optimized_prompt: "后台优化后的提示词",
+      score: { total_score: 80, dimensions: [] },
+      suggestions: [],
+      strengths: [],
+      created_at: "2026-06-15T00:00:00Z"
+    };
+    stubFetch((url: string) => {
+      if (url.startsWith("/api/templates")) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      if (url === "/api/history") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      if (url === "/api/tasks/optimize") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ task_id: "task-1", status: "queued" })
+        });
+      }
+      if (url === "/api/tasks/task-1") {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              id: "task-1",
+              owner_id: 1,
+              kind: "optimize",
+              status: "succeeded",
+              created_at: "2026-06-15T00:00:00Z",
+              updated_at: "2026-06-15T00:00:00Z"
+            })
+        });
+      }
+      if (url === "/api/tasks/task-1/result") {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              version_id: 1,
+              analysis,
+              metadata: {
+                provider_requested: "offline",
+                provider_used: "offline",
+                fallback_used: false,
+                latency_ms: 1
+              }
+            })
+        });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+    render(<App />);
+
+    fireEvent.click(await screen.findByText("后台优化"));
+
+    expect(await screen.findByText("optimize · succeeded")).toBeInTheDocument();
+    expect(screen.getByText("后台优化后的提示词")).toBeInTheDocument();
+  });
 });

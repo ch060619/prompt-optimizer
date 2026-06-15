@@ -7,6 +7,7 @@ import type {
   OptimizeResponse,
   PromptAnalysis,
   PromptTemplate,
+  TaskRecord,
   UserPublic,
   VersionSummary
 } from "./types";
@@ -37,6 +38,7 @@ export function App() {
   const [user, setUser] = useState<UserPublic | null>(null);
   const [username, setUsername] = useState("demo-user");
   const [password, setPassword] = useState("demo-password");
+  const [task, setTask] = useState<TaskRecord | null>(null);
 
   const visibleTemplates = useMemo(() => templates, [templates]);
 
@@ -128,6 +130,26 @@ export function App() {
       });
       setDiff(null);
       await loadHistory();
+    });
+  }
+
+  async function runOptimizeTask() {
+    await withLoading(async () => {
+      const created = await api.createOptimizeTask(prompt, selectedTemplate);
+      let current = await api.task(created.task_id);
+      setTask(current);
+      for (let attempt = 0; attempt < 5 && ["queued", "running"].includes(current.status); attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 250));
+        current = await api.task(created.task_id);
+        setTask(current);
+      }
+      if (current.status === "succeeded") {
+        applyOptimizeResult(await api.taskResult(created.task_id));
+        await loadHistory();
+      }
+      if (current.status === "failed") {
+        throw new Error(current.error ?? "后台任务失败");
+      }
     });
   }
 
@@ -244,6 +266,7 @@ export function App() {
           <button onClick={runAnalyze} disabled={loading}>分析</button>
           <button className="primary" onClick={runOptimize} disabled={loading}>优化并保存</button>
           <button onClick={() => void runStreamOptimize()} disabled={loading}>流式优化</button>
+          <button onClick={() => void runOptimizeTask()} disabled={loading}>后台优化</button>
           {["md", "json", "txt", "csv"].map((format) => (
             <button key={format} onClick={() => void runExport(format)} title={`导出 ${format}`}>
               <Download size={15} />
@@ -257,6 +280,12 @@ export function App() {
           <section className="stream-panel">
             <strong>{streamStatus}</strong>
             {streamText ? <pre>{streamText}</pre> : null}
+          </section>
+        ) : null}
+        {task ? (
+          <section className="task-panel">
+            <strong>后台任务</strong>
+            <span>{task.kind} · {task.status}</span>
           </section>
         ) : null}
         {analysis ? (

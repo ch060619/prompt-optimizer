@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 
 ExportFormat = Literal["md", "json", "txt", "csv"]
 ModelProviderName = Literal["offline", "openai", "tongyi", "zhipu"]
+TaskStatus = Literal["queued", "running", "succeeded", "failed"]
+TaskKind = Literal["optimize", "export", "evaluate"]
 
 
 class ScoreDimension(BaseModel):
@@ -132,3 +134,25 @@ class AuthResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserPublic
+
+
+class TaskRecord(BaseModel):
+    id: str
+    owner_id: int
+    kind: TaskKind
+    status: TaskStatus
+    input_json: dict[str, Any]
+    result_json: dict[str, Any] | None = None
+    error: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class TaskCreateResponse(BaseModel):
+    task_id: str
+    status: TaskStatus
+
+
+class EvaluateTaskRequest(BaseModel):
+    prompts: list[str] = Field(min_length=1, max_length=100)
+    provider: ModelProviderName = "offline"

@@ -10,6 +10,9 @@ from prompt_optimizer.core.models import (
     ProjectSpace,
     PromptAnalysis,
     PromptVersion,
+    TaskKind,
+    TaskRecord,
+    TaskStatus,
     UserPublic,
     VersionSummary,
 )
@@ -231,6 +234,109 @@ class StorageService:
             for row in rows
         ]
 
+    def create_task(
+        self,
+        *,
+        task_id: str,
+        owner_id: int,
+        kind: TaskKind,
+        input_json: dict[str, object],
+    ) -> TaskRecord:
+        now = datetime.now(UTC).isoformat()
+        with self._connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO tasks
+                    (
+                        id,
+                        owner_id,
+                        kind,
+                        status,
+                        input_json,
+                        result_json,
+                        error,
+                        created_at,
+                        updated_at
+                    )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    task_id,
+                    owner_id,
+                    kind,
+                    "queued",
+                    json.dumps(input_json, ensure_ascii=False),
+                    None,
+                    None,
+                    now,
+                    now,
+                ),
+            )
+        return self.get_task(task_id, owner_id)
+
+    def update_task(
+        self,
+        task_id: str,
+        owner_id: int,
+        *,
+        status: TaskStatus,
+        result_json: dict[str, object] | None = None,
+        error: str | None = None,
+    ) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                """
+                UPDATE tasks
+                SET status = ?, result_json = ?, error = ?, updated_at = ?
+                WHERE id = ? AND owner_id = ?
+                """,
+                (
+                    status,
+                    (
+                        json.dumps(result_json, ensure_ascii=False)
+                        if result_json is not None
+                        else None
+                    ),
+                    error,
+                    datetime.now(UTC).isoformat(),
+                    task_id,
+                    owner_id,
+                ),
+            )
+
+    def get_task(self, task_id: str, owner_id: int) -> TaskRecord:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT
+                    id,
+                    owner_id,
+                    kind,
+                    status,
+                    input_json,
+                    result_json,
+                    error,
+                    created_at,
+                    updated_at
+                FROM tasks
+                WHERE id = ? AND owner_id = ?
+                """,
+                (task_id, owner_id),
+            ).fetchone()
+        if row is None:
+            raise KeyError(f"未找到任务：{task_id}")
+        return TaskRecord(
+            id=row["id"],
+            owner_id=int(row["owner_id"]),
+            kind=row["kind"],
+            status=row["status"],
+            input_json=json.loads(row["input_json"]),
+            result_json=json.loads(row["result_json"]) if row["result_json"] else None,
+            error=row["error"],
+            created_at=datetime.fromisoformat(row["created_at"]),
+            updated_at=datetime.fromisoformat(row["updated_at"]),
+        )
+
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.db_path)
         connection.row_factory = sqlite3.Row
@@ -303,6 +409,22 @@ class StorageService:
                 "INTEGER NOT NULL DEFAULT 1",
             )
             self._ensure_column(connection, "user_templates", "project_id", "INTEGER")
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tasks (
+                    id TEXT PRIMARY KEY,
+                    owner_id INTEGER NOT NULL,
+                    kind TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    input_json TEXT NOT NULL,
+                    result_json TEXT,
+                    error TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(owner_id) REFERENCES users(id)
+                )
+                """
+            )
         demo = self.ensure_demo_user()
         default_project = self.ensure_default_project(demo.id)
         with self._connect() as connection:

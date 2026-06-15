@@ -13,6 +13,7 @@ from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.export.service import ExportService
 from prompt_optimizer.providers import ModelProviderError, ModelRequest, ProviderRegistry
 from prompt_optimizer.storage.version_service import VersionService
+from prompt_optimizer.tasks import TaskService
 from prompt_optimizer.templates.manager import TemplateManager
 
 
@@ -25,6 +26,7 @@ class AppServices:
         self.export = ExportService()
         self.providers = ProviderRegistry(self.optimizer)
         self.auth = AuthService()
+        self.tasks = TaskService(self.versions.storage)
 
     def register_user(self, username: str, password: str) -> AuthResponse:
         user = self.versions.storage.create_user(username, self.auth.hash_password(password))

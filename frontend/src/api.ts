@@ -5,6 +5,8 @@ import type {
   PromptAnalysis,
   PromptTemplate,
   StreamEvent,
+  TaskCreateResponse,
+  TaskRecord,
   VersionSummary
 } from "./types";
 
@@ -102,6 +104,18 @@ export const api = {
         onEvent(parsed);
       }
     }
+  },
+  createOptimizeTask(prompt: string, templateId?: string, provider = "offline") {
+    return request<TaskCreateResponse>("/api/tasks/optimize", {
+      method: "POST",
+      body: JSON.stringify({ prompt, template_id: templateId, provider })
+    });
+  },
+  task(taskId: string) {
+    return request<TaskRecord>(`/api/tasks/${taskId}`);
+  },
+  taskResult(taskId: string) {
+    return request<OptimizeResponse>(`/api/tasks/${taskId}/result`);
   },
   templates(category?: string) {
     const query = category ? `?category=${encodeURIComponent(category)}` : "";
