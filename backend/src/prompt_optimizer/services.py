@@ -1,7 +1,14 @@
 from __future__ import annotations
 
+from prompt_optimizer.auth.service import AuthError, AuthService
 from prompt_optimizer.core.analyzer import Analyzer
-from prompt_optimizer.core.models import OptimizeMetadata, OptimizeResponse, PromptTemplate
+from prompt_optimizer.core.models import (
+    AuthResponse,
+    OptimizeMetadata,
+    OptimizeResponse,
+    PromptTemplate,
+    UserPublic,
+)
 from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.export.service import ExportService
 from prompt_optimizer.providers import ModelProviderError, ModelRequest, ProviderRegistry
@@ -17,6 +24,28 @@ class AppServices:
         self.versions = VersionService()
         self.export = ExportService()
         self.providers = ProviderRegistry(self.optimizer)
+        self.auth = AuthService()
+
+    def register_user(self, username: str, password: str) -> AuthResponse:
+        user = self.versions.storage.create_user(username, self.auth.hash_password(password))
+        return AuthResponse(access_token=self.auth.create_token(user), user=user)
+
+    def login_user(self, username: str, password: str) -> AuthResponse:
+        found = self.versions.storage.get_user_by_username(username)
+        if found is None:
+            raise AuthError("用户名或密码错误。")
+        user, password_hash = found
+        if not self.auth.verify_password(password, password_hash):
+            raise AuthError("用户名或密码错误。")
+        return AuthResponse(access_token=self.auth.create_token(user), user=user)
+
+    def get_user_from_token(self, token: str | None) -> UserPublic:
+        if not token:
+            return self.versions.storage.ensure_demo_user()
+        if not token.startswith("Bearer "):
+            raise AuthError("无效 token。")
+        token_value = token.removeprefix("Bearer ").strip()
+        return self.versions.storage.get_user(self.auth.read_token(token_value))
 
     def optimize_and_save(
         self,
@@ -25,6 +54,8 @@ class AppServices:
         prompt: str,
         template: PromptTemplate | None,
         provider_name: str = "offline",
+        owner_id: int = 1,
+        project_id: int | None = None,
     ) -> OptimizeResponse:
         request = ModelRequest(prompt=prompt, template=template)
         fallback_used = False
@@ -42,6 +73,8 @@ class AppServices:
             original_prompt=original_prompt,
             optimized_prompt=analysis.optimized_prompt or prompt,
             analysis=analysis,
+            owner_id=owner_id,
+            project_id=project_id,
         )
         metadata = OptimizeMetadata(
             provider_requested=provider_name,

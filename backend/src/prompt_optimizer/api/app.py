@@ -4,16 +4,18 @@ import json
 from collections.abc import Iterator
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from prompt_optimizer.core.models import (
     AnalyzeRequest,
+    AuthRequest,
     ExportRequest,
     OptimizeRequest,
     PromptTemplate,
+    UserPublic,
 )
 from prompt_optimizer.paths import PROJECT_ROOT
 from prompt_optimizer.services import AppServices
@@ -39,15 +41,43 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    @app.post("/api/optimize")
-    def optimize(request: OptimizeRequest) -> object:
+    @app.post("/api/auth/register")
+    def register(request: AuthRequest) -> object:
         try:
+            return current_services.register_user(request.username, request.password)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/auth/login")
+    def login(request: AuthRequest) -> object:
+        try:
+            return current_services.login_user(request.username, request.password)
+        except RuntimeError as exc:
+            raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+    @app.get("/api/auth/me")
+    def me(authorization: str | None = Header(default=None)) -> object:
+        return _current_user(current_services, authorization)
+
+    @app.get("/api/projects")
+    def projects(authorization: str | None = Header(default=None)) -> object:
+        user = _current_user(current_services, authorization)
+        return current_services.versions.storage.list_project_spaces(user.id)
+
+    @app.post("/api/optimize")
+    def optimize(
+        request: OptimizeRequest,
+        authorization: str | None = Header(default=None),
+    ) -> object:
+        try:
+            user = _current_user(current_services, authorization)
             prompt, template = _prepare_prompt(current_services, request)
             return current_services.optimize_and_save(
                 original_prompt=request.prompt,
                 prompt=prompt,
                 template=template,
                 provider_name=request.provider,
+                owner_id=user.id,
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -55,9 +85,13 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.post("/api/optimize/stream")
-    def optimize_stream(request: OptimizeRequest) -> StreamingResponse:
+    def optimize_stream(
+        request: OptimizeRequest,
+        authorization: str | None = Header(default=None),
+    ) -> StreamingResponse:
         def events() -> Iterator[str]:
             try:
+                user = _current_user(current_services, authorization)
                 yield _sse("started", {"provider": request.provider})
                 prompt, template = _prepare_prompt(current_services, request)
                 preview = current_services.analyzer.analyze(prompt)
@@ -67,6 +101,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
                     prompt=prompt,
                     template=template,
                     provider_name=request.provider,
+                    owner_id=user.id,
                 )
                 if result.metadata.fallback_used:
                     yield _sse("fallback", result.metadata.model_dump(mode="json"))
@@ -98,27 +133,38 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/api/history")
-    def history() -> object:
-        return current_services.versions.list()
+    def history(authorization: str | None = Header(default=None)) -> object:
+        user = _current_user(current_services, authorization)
+        return current_services.versions.list(user.id)
 
     @app.get("/api/history/{version_id}")
-    def version(version_id: int) -> object:
+    def version(version_id: int, authorization: str | None = Header(default=None)) -> object:
         try:
-            return current_services.versions.get(version_id)
+            user = _current_user(current_services, authorization)
+            return current_services.versions.get(version_id, user.id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/api/history/{version_id}/diff/{other_id}")
-    def diff(version_id: int, other_id: int) -> object:
+    def diff(
+        version_id: int,
+        other_id: int,
+        authorization: str | None = Header(default=None),
+    ) -> object:
         try:
-            return current_services.versions.diff(version_id, other_id)
+            user = _current_user(current_services, authorization)
+            return current_services.versions.diff(version_id, other_id, user.id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/api/export")
-    def export(request: ExportRequest) -> Response:
+    def export(
+        request: ExportRequest,
+        authorization: str | None = Header(default=None),
+    ) -> Response:
         try:
-            version = current_services.versions.get(request.version_id)
+            user = _current_user(current_services, authorization)
+            version = current_services.versions.get(request.version_id, user.id)
             content = current_services.export.render(version, request.format)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -149,6 +195,13 @@ def _prepare_prompt(
         rendered = current_services.templates.render(request.template_id, request.variables)
         prompt = f"{rendered}\n\n用户补充：{request.prompt}"
     return prompt, template
+
+
+def _current_user(current_services: AppServices, authorization: str | None) -> UserPublic:
+    try:
+        return current_services.get_user_from_token(authorization)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
 
 
 def _sse(event: str, payload: object) -> str:

@@ -7,6 +7,7 @@ import type {
   OptimizeResponse,
   PromptAnalysis,
   PromptTemplate,
+  UserPublic,
   VersionSummary
 } from "./types";
 
@@ -33,14 +34,38 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [streamStatus, setStreamStatus] = useState<string | null>(null);
   const [streamText, setStreamText] = useState("");
+  const [user, setUser] = useState<UserPublic | null>(null);
+  const [username, setUsername] = useState("demo-user");
+  const [password, setPassword] = useState("demo-password");
 
   const visibleTemplates = useMemo(() => templates, [templates]);
 
   useEffect(() => {
     void withLoading(async () => {
+      if (api.getToken()) {
+        setUser(await api.me());
+      }
       await Promise.all([loadTemplates(category), loadHistory()]);
     });
   }, [category]);
+
+  async function runAuth(mode: "login" | "register") {
+    await withLoading(async () => {
+      const result =
+        mode === "login"
+          ? await api.login(username, password)
+          : await api.register(username, password);
+      api.setToken(result.access_token);
+      setUser(result.user);
+      await loadHistory();
+    });
+  }
+
+  async function logout() {
+    api.setToken(null);
+    setUser(null);
+    await loadHistory();
+  }
 
   async function loadTemplates(nextCategory: string) {
     const items = await api.templates(nextCategory === "all" ? undefined : nextCategory);
@@ -155,6 +180,32 @@ export function App() {
         <div className="brand">
           <Sparkles size={22} />
           <span>Prompt Optimizer</span>
+        </div>
+        <div className="auth-panel">
+          {user ? (
+            <>
+              <strong>{user.username}</strong>
+              <button onClick={() => void logout()}>退出</button>
+            </>
+          ) : (
+            <>
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="用户名"
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="密码"
+              />
+              <div>
+                <button onClick={() => void runAuth("login")}>登录</button>
+                <button onClick={() => void runAuth("register")}>注册</button>
+              </div>
+            </>
+          )}
         </div>
         <div className="section-title">
           <Library size={16} />

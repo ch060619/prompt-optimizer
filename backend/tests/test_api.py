@@ -56,6 +56,74 @@ def test_api_optimize_and_export(client: TestClient) -> None:
     assert "提示词优化结果" in export_response.text
 
 
+def test_api_auth_register_login_and_me(client: TestClient) -> None:
+    register_response = client.post(
+        "/api/auth/register",
+        json={"username": "alice", "password": "secret123"},
+    )
+    assert register_response.status_code == 200
+    token = register_response.json()["access_token"]
+
+    me_response = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me_response.status_code == 200
+    assert me_response.json()["username"] == "alice"
+
+    login_response = client.post(
+        "/api/auth/login",
+        json={"username": "alice", "password": "secret123"},
+    )
+    assert login_response.status_code == 200
+    assert login_response.json()["user"]["username"] == "alice"
+
+
+def test_api_history_is_scoped_to_current_user(client: TestClient) -> None:
+    alice_token = client.post(
+        "/api/auth/register",
+        json={"username": "alice", "password": "secret123"},
+    ).json()["access_token"]
+    bob_token = client.post(
+        "/api/auth/register",
+        json={"username": "bob", "password": "secret123"},
+    ).json()["access_token"]
+
+    response = client.post(
+        "/api/optimize",
+        json={"prompt": "帮我写销售话术"},
+        headers={"Authorization": f"Bearer {alice_token}"},
+    )
+    assert response.status_code == 200
+    version_id = response.json()["version_id"]
+
+    alice_history = client.get("/api/history", headers={"Authorization": f"Bearer {alice_token}"})
+    bob_history = client.get("/api/history", headers={"Authorization": f"Bearer {bob_token}"})
+    bob_version = client.get(
+        f"/api/history/{version_id}",
+        headers={"Authorization": f"Bearer {bob_token}"},
+    )
+
+    assert len(alice_history.json()) == 1
+    assert bob_history.json() == []
+    assert bob_version.status_code == 404
+
+
+def test_api_projects_returns_default_space(client: TestClient) -> None:
+    token = client.post(
+        "/api/auth/register",
+        json={"username": "alice", "password": "secret123"},
+    ).json()["access_token"]
+
+    response = client.get("/api/projects", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
+    assert response.json()[0]["name"] == "默认项目"
+
+
+def test_api_rejects_invalid_auth_header(client: TestClient) -> None:
+    response = client.get("/api/auth/me", headers={"Authorization": "bad-token"})
+
+    assert response.status_code == 401
+
+
 def test_api_optimize_falls_back_to_offline_provider(tmp_path: Path) -> None:
     services = AppServices()
     services.versions = VersionService(StorageService(tmp_path / "fallback.sqlite3"))

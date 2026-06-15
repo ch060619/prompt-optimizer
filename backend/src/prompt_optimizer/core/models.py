@@ -52,6 +52,8 @@ class PromptTemplate(BaseModel):
 
 class PromptVersion(BaseModel):
     id: int
+    owner_id: int = 1
+    project_id: int | None = None
     original_prompt: str
     optimized_prompt: str
     analysis: PromptAnalysis
@@ -60,6 +62,8 @@ class PromptVersion(BaseModel):
 
 class VersionSummary(BaseModel):
     id: int
+    owner_id: int = 1
+    project_id: int | None = None
     original_preview: str
     optimized_preview: str
     score: float
@@ -104,3 +108,27 @@ class OptimizeResponse(BaseModel):
     version_id: int
     analysis: PromptAnalysis
     metadata: OptimizeMetadata
+
+
+class UserPublic(BaseModel):
+    id: int
+    username: str
+    created_at: datetime
+
+
+class ProjectSpace(BaseModel):
+    id: int
+    owner_id: int
+    name: str
+    created_at: datetime
+
+
+class AuthRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=64)
+    password: str = Field(min_length=6, max_length=128)
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserPublic

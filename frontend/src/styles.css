@@ -23,6 +23,15 @@ button {
   padding: 7px 10px;
 }
 
+input {
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  font: inherit;
+  min-height: 34px;
+  padding: 7px 9px;
+  width: 100%;
+}
+
 button:hover {
   border-color: #607d8b;
 }
@@ -81,6 +90,19 @@ button.active {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(3, 1fr);
+}
+
+.auth-panel {
+  border-bottom: 1px solid #d9e1e5;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+}
+
+.auth-panel div {
+  display: flex;
+  gap: 8px;
 }
 
 .template-list,

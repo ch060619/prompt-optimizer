@@ -38,6 +38,7 @@ interface ResponseLike {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 describe("App", () => {
@@ -123,5 +124,38 @@ describe("App", () => {
 
     expect(await screen.findByText("优化完成")).toBeInTheDocument();
     expect(screen.getAllByText("优化后的提示词").length).toBeGreaterThan(0);
+  });
+
+  it("registers and stores an authenticated user", async () => {
+    let sawAuthHeader = false;
+    stubFetch((url: string) => {
+      if (url.startsWith("/api/templates")) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      if (url === "/api/auth/register") {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              access_token: "token-1",
+              token_type: "bearer",
+              user: { id: 2, username: "demo-user", created_at: "2026-06-15T00:00:00Z" }
+            })
+        });
+      }
+      if (url === "/api/history") {
+        const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls;
+        const headers = calls[calls.length - 1]?.[1]?.headers as Record<string, string> | undefined;
+        sawAuthHeader = headers?.Authorization === "Bearer token-1";
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+    render(<App />);
+
+    fireEvent.click(await screen.findByText("注册"));
+
+    expect(await screen.findByText("demo-user")).toBeInTheDocument();
+    expect(sawAuthHeader).toBe(true);
   });
 });

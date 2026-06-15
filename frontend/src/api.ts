@@ -1,4 +1,5 @@
 import type {
+  AuthResponse,
   DiffResult,
   OptimizeResponse,
   PromptAnalysis,
@@ -7,9 +8,11 @@ import type {
   VersionSummary
 } from "./types";
 
+let accessToken: string | null = localStorage.getItem("prompt_optimizer_token");
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    headers: authHeaders(init?.headers),
     ...init
   });
   if (!response.ok) {
@@ -20,6 +23,32 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  setToken(token: string | null) {
+    accessToken = token;
+    if (token) {
+      localStorage.setItem("prompt_optimizer_token", token);
+    } else {
+      localStorage.removeItem("prompt_optimizer_token");
+    }
+  },
+  getToken() {
+    return accessToken;
+  },
+  register(username: string, password: string) {
+    return request<AuthResponse>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ username, password })
+    });
+  },
+  login(username: string, password: string) {
+    return request<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password })
+    });
+  },
+  me() {
+    return request<AuthResponse["user"]>("/api/auth/me");
+  },
   analyze(prompt: string) {
     return request<PromptAnalysis>("/api/analyze", {
       method: "POST",
@@ -40,7 +69,7 @@ export const api = {
   ) {
     const response = await fetch("/api/optimize/stream", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({ prompt, template_id: templateId, provider })
     });
     if (!response.ok || !response.body) {
@@ -87,7 +116,7 @@ export const api = {
   async export(versionId: number, format: string) {
     const response = await fetch("/api/export", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({ version_id: versionId, format })
     });
     if (!response.ok) {
@@ -97,6 +126,14 @@ export const api = {
     return response.text();
   }
 };
+
+function authHeaders(headers?: HeadersInit): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...(headers ?? {})
+  };
+}
 
 function parseStreamEvent(raw: string): StreamEvent | null {
   const eventLine = raw.split("\n").find((line) => line.startsWith("event: "));

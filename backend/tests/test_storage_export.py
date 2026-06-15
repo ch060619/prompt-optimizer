@@ -26,6 +26,25 @@ def test_version_storage_and_diff(tmp_path) -> None:  # type: ignore[no-untyped-
     assert diff.diff_lines
 
 
+def test_version_storage_scopes_versions_by_owner(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    storage = StorageService(tmp_path / "owners.sqlite3")
+    service = VersionService(storage)
+    alice = storage.create_user("alice", "hash-1")
+    bob = storage.create_user("bob", "hash-2")
+    analysis = Optimizer().optimize("写一个总结")
+
+    alice_id = service.create("写一个总结", analysis.optimized_prompt or "", analysis, alice.id)
+    service.create("写一个总结", analysis.optimized_prompt or "", analysis, bob.id)
+
+    assert [item.id for item in service.list(alice.id)] == [alice_id]
+    try:
+        service.get(alice_id, bob.id)
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("bob should not read alice version")
+
+
 def test_export_formats(tmp_path) -> None:  # type: ignore[no-untyped-def]
     storage = StorageService(tmp_path / "export.sqlite3")
     service = VersionService(storage)

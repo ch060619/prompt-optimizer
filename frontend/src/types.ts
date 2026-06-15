@@ -41,6 +41,18 @@ export interface PromptTemplate {
   best_practices: string[];
 }
 
+export interface UserPublic {
+  id: number;
+  username: string;
+  created_at: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: UserPublic;
+}
+
 export interface OptimizeResponse {
   version_id: number;
   analysis: PromptAnalysis;
