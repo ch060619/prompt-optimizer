@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -46,4 +47,7 @@ class ModelProvider(Protocol):
     name: str
 
     def optimize(self, request: ModelRequest) -> ModelResponse:
+        pass
+
+    def stream(self, request: ModelRequest) -> Iterator[str]:
         pass

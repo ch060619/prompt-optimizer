@@ -226,8 +226,46 @@ def test_api_optimize_stream_emits_sse_events(client: TestClient) -> None:
     assert "event: completed" in body
 
 
+def test_api_optimize_stream_can_use_provider_chunks(tmp_path: Path) -> None:
+    services = AppServices()
+    services.versions = VersionService(StorageService(tmp_path / "stream-provider.sqlite3"))
+    services.providers = ProviderRegistry(
+        services.optimizer,
+        providers={
+            "offline": services.providers.get("offline"),
+            "openai": StreamingProvider(),
+        },
+    )
+    with TestClient(create_app(services)) as test_client:
+        with test_client.stream(
+            "POST",
+            "/api/optimize/stream",
+            json={"prompt": "帮我写销售话术", "provider": "openai"},
+        ) as response:
+            body = "".join(response.iter_text())
+
+    assert response.status_code == 200
+    assert 'data: {"text": "流式"}' in body
+    assert 'data: {"text": "优化"}' in body
+    assert '"provider_used": "openai"' in body
+
+
 class FailingProvider:
     name = "openai"
 
     def optimize(self, request: ModelRequest) -> ModelResponse:
         raise ModelProviderError("boom")
+
+    def stream(self, request: ModelRequest):  # type: ignore[no-untyped-def]
+        raise ModelProviderError("boom")
+
+
+class StreamingProvider:
+    name = "openai"
+
+    def optimize(self, request: ModelRequest) -> ModelResponse:
+        raise AssertionError("streaming path should not call optimize")
+
+    def stream(self, request: ModelRequest):  # type: ignore[no-untyped-def]
+        yield "流式"
+        yield "优化"

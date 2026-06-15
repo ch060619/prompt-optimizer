@@ -6,6 +6,7 @@ from prompt_optimizer.core.models import (
     AuthResponse,
     OptimizeMetadata,
     OptimizeResponse,
+    PromptAnalysis,
     PromptTemplate,
     UserPublic,
 )
@@ -83,6 +84,38 @@ class AppServices:
             provider_used=provider_response.provider_used,
             fallback_used=fallback_used,
             latency_ms=provider_response.latency_ms,
+            error_summary=error_summary,
+        )
+        return OptimizeResponse(version_id=version_id, analysis=analysis, metadata=metadata)
+
+    def save_optimized_text(
+        self,
+        *,
+        original_prompt: str,
+        prompt: str,
+        optimized_prompt: str,
+        provider_requested: str,
+        provider_used: str,
+        fallback_used: bool,
+        latency_ms: int,
+        error_summary: str | None,
+        owner_id: int = 1,
+        project_id: int | None = None,
+    ) -> OptimizeResponse:
+        analysis: PromptAnalysis = self.analyzer.analyze(optimized_prompt)
+        analysis.optimized_prompt = optimized_prompt
+        version_id = self.versions.create(
+            original_prompt=original_prompt,
+            optimized_prompt=optimized_prompt or prompt,
+            analysis=analysis,
+            owner_id=owner_id,
+            project_id=project_id,
+        )
+        metadata = OptimizeMetadata(
+            provider_requested=provider_requested,
+            provider_used=provider_used,
+            fallback_used=fallback_used,
+            latency_ms=latency_ms,
             error_summary=error_summary,
         )
         return OptimizeResponse(version_id=version_id, analysis=analysis, metadata=metadata)

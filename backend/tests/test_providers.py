@@ -115,3 +115,27 @@ def test_http_provider_rate_limit() -> None:
         assert "限流" in str(exc)
     else:
         raise AssertionError("rate limit should fail")
+
+
+def test_http_provider_streams_chat_chunks() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            content=(
+                'data: {"choices":[{"delta":{"content":"优化"}}]}\n\n'
+                'data: {"choices":[{"delta":{"content":"提示词"}}]}\n\n'
+                "data: [DONE]\n\n"
+            ),
+        )
+
+    provider = HttpChatProvider(
+        ProviderConfig(
+            name="openai",
+            base_url="https://example.test/chat",
+            api_key="test-key",
+            model="demo",
+        ),
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    assert list(provider.stream(ModelRequest(prompt="写报告"))) == ["优化", "提示词"]

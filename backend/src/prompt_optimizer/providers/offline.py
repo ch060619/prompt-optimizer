@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from time import perf_counter
 
 from prompt_optimizer.core.optimizer import Optimizer
@@ -21,3 +22,9 @@ class OfflineRuleProvider:
             provider_used=self.name,
             latency_ms=latency_ms,
         )
+
+    def stream(self, request: ModelRequest) -> Iterator[str]:
+        response = self.optimize(request)
+        optimized = response.analysis.optimized_prompt or ""
+        for start in range(0, len(optimized), 120):
+            yield optimized[start : start + 120]

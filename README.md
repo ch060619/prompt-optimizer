@@ -8,6 +8,9 @@ Prompt Optimizer 是一个离线优先的提示词分析、优化、模板管理
 - 智能优化建议：基于规则和启发式算法生成具体改进建议。
 - 模板库管理：内置技术、创意、商务、教育、通用场景模板。
 - 版本控制与对比：SQLite 保存优化历史，支持版本 diff 和分数变化。
+- 模型接入抽象：支持离线规则 Provider，并预留 OpenAI、通义、智谱 HTTP Provider。
+- 流式与异步：提供 SSE 流式优化接口，以及后台优化、导出、评测任务。
+- 多用户归属：JWT 登录后按用户隔离历史版本、项目空间和任务。
 - 多格式导出：支持 Markdown、JSON、TXT、CSV。
 - 双入口使用：CLI 覆盖全部能力，Web UI 提供本地工作台。
 
@@ -96,6 +99,12 @@ prompt-opt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluati
 
 报告记录优化前后得分、人工标签、规则误判备注、Provider、降级状态和本地耗时。仓库中的 [评测报告](docs/evaluation-report.md) 由上述命令生成，简历中的 QPS、耗时、覆盖率等数字应只引用实际运行结果。
 
+## 工程化亮点
+
+- 规则引擎链路：评分维度、建议生成、优化结果和版本保存可独立测试。
+- 模型降级链路：远程 Provider 超时、限流或失败时自动回退离线规则，并返回 metadata。
+- 验证方法链路：内置评测集、报告生成、测试覆盖率命令和 [压测方法](docs/performance.md)，所有性能数字以实际运行为准。
+
 ## 本地数据
 
 默认 SQLite 数据库保存到系统应用数据目录。可通过环境变量覆盖：
@@ -109,7 +118,7 @@ set PROMPT_OPTIMIZER_DB=<your-data-dir>\prompt_optimizer.sqlite3
 
 ```bash
 cd backend
-pytest
+pytest --cov=prompt_optimizer --cov-report=term-missing
 ruff check .
 mypy src
 

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
+import logging
+from collections.abc import Awaitable, Callable, Generator, Iterator
 from pathlib import Path
+from time import perf_counter
+from uuid import uuid4
 
-from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Response
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,19 +18,48 @@ from prompt_optimizer.core.models import (
     EvaluateTaskRequest,
     ExportRequest,
     OptimizeRequest,
+    OptimizeResponse,
     PromptTemplate,
     TaskCreateResponse,
     UserPublic,
 )
 from prompt_optimizer.paths import PROJECT_ROOT
+from prompt_optimizer.providers import ModelProviderError, ModelRequest
 from prompt_optimizer.services import AppServices
 
 services = AppServices()
+logger = logging.getLogger("prompt_optimizer.api")
 
 
 def create_app(app_services: AppServices | None = None) -> FastAPI:
     current_services = app_services or services
     app = FastAPI(title="Prompt Optimizer", version="0.1.0")
+
+    @app.middleware("http")
+    async def request_logging(
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
+        request_id = request.headers.get("X-Request-ID", uuid4().hex)
+        started = perf_counter()
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        latency_ms = int((perf_counter() - started) * 1000)
+        logger.info(
+            json.dumps(
+                {
+                    "event": "http_request",
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status": response.status_code,
+                    "latency_ms": latency_ms,
+                },
+                ensure_ascii=False,
+            )
+        )
+        return response
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -98,18 +130,13 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
                 prompt, template = _prepare_prompt(current_services, request)
                 preview = current_services.analyzer.analyze(prompt)
                 yield _sse("analysis", preview.model_dump(mode="json"))
-                result = current_services.optimize_and_save(
-                    original_prompt=request.prompt,
-                    prompt=prompt,
-                    template=template,
-                    provider_name=request.provider,
-                    owner_id=user.id,
+                result = yield from _stream_provider_result(
+                    current_services,
+                    request,
+                    prompt,
+                    template,
+                    user.id,
                 )
-                if result.metadata.fallback_used:
-                    yield _sse("fallback", result.metadata.model_dump(mode="json"))
-                optimized = result.analysis.optimized_prompt or ""
-                for chunk in _chunks(optimized):
-                    yield _sse("chunk", {"text": chunk})
                 yield _sse(
                     "saved",
                     {
@@ -338,6 +365,62 @@ def _run_evaluate_task(
         return {"items": items}
 
     current_services.tasks.run(task_id, owner_id, work)
+
+
+def _stream_provider_result(
+    current_services: AppServices,
+    request: OptimizeRequest,
+    prompt: str,
+    template: PromptTemplate | None,
+    owner_id: int,
+) -> Generator[str, None, OptimizeResponse]:
+    started = perf_counter()
+    streamed_chunks: list[str] = []
+    provider_used: str = request.provider
+    fallback_used = False
+    error_summary: str | None = None
+    try:
+        provider = current_services.providers.get(request.provider)
+        provider_used = provider.name
+        for chunk in provider.stream(ModelRequest(prompt=prompt, template=template)):
+            streamed_chunks.append(chunk)
+            yield _sse("chunk", {"text": chunk})
+    except (ModelProviderError, RuntimeError, ValueError) as exc:
+        if request.provider == "offline":
+            raise
+        fallback_used = True
+        error_summary = str(exc)
+        fallback_response = current_services.providers.get("offline").optimize(
+            ModelRequest(prompt=prompt, template=template)
+        )
+        fallback = current_services.save_optimized_text(
+            original_prompt=request.prompt,
+            prompt=prompt,
+            optimized_prompt=fallback_response.analysis.optimized_prompt or prompt,
+            provider_requested=request.provider,
+            provider_used=fallback_response.provider_used,
+            fallback_used=fallback_used,
+            latency_ms=fallback_response.latency_ms,
+            error_summary=error_summary,
+            owner_id=owner_id,
+        )
+        yield _sse("fallback", fallback.metadata.model_dump(mode="json"))
+        for chunk in _chunks(fallback.analysis.optimized_prompt or ""):
+            yield _sse("chunk", {"text": chunk})
+        return fallback
+    optimized_prompt = "".join(streamed_chunks)
+    latency_ms = int((perf_counter() - started) * 1000)
+    return current_services.save_optimized_text(
+        original_prompt=request.prompt,
+        prompt=prompt,
+        optimized_prompt=optimized_prompt,
+        provider_requested=request.provider,
+        provider_used=provider_used,
+        fallback_used=fallback_used,
+        latency_ms=latency_ms,
+        error_summary=error_summary,
+        owner_id=owner_id,
+    )
 
 
 def _sse(event: str, payload: object) -> str:
