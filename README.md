@@ -50,6 +50,8 @@ npm install
 ```bash
 prompt-opt analyze "你是一名老师，请解释机器学习，输出格式为列表。"
 prompt-opt optimize "帮我写一封商务邮件"
+prompt-opt optimize "帮我写一封商务邮件" --provider offline
+prompt-opt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
 prompt-opt templates list --category tech
 prompt-opt templates show tech-code-generation
 prompt-opt history list
@@ -79,9 +81,20 @@ backend/                  Python 核心库、CLI、API、测试
 frontend/                 React + Vite Web 工作台
 data/rules/               内置评分规则
 data/templates/           内置提示词模板
+data/evaluation/          提示词评测集
 docs/                     架构、计划、规范和贡献文档
 .github/workflows/ci.yml  自动化测试与质量检查
 ```
+
+## 评测集
+
+项目内置 50+ 条多场景提示词评测样本，覆盖技术、商务、教育、创意、客服、数据分析和长文本场景。运行以下命令可生成本地评测报告：
+
+```bash
+prompt-opt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
+```
+
+报告记录优化前后得分、人工标签、规则误判备注、Provider、降级状态和本地耗时。仓库中的 [评测报告](docs/evaluation-report.md) 由上述命令生成，简历中的 QPS、耗时、覆盖率等数字应只引用实际运行结果。
 
 ## 本地数据
 

@@ -1,0 +1,331 @@
+cases:
+  - id: tech-001
+    category: tech
+    prompt: "写一个登录接口"
+    expected_focus: "接口边界、鉴权错误、输入输出格式"
+    manual_label: "模糊技术需求"
+    notes: "原始提示缺少角色、格式和验收标准。"
+  - id: tech-002
+    category: tech
+    prompt: "你是后端工程师，设计一个订单查询 API，输出字段列表。"
+    expected_focus: "角色明确但缺少异常与分页"
+    manual_label: "中等完整"
+    notes: "规则可能低估业务上下文。"
+  - id: tech-003
+    category: tech
+    prompt: "帮我优化 SQL"
+    expected_focus: "需要补充表结构、数据量、索引和慢查询信息"
+    manual_label: "高风险模糊"
+    notes: "典型规则引擎应提示缺少上下文。"
+  - id: tech-004
+    category: tech
+    prompt: "生成 Python 单元测试，覆盖成功、失败和边界输入，输出 pytest 代码。"
+    expected_focus: "输出格式和覆盖面"
+    manual_label: "较完整"
+    notes: "缺少被测函数签名。"
+  - id: tech-005
+    category: tech
+    prompt: "你是 SRE，请给出 Redis 延迟升高排查步骤，限制不超过 800 字。"
+    expected_focus: "排查步骤、指标、限制"
+    manual_label: "较完整"
+    notes: "可以补充命令示例。"
+  - id: tech-006
+    category: tech
+    prompt: "解释 Kubernetes"
+    expected_focus: "受众、深度、输出格式"
+    manual_label: "教育型模糊"
+    notes: "缺少目标读者。"
+  - id: tech-007
+    category: tech
+    prompt: "根据这段日志定位问题：timeout error，给出原因和修复建议。"
+    expected_focus: "日志上下文不足"
+    manual_label: "部分完整"
+    notes: "规则可能识别到输出要求但应提示证据不足。"
+  - id: tech-008
+    category: tech
+    prompt: "生成一份前端性能优化 checklist，使用 Markdown 表格，列出问题、检查方法、修复建议。"
+    expected_focus: "格式明确"
+    manual_label: "完整"
+    notes: "上下文可以更细。"
+  - id: tech-009
+    category: tech
+    prompt: "你是资深架构师，请比较单体和微服务，包含适用场景、风险、迁移建议。"
+    expected_focus: "比较维度和建议"
+    manual_label: "完整"
+    notes: "可以增加项目规模假设。"
+  - id: tech-010
+    category: tech
+    prompt: "写 Dockerfile"
+    expected_focus: "语言、运行命令、安全和缓存"
+    manual_label: "模糊技术需求"
+    notes: "极简提示。"
+  - id: business-001
+    category: business
+    prompt: "写一封商务合作邮件"
+    expected_focus: "目标对象、语气、CTA"
+    manual_label: "模糊商务"
+    notes: "缺少公司背景。"
+  - id: business-002
+    category: business
+    prompt: "你是销售顾问，为企业客户写 SaaS 续费话术，限制不夸大承诺。"
+    expected_focus: "受众、限制、价值证明"
+    manual_label: "中等完整"
+    notes: "可补充客户行业。"
+  - id: business-003
+    category: business
+    prompt: "生成季度复盘大纲，包含目标、结果、差距、下一步。"
+    expected_focus: "结构化复盘"
+    manual_label: "较完整"
+    notes: "缺少业务背景。"
+  - id: business-004
+    category: business
+    prompt: "帮我写融资 BP"
+    expected_focus: "公司阶段、市场、财务、用途"
+    manual_label: "高风险模糊"
+    notes: "需要大量上下文。"
+  - id: business-005
+    category: business
+    prompt: "为新品发布写 3 条朋友圈文案，语气专业，避免过度营销。"
+    expected_focus: "数量、渠道、语气限制"
+    manual_label: "较完整"
+    notes: "缺少产品信息。"
+  - id: business-006
+    category: business
+    prompt: "你是 HR，请写一份候选人拒信，语气真诚，100 字以内。"
+    expected_focus: "角色、语气、字数"
+    manual_label: "完整"
+    notes: "可补充岗位。"
+  - id: business-007
+    category: business
+    prompt: "分析竞品"
+    expected_focus: "竞品名单、维度、输出格式"
+    manual_label: "模糊商务"
+    notes: "典型需要澄清。"
+  - id: business-008
+    category: business
+    prompt: "输出一份客户访谈提纲，包含背景、痛点、预算、决策流程，格式为列表。"
+    expected_focus: "访谈维度"
+    manual_label: "较完整"
+    notes: "受众行业可补。"
+  - id: business-009
+    category: business
+    prompt: "写 OKR"
+    expected_focus: "团队、周期、指标"
+    manual_label: "模糊管理"
+    notes: "缺少团队目标。"
+  - id: business-010
+    category: business
+    prompt: "你是运营负责人，请制定 30 天拉新计划，包含渠道、预算、指标、风险。"
+    expected_focus: "行动计划和指标"
+    manual_label: "完整"
+    notes: "可补充产品阶段。"
+  - id: education-001
+    category: education
+    prompt: "给小学生解释机器学习"
+    expected_focus: "受众、类比、输出深度"
+    manual_label: "部分完整"
+    notes: "缺少格式和时长。"
+  - id: education-002
+    category: education
+    prompt: "你是高中数学老师，请用步骤讲解二次函数配方法，并给 2 道练习。"
+    expected_focus: "角色、步骤、练习"
+    manual_label: "完整"
+    notes: "可以补答案解析。"
+  - id: education-003
+    category: education
+    prompt: "生成英语学习计划"
+    expected_focus: "水平、目标、周期"
+    manual_label: "模糊教育"
+    notes: "缺少学习者情况。"
+  - id: education-004
+    category: education
+    prompt: "为 45 分钟公开课设计教案，主题是光合作用，包含导入、实验、总结。"
+    expected_focus: "课堂流程"
+    manual_label: "较完整"
+    notes: "缺少年级。"
+  - id: education-005
+    category: education
+    prompt: "解释区块链"
+    expected_focus: "受众和深度"
+    manual_label: "模糊科普"
+    notes: "易输出泛泛内容。"
+  - id: education-006
+    category: education
+    prompt: "请按 Markdown 表格生成 7 天阅读计划，包含每天章节、问题、输出任务。"
+    expected_focus: "格式和执行任务"
+    manual_label: "较完整"
+    notes: "缺少书名。"
+  - id: education-007
+    category: education
+    prompt: "你是面试教练，帮应届生准备 Java 面试，输出复习路线和模拟题。"
+    expected_focus: "路线、题目、目标人群"
+    manual_label: "完整"
+    notes: "可以补岗位方向。"
+  - id: education-008
+    category: education
+    prompt: "出 10 道历史选择题"
+    expected_focus: "范围、难度、答案"
+    manual_label: "部分完整"
+    notes: "缺少题目范围。"
+  - id: education-009
+    category: education
+    prompt: "帮我复习考研政治"
+    expected_focus: "阶段、时间、模块"
+    manual_label: "模糊教育"
+    notes: "缺少考试时间。"
+  - id: education-010
+    category: education
+    prompt: "用苏格拉底式提问引导我理解递归，每次只问一个问题。"
+    expected_focus: "交互方式"
+    manual_label: "较完整"
+    notes: "规则可能低估示例缺失。"
+  - id: creative-001
+    category: creative
+    prompt: "写一个科幻故事"
+    expected_focus: "设定、风格、长度"
+    manual_label: "模糊创意"
+    notes: "需要创作边界。"
+  - id: creative-002
+    category: creative
+    prompt: "你是编剧，写一段 500 字悬疑短篇，结尾反转，不出现血腥描写。"
+    expected_focus: "角色、长度、限制"
+    manual_label: "完整"
+    notes: "可补角色设定。"
+  - id: creative-003
+    category: creative
+    prompt: "给咖啡店起名"
+    expected_focus: "定位、风格、数量"
+    manual_label: "模糊创意"
+    notes: "缺少品牌调性。"
+  - id: creative-004
+    category: creative
+    prompt: "生成 10 个播客标题，主题是 AI 工具效率，语气轻松但专业。"
+    expected_focus: "数量、主题、语气"
+    manual_label: "较完整"
+    notes: "可补受众。"
+  - id: creative-005
+    category: creative
+    prompt: "写一个广告 slogan"
+    expected_focus: "产品、受众、调性"
+    manual_label: "模糊营销"
+    notes: "缺少产品信息。"
+  - id: creative-006
+    category: creative
+    prompt: "你是游戏策划，请设计一个解谜关卡，包含核心机制、胜利条件、失败条件。"
+    expected_focus: "机制和条件"
+    manual_label: "完整"
+    notes: "可补平台和难度。"
+  - id: creative-007
+    category: creative
+    prompt: "改写这句话，让它更高级：我们的产品很好用。"
+    expected_focus: "改写目标和约束"
+    manual_label: "部分完整"
+    notes: "缺少行业和风格。"
+  - id: creative-008
+    category: creative
+    prompt: "为毕业旅行生成 vlog 脚本，包含开场、转场、旁白、结尾。"
+    expected_focus: "脚本结构"
+    manual_label: "较完整"
+    notes: "缺少地点。"
+  - id: creative-009
+    category: creative
+    prompt: "写诗"
+    expected_focus: "主题、体裁、情绪"
+    manual_label: "极简模糊"
+    notes: "规则应给出大量补充建议。"
+  - id: creative-010
+    category: creative
+    prompt: "你是品牌设计师，请给环保水杯设计 5 个包装文案，避免夸大环保功效。"
+    expected_focus: "数量、产品、限制"
+    manual_label: "完整"
+    notes: "可补价格带。"
+  - id: support-001
+    category: support
+    prompt: "回复客户投诉"
+    expected_focus: "投诉内容、语气、补偿政策"
+    manual_label: "模糊客服"
+    notes: "缺少事实信息。"
+  - id: support-002
+    category: support
+    prompt: "你是客服主管，回复客户因物流延迟要求退款，语气诚恳，给出处理步骤。"
+    expected_focus: "场景、角色、步骤"
+    manual_label: "完整"
+    notes: "可补政策边界。"
+  - id: support-003
+    category: support
+    prompt: "生成 FAQ"
+    expected_focus: "产品、问题范围、格式"
+    manual_label: "模糊客服"
+    notes: "缺少产品信息。"
+  - id: support-004
+    category: support
+    prompt: "输出 8 条 App 新手引导 FAQ，格式为问答列表，避免技术术语。"
+    expected_focus: "数量、格式、语言限制"
+    manual_label: "较完整"
+    notes: "缺少 App 类型。"
+  - id: support-005
+    category: support
+    prompt: "写服务中断公告"
+    expected_focus: "影响范围、时间、补救措施"
+    manual_label: "模糊运维沟通"
+    notes: "高风险，需要准确事实。"
+  - id: data-001
+    category: data
+    prompt: "分析用户留存"
+    expected_focus: "指标口径、时间窗口、数据字段"
+    manual_label: "模糊数据分析"
+    notes: "缺少数据定义。"
+  - id: data-002
+    category: data
+    prompt: "你是数据分析师，请设计 SQL 分析 7 日留存，包含口径、分组和结果表字段。"
+    expected_focus: "口径和输出字段"
+    manual_label: "完整"
+    notes: "缺少表结构。"
+  - id: data-003
+    category: data
+    prompt: "生成一份销售日报模板，包含 GMV、订单数、客单价、环比变化。"
+    expected_focus: "指标和模板"
+    manual_label: "较完整"
+    notes: "可补渠道维度。"
+  - id: data-004
+    category: data
+    prompt: "帮我看这组数据有没有问题"
+    expected_focus: "数据、异常标准、输出方式"
+    manual_label: "模糊数据分析"
+    notes: "没有提供数据。"
+  - id: data-005
+    category: data
+    prompt: "输出 A/B 实验分析报告大纲，包含假设、样本量、显著性、结论风险。"
+    expected_focus: "实验分析结构"
+    manual_label: "较完整"
+    notes: "缺少业务场景。"
+  - id: long-001
+    category: long_text
+    prompt: "请把一篇 5000 字报告总结成 5 个要点，并保留关键数字。"
+    expected_focus: "长文本处理、保留数字、输出数量"
+    manual_label: "部分完整"
+    notes: "未提供报告正文。"
+  - id: long-002
+    category: long_text
+    prompt: "你是法务助理，请审阅合同条款，列出风险、依据、修改建议，不能给确定法律结论。"
+    expected_focus: "高风险限制和输出结构"
+    manual_label: "完整"
+    notes: "缺少合同文本。"
+  - id: long-003
+    category: long_text
+    prompt: "批量优化这些提示词"
+    expected_focus: "批量输入格式、评价标准、输出格式"
+    manual_label: "模糊批处理"
+    notes: "适合异步任务场景。"
+  - id: long-004
+    category: long_text
+    prompt: "根据用户访谈记录提炼 10 条洞察，按痛点、证据、机会点输出表格。"
+    expected_focus: "结构化抽取"
+    manual_label: "较完整"
+    notes: "缺少访谈记录。"
+  - id: long-005
+    category: long_text
+    prompt: "把会议纪要整理成行动项，包含负责人、截止时间、风险。"
+    expected_focus: "行动项结构"
+    manual_label: "较完整"
+    notes: "缺少纪要原文。"

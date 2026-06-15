@@ -10,6 +10,7 @@ from rich.table import Table
 
 from prompt_optimizer.api.app import create_app
 from prompt_optimizer.core.models import ExportFormat, ModelProviderName, PromptAnalysis
+from prompt_optimizer.evaluation import EvaluationService
 from prompt_optimizer.services import AppServices
 
 app = typer.Typer(help="离线提示词分析、优化、模板管理和版本对比工具。")
@@ -139,6 +140,22 @@ def export_version(
         console.print(f"[green]已导出到 {output}[/green]")
     else:
         console.print(content)
+
+
+@app.command()
+def evaluate(
+    dataset: Annotated[Path, typer.Option("--dataset", "-d")],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    provider: Annotated[ModelProviderName, typer.Option("--provider", "-p")] = "offline",
+) -> None:
+    """运行提示词评测集并生成 Markdown 报告。"""
+    try:
+        report = EvaluationService(services).run_markdown(dataset, provider)
+    except (KeyError, ValueError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(report, encoding="utf-8")
+    console.print(f"[green]评测报告已生成：{output}[/green]")
 
 
 @app.command()

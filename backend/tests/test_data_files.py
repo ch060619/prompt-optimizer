@@ -75,3 +75,19 @@ def test_template_render_replaces_known_variables_and_keeps_missing_placeholders
     rendered_with_missing = manager.render("tech-code-review", {"language": "TypeScript"})
     assert "TypeScript" in rendered_with_missing
     assert "{focus}" in rendered_with_missing
+
+
+def test_evaluation_dataset_is_complete() -> None:
+    payload = _load_yaml(DATA_ROOT / "evaluation" / "prompts.yml")
+    cases = payload["cases"]
+    ids = [item["id"] for item in cases]
+
+    assert len(cases) >= 50
+    assert len(ids) == len(set(ids))
+    for item in cases:
+        assert item["id"]
+        assert item["category"]
+        assert item["prompt"]
+        assert item["expected_focus"]
+        assert item["manual_label"]
+        assert "notes" in item
