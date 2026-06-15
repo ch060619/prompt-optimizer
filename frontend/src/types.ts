@@ -44,6 +44,13 @@ export interface PromptTemplate {
 export interface OptimizeResponse {
   version_id: number;
   analysis: PromptAnalysis;
+  metadata: {
+    provider_requested: string;
+    provider_used: string;
+    fallback_used: boolean;
+    latency_ms: number;
+    error_summary?: string | null;
+  };
 }
 
 export interface VersionSummary {
@@ -62,4 +69,3 @@ export interface DiffResult {
   score_delta: number;
   diff_lines: string[];
 }
-

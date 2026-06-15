@@ -25,10 +25,10 @@ export const api = {
       body: JSON.stringify({ prompt })
     });
   },
-  optimize(prompt: string, templateId?: string) {
+  optimize(prompt: string, templateId?: string, provider = "offline") {
     return request<OptimizeResponse>("/api/optimize", {
       method: "POST",
-      body: JSON.stringify({ prompt, template_id: templateId })
+      body: JSON.stringify({ prompt, template_id: templateId, provider })
     });
   },
   templates(category?: string) {

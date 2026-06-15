@@ -43,13 +43,12 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             if request.template_id and request.variables:
                 rendered = current_services.templates.render(request.template_id, request.variables)
                 prompt = f"{rendered}\n\n用户补充：{request.prompt}"
-            analysis = current_services.optimizer.optimize(prompt, template)
-            version_id = current_services.versions.create(
+            return current_services.optimize_and_save(
                 original_prompt=request.prompt,
-                optimized_prompt=analysis.optimized_prompt or prompt,
-                analysis=analysis,
+                prompt=prompt,
+                template=template,
+                provider_name=request.provider,
             )
-            return {"version_id": version_id, "analysis": analysis}
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:

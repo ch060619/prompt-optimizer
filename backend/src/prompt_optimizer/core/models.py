@@ -6,6 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 ExportFormat = Literal["md", "json", "txt", "csv"]
+ModelProviderName = Literal["offline", "openai", "tongyi", "zhipu"]
 
 
 class ScoreDimension(BaseModel):
@@ -88,3 +89,18 @@ class OptimizeRequest(BaseModel):
     prompt: str
     template_id: str | None = None
     variables: dict[str, Any] = Field(default_factory=dict)
+    provider: ModelProviderName = "offline"
+
+
+class OptimizeMetadata(BaseModel):
+    provider_requested: str
+    provider_used: str
+    fallback_used: bool = False
+    latency_ms: int
+    error_summary: str | None = None
+
+
+class OptimizeResponse(BaseModel):
+    version_id: int
+    analysis: PromptAnalysis
+    metadata: OptimizeMetadata

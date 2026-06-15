@@ -8,6 +8,12 @@ from pytest import fixture
 
 from prompt_optimizer.api.app import create_app
 from prompt_optimizer.export.service import ExportService
+from prompt_optimizer.providers import (
+    ModelProviderError,
+    ModelRequest,
+    ModelResponse,
+    ProviderRegistry,
+)
 from prompt_optimizer.services import AppServices
 from prompt_optimizer.storage.service import StorageService
 from prompt_optimizer.storage.version_service import VersionService
@@ -40,8 +46,42 @@ def test_api_templates(client: TestClient) -> None:
 def test_api_optimize_and_export(client: TestClient) -> None:
     response = client.post("/api/optimize", json={"prompt": "帮我写销售话术"})
     assert response.status_code == 200
-    version_id = response.json()["version_id"]
+    payload = response.json()
+    version_id = payload["version_id"]
+    assert payload["metadata"]["provider_used"] == "offline"
+    assert payload["metadata"]["fallback_used"] is False
 
     export_response = client.post("/api/export", json={"version_id": version_id, "format": "md"})
     assert export_response.status_code == 200
     assert "提示词优化结果" in export_response.text
+
+
+def test_api_optimize_falls_back_to_offline_provider(tmp_path: Path) -> None:
+    services = AppServices()
+    services.versions = VersionService(StorageService(tmp_path / "fallback.sqlite3"))
+    services.providers = ProviderRegistry(
+        services.optimizer,
+        providers={
+            "offline": services.providers.get("offline"),
+            "openai": FailingProvider(),
+        },
+    )
+    with TestClient(create_app(services)) as test_client:
+        response = test_client.post(
+            "/api/optimize",
+            json={"prompt": "帮我写销售话术", "provider": "openai"},
+        )
+
+    assert response.status_code == 200
+    metadata = response.json()["metadata"]
+    assert metadata["provider_requested"] == "openai"
+    assert metadata["provider_used"] == "offline"
+    assert metadata["fallback_used"] is True
+    assert "boom" in metadata["error_summary"]
+
+
+class FailingProvider:
+    name = "openai"
+
+    def optimize(self, request: ModelRequest) -> ModelResponse:
+        raise ModelProviderError("boom")

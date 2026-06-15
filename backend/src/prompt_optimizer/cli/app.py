@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from prompt_optimizer.api.app import create_app
-from prompt_optimizer.core.models import ExportFormat, PromptAnalysis
+from prompt_optimizer.core.models import ExportFormat, ModelProviderName, PromptAnalysis
 from prompt_optimizer.services import AppServices
 
 app = typer.Typer(help="离线提示词分析、优化、模板管理和版本对比工具。")
@@ -36,18 +36,27 @@ def analyze(prompt: Annotated[str, typer.Argument(help="待分析的提示词")]
 def optimize(
     prompt: Annotated[str, typer.Argument(help="待优化的提示词")],
     template_id: Annotated[str | None, typer.Option("--template-id", "-t")] = None,
+    provider: Annotated[ModelProviderName, typer.Option("--provider", "-p")] = "offline",
 ) -> None:
     """优化提示词并保存版本历史。"""
     try:
         template = services.templates.get(template_id) if template_id else None
-        analysis = services.optimizer.optimize(prompt, template)
-        version_id = services.versions.create(prompt, analysis.optimized_prompt or prompt, analysis)
+        result = services.optimize_and_save(
+            original_prompt=prompt,
+            prompt=prompt,
+            template=template,
+            provider_name=provider,
+        )
     except (ValueError, KeyError) as exc:
         raise typer.BadParameter(str(exc)) from exc
-    console.print(f"[bold green]已生成版本 #{version_id}[/bold green]")
-    _print_analysis(analysis)
+    console.print(f"[bold green]已生成版本 #{result.version_id}[/bold green]")
+    console.print(
+        f"模型：{result.metadata.provider_used}"
+        f"{'（已降级）' if result.metadata.fallback_used else ''}"
+    )
+    _print_analysis(result.analysis)
     console.print("\n[bold]优化后提示词[/bold]")
-    console.print(analysis.optimized_prompt)
+    console.print(result.analysis.optimized_prompt)
 
 
 @templates_app.command("list")
