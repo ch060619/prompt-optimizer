@@ -4,7 +4,7 @@
 - 状态：已完成
 - 负责人：Codex
 - 基线 Commit：`ed210b1`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`b14a498`
 - 前置 RC：RC-027（已提交并有待确认差异项）
 - 修改文件：MIT 分析资料审计登记、审计报告、校验器和 CI 步骤
 - 用户可见行为：分析资料来源必须先按 `approved/restricted/rejected` 处理，未批准内容不能成为实现 Provenance。
