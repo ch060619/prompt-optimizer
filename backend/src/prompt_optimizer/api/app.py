@@ -5,27 +5,38 @@ import logging
 from collections.abc import Awaitable, Callable, Generator, Iterator
 from pathlib import Path
 from time import perf_counter
+from typing import Any
 from uuid import uuid4
 
-from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from prompt_optimizer.core.models import (
     AnalyzeRequest,
     AuthRequest,
+    AuthResponse,
+    DiffResult,
     EvaluateTaskRequest,
     ExportRequest,
     OptimizeRequest,
     OptimizeResponse,
+    ProjectSpace,
+    PromptAnalysis,
     PromptTemplate,
+    PromptVersion,
     TaskCreateResponse,
+    TaskRecord,
     UserPublic,
+    VersionSummary,
 )
 from prompt_optimizer.paths import PROJECT_ROOT
 from prompt_optimizer.providers import ModelProviderError, ModelRequest
 from prompt_optimizer.services import AppServices
+
+# RC ID: RC-048. Preserve the V2 API while exposing the versioned compatibility surface.
 
 services = AppServices()
 logger = logging.getLogger("prompt_optimizer.api")
@@ -33,7 +44,14 @@ logger = logging.getLogger("prompt_optimizer.api")
 
 def create_app(app_services: AppServices | None = None) -> FastAPI:
     current_services = app_services or services
-    app = FastAPI(title="Prompt Optimizer", version="0.1.0")
+    app = FastAPI(
+        title="Prompt Optimizer",
+        version="2.0.0",
+        openapi_tags=[
+            {"name": "legacy", "description": "V2 兼容入口，供现有客户端继续使用。"},
+            {"name": "v1", "description": "新客户端使用的版本化 API 契约。"},
+        ],
+    )
 
     @app.middleware("http")
     async def request_logging(
@@ -68,41 +86,43 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.post("/api/analyze")
-    def analyze(request: AnalyzeRequest) -> object:
+    api_router = APIRouter()
+
+    @api_router.post("/analyze", response_model=PromptAnalysis)
+    def analyze(request: AnalyzeRequest) -> PromptAnalysis:
         try:
             return current_services.analyzer.analyze(request.prompt)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    @app.post("/api/auth/register")
-    def register(request: AuthRequest) -> object:
+    @api_router.post("/auth/register", response_model=AuthResponse)
+    def register(request: AuthRequest) -> AuthResponse:
         try:
             return current_services.register_user(request.username, request.password)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    @app.post("/api/auth/login")
-    def login(request: AuthRequest) -> object:
+    @api_router.post("/auth/login", response_model=AuthResponse)
+    def login(request: AuthRequest) -> AuthResponse:
         try:
             return current_services.login_user(request.username, request.password)
         except RuntimeError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
 
-    @app.get("/api/auth/me")
-    def me(authorization: str | None = Header(default=None)) -> object:
+    @api_router.get("/auth/me", response_model=UserPublic)
+    def me(authorization: str | None = Header(default=None)) -> UserPublic:
         return _current_user(current_services, authorization)
 
-    @app.get("/api/projects")
-    def projects(authorization: str | None = Header(default=None)) -> object:
+    @api_router.get("/projects", response_model=list[ProjectSpace])
+    def projects(authorization: str | None = Header(default=None)) -> list[ProjectSpace]:
         user = _current_user(current_services, authorization)
         return current_services.versions.storage.list_project_spaces(user.id)
 
-    @app.post("/api/optimize")
+    @api_router.post("/optimize", response_model=OptimizeResponse)
     def optimize(
         request: OptimizeRequest,
         authorization: str | None = Header(default=None),
-    ) -> object:
+    ) -> OptimizeResponse:
         try:
             user = _optional_user(current_services, authorization)
             prompt, template = _prepare_prompt(current_services, request)
@@ -118,7 +138,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    @app.post("/api/optimize/stream")
+    @api_router.post("/optimize/stream", response_class=StreamingResponse)
     def optimize_stream(
         request: OptimizeRequest,
         authorization: str | None = Header(default=None),
@@ -151,12 +171,12 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
 
         return StreamingResponse(events(), media_type="text/event-stream")
 
-    @app.post("/api/tasks/optimize")
+    @api_router.post("/tasks/optimize", response_model=TaskCreateResponse)
     def create_optimize_task(
         request: OptimizeRequest,
         background_tasks: BackgroundTasks,
         authorization: str | None = Header(default=None),
-    ) -> object:
+    ) -> TaskCreateResponse:
         user = _current_user(current_services, authorization)
         task = current_services.tasks.create(
             owner_id=user.id,
@@ -166,12 +186,12 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         background_tasks.add_task(_run_optimize_task, current_services, task.id, user.id, request)
         return TaskCreateResponse(task_id=task.id, status=task.status)
 
-    @app.post("/api/tasks/export")
+    @api_router.post("/tasks/export", response_model=TaskCreateResponse)
     def create_export_task(
         request: ExportRequest,
         background_tasks: BackgroundTasks,
         authorization: str | None = Header(default=None),
-    ) -> object:
+    ) -> TaskCreateResponse:
         user = _current_user(current_services, authorization)
         task = current_services.tasks.create(
             owner_id=user.id,
@@ -181,12 +201,12 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         background_tasks.add_task(_run_export_task, current_services, task.id, user.id, request)
         return TaskCreateResponse(task_id=task.id, status=task.status)
 
-    @app.post("/api/tasks/evaluate")
+    @api_router.post("/tasks/evaluate", response_model=TaskCreateResponse)
     def create_evaluate_task(
         request: EvaluateTaskRequest,
         background_tasks: BackgroundTasks,
         authorization: str | None = Header(default=None),
-    ) -> object:
+    ) -> TaskCreateResponse:
         user = _current_user(current_services, authorization)
         task = current_services.tasks.create(
             owner_id=user.id,
@@ -196,8 +216,8 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         background_tasks.add_task(_run_evaluate_task, current_services, task.id, user.id, request)
         return TaskCreateResponse(task_id=task.id, status=task.status)
 
-    @app.get("/api/tasks/{task_id}")
-    def get_task(task_id: str, authorization: str | None = Header(default=None)) -> object:
+    @api_router.get("/tasks/{task_id}", response_model=TaskRecord)
+    def get_task(task_id: str, authorization: str | None = Header(default=None)) -> TaskRecord:
         try:
             user = _current_user(current_services, authorization)
             task = current_services.tasks.get(task_id, user.id)
@@ -205,8 +225,11 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         return task
 
-    @app.get("/api/tasks/{task_id}/result")
-    def get_task_result(task_id: str, authorization: str | None = Header(default=None)) -> object:
+    @api_router.get("/tasks/{task_id}/result")
+    def get_task_result(
+        task_id: str,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, object]:
         try:
             user = _current_user(current_services, authorization)
             task = current_services.tasks.get(task_id, user.id)
@@ -216,43 +239,43 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             raise HTTPException(status_code=409, detail="任务尚未完成。")
         return task.result_json or {}
 
-    @app.get("/api/templates")
-    def templates(category: str | None = None) -> object:
+    @api_router.get("/templates", response_model=list[PromptTemplate])
+    def templates(category: str | None = None) -> list[PromptTemplate]:
         return current_services.templates.list_templates(category)
 
-    @app.get("/api/templates/{template_id}")
-    def template(template_id: str) -> object:
+    @api_router.get("/templates/{template_id}", response_model=PromptTemplate)
+    def template(template_id: str) -> PromptTemplate:
         try:
             return current_services.templates.get(template_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    @app.get("/api/history")
-    def history(authorization: str | None = Header(default=None)) -> object:
+    @api_router.get("/history", response_model=list[VersionSummary])
+    def history(authorization: str | None = Header(default=None)) -> list[VersionSummary]:
         user = _current_user(current_services, authorization)
         return current_services.versions.list(user.id)
 
-    @app.get("/api/history/{version_id}")
-    def version(version_id: int, authorization: str | None = Header(default=None)) -> object:
+    @api_router.get("/history/{version_id}", response_model=PromptVersion)
+    def version(version_id: int, authorization: str | None = Header(default=None)) -> PromptVersion:
         try:
             user = _current_user(current_services, authorization)
             return current_services.versions.get(version_id, user.id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    @app.get("/api/history/{version_id}/diff/{other_id}")
+    @api_router.get("/history/{version_id}/diff/{other_id}", response_model=DiffResult)
     def diff(
         version_id: int,
         other_id: int,
         authorization: str | None = Header(default=None),
-    ) -> object:
+    ) -> DiffResult:
         try:
             user = _current_user(current_services, authorization)
             return current_services.versions.diff(version_id, other_id, user.id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    @app.post("/api/export")
+    @api_router.post("/export", response_class=Response)
     def export(
         request: ExportRequest,
         authorization: str | None = Header(default=None),
@@ -272,6 +295,25 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             "json": "application/json; charset=utf-8",
         }
         return Response(content=content, media_type=media_types[request.format])
+
+    app.include_router(api_router, prefix="/api", tags=["legacy"])
+    app.include_router(api_router, prefix="/api/v1", tags=["v1"])
+
+    def custom_openapi() -> dict[str, Any]:
+        if app.openapi_schema is None:
+            app.openapi_schema = get_openapi(
+                title=app.title,
+                version=app.version,
+                description="新客户端使用 /api/v1；/api 保留为现有客户端兼容入口。",
+                routes=app.routes,
+                tags=app.openapi_tags,
+            )
+            app.openapi_schema["x-api-version"] = "v1"
+            app.openapi_schema["x-legacy-prefix"] = "/api"
+            app.openapi_schema["x-rc-reference"] = "RC IDs: RC-048"
+        return app.openapi_schema
+
+    app.openapi = custom_openapi  # type: ignore[method-assign]
 
     static_dir = PROJECT_ROOT / "frontend" / "dist"
     if Path(static_dir).exists():
