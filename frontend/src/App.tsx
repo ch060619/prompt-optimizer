@@ -11,6 +11,7 @@ import type {
   UserPublic,
   VersionSummary
 } from "./types";
+import { SiteShell } from "./components/SiteShell";
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
@@ -197,7 +198,8 @@ export function App() {
   }
 
   return (
-    <main className="app-shell">
+    <SiteShell>
+      <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
           <Sparkles size={22} />
@@ -348,6 +350,7 @@ export function App() {
           </section>
         ) : null}
       </aside>
-    </main>
+      </main>
+    </SiteShell>
   );
 }

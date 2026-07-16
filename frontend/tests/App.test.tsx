@@ -45,7 +45,7 @@ describe("App", () => {
   it("renders the local workspace", async () => {
     stubFetch();
     render(<App />);
-    expect(await screen.findByText("Prompt Optimizer")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
     expect(screen.getByText("优化并保存")).toBeInTheDocument();
   });
 
