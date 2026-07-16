@@ -4,7 +4,7 @@
 - 状态：已完成
 - 负责人：Codex
 - 基线 Commit：`71d5d1a`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`2e9ab4f`
 - 前置 RC：RC-022（已提交并有待人工法律复核项）
 - 修改文件：denylist、扫描器、注入失败测试、pre-commit 配置、CI
 - 用户可见行为：source-map 仓库 URL、仓库名、artifact 名称和固定哈希进入统一阻断门禁。
