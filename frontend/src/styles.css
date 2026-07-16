@@ -70,25 +70,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .site-frame { min-height: 100vh; overflow: clip; }
 
-.activity-bar {
-  align-items: center;
-  background: var(--black);
-  color: var(--paper);
-  display: flex;
-  font: 11px/1.2 var(--mono);
-  gap: 10px;
-  justify-content: center;
-  letter-spacing: 0.06em;
-  min-height: 42px;
-  padding: 9px var(--gutter);
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.activity-bar a { align-items: center; color: var(--gold); display: inline-flex; gap: 5px; }
-.activity-mark { color: var(--gold); font-size: 18px; line-height: 0.6; }
-.activity-separator { color: var(--gold); }
-
 .site-header {
   align-items: stretch;
   background: var(--paper);
@@ -206,8 +187,6 @@ pre { background: var(--black); color: var(--paper); font: 13px/1.55 var(--mono)
 
 @media (max-width: 700px) {
   :root { --gutter: 24px; }
-  .activity-bar { justify-content: flex-start; overflow: hidden; white-space: nowrap; }
-  .activity-bar > span:nth-child(2), .activity-separator { display: none; }
   .site-header { min-height: 68px; }
   .site-logo { font-size: 20px; padding: 0 18px; }
   .header-action { font-size: 10px; padding: 0 12px; }

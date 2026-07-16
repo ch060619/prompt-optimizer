@@ -53,6 +53,7 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
     expect(screen.queryByText("优化并保存")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("renders the local workspace on its dedicated route", async () => {

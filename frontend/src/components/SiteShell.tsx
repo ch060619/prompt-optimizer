@@ -89,24 +89,12 @@ export function SiteShell({ children, authenticated = false, isWorkspace = false
 
   return (
     <div className="site-frame" ref={frameRef}>
-      <ActivityBar />
       <SiteHeader authenticated={authenticated} isWorkspace={isWorkspace} menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} onSignOut={onSignOut} />
       <div className="site-content">
         {showSharedRabbit ? <SharedRabbit /> : null}
         {children}
       </div>
       {menuOpen ? <SiteMenu menuRef={menuRef} onClose={() => setMenuOpen(false)} /> : null}
-    </div>
-  );
-}
-
-function ActivityBar() {
-  return (
-    <div className="activity-bar" role="status">
-      <span className="activity-mark" aria-hidden="true">+</span>
-      <span>OFFLINE-FIRST PROMPT WORKSPACE</span>
-      <span className="activity-separator" aria-hidden="true">·</span>
-      <a href="/blog">READ THE BUILD NOTES <ArrowUpRight size={13} aria-hidden="true" /></a>
     </div>
   );
 }
