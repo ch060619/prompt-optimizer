@@ -26,8 +26,8 @@
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
 | 当前状态 | RC-021 已提交 5 个 source-map 仓库的元数据/README 证据与禁止复用边界；DMCA/删除状态待确认，准备执行 RC-022 |
 | 当前阻塞 | RC-021 GitHub API 不提供 DMCA/删除字段；已记录 `not-observed`，不阻塞 RC-022 |
-| 最近一次完整验证 | 待完成 RC-021 状态记录后的进度计数与追踪检查 |
-| 最近更新时间 | 2026-07-17 04:12:16 +08:00 |
+| 最近一次完整验证 | 2026-07-17：进度计数 Done=17/Pending=293/Total=310/UniqueIds=310；9 个来源基线、Codex、OpenCode、Claude Code、Claude Agent SDK、5 个 source-map 条目校验通过；Ruff 与 RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 04:13:18 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志

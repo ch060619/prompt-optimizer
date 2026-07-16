@@ -4,7 +4,7 @@
 - 状态：已提交（含待确认项）
 - 负责人：Codex
 - 基线 Commit：`ee19518`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`46f5cec`
 - 前置 RC：RC-020（已提交并有证据）
 - 修改文件：source-map 元数据证据、复用边界、校验器
 - 用户可见行为：source-map 仓库被登记为高风险、禁止复用；Rabbit Code 不把当前 GitHub 可见性当成授权。
