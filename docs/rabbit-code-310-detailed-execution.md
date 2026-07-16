@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 1 |
-| 最后完成项 | RC-043 |
-| 下一待执行项 | RC-046 |
+| 已完成项数 | 2 |
+| 最后完成项 | RC-046 |
+| 下一待执行项 | RC-047 |
 | 当前里程碑 | W0：保护现有项目基线，为 M0 准备 |
-| 当前状态 | RC-043 追踪基础设施已完成，准备执行 RC-046 |
+| 当前状态 | RC-046 技术栈 ADR 与 sidecar 原型已完成，准备执行 RC-047 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：后端 36 passed，Ruff/Mypy 通过；前端 9 passed，Lint/Build 通过；RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 00:59:26 +08:00 |
+| 最近一次完整验证 | 2026-07-17：sidecar 3 passed；后端 39 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 01:20:40 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -35,6 +35,7 @@
 | RC | 完成时间 | Commit/PR | 验证结果 | 证据 | 遗留问题 |
 | --- | --- | --- | --- | --- | --- |
 | RC-043 | 2026-07-17 00:59:26 +08:00 | `ed0e098` | PASS：追踪契约 4 passed；后端 36 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-043/README.md` | 309 项待实施；48 个现有代码文件待随对应 RC 建立关联，不阻塞本项 |
+| RC-046 | 2026-07-17 01:20:40 +08:00 | `4429c82` | PASS：sidecar 3 passed；后端 39 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-046/README.md` | Windows 强制终止退出码 1；Docker Engine 未运行；跨平台/生产生命周期留给 RC-057/067 |
 
 ### 进度记录一致性检查
 
@@ -2394,7 +2395,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### 4. 现有 Prompt Optimizer 资产盘点与迁移
 
-- [ ] **RC-046** 保留现有 Python 3.12、FastAPI、React、Vite、TypeScript、SQLite、Typer、测试和 Docker 基础，先通过 ADR 决定升级或替换范围。
+- [x] **RC-046** 保留现有 Python 3.12、FastAPI、React、Vite、TypeScript、SQLite、Typer、测试和 Docker 基础，先通过 ADR 决定升级或替换范围。
 - [ ] **RC-047** 复用并回归验证现有评分、建议、规则、模板、优化、版本 diff、历史、导出和评测模块。
 - [ ] **RC-048** 复用现有 `/api/analyze`、`/api/optimize`、`/api/optimize/stream`、任务、认证、项目和版本接口的有效能力。
 - [ ] **RC-049** 将现有仅能基本处理 OpenAI Chat Completions 的通用 HTTP Provider 拆分为协议明确、能力可探测的 Provider Adapter。
