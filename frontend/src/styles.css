@@ -331,24 +331,15 @@ pre { background: var(--black); color: var(--paper); font: 13px/1.55 var(--mono)
 .ring-copy-top { top: 16%; }
 
 .artwork-slot {
-  border: 1px solid var(--line);
+  align-items: center;
+  display: flex;
   height: 250px;
+  justify-content: center;
   position: relative;
   width: 250px;
 }
 
-.artwork-slot::before,
-.artwork-slot::after {
-  background: var(--ink);
-  content: "";
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.artwork-slot::before { height: 1px; width: 160px; }
-.artwork-slot::after { height: 160px; width: 1px; }
+.rabbit-artwork { display: block; height: 236px; max-width: 92%; object-fit: contain; width: auto; }
 
 .paper-preview-label {
   align-items: center;
@@ -613,6 +604,7 @@ pre { background: var(--black); color: var(--paper); font: 13px/1.55 var(--mono)
   .home-hero p, .template-hero > p, .contact-copy > p { font-size: 17px; }
   .paper-preview { margin-top: 42px; min-height: 380px; }
   .artwork-slot { height: 210px; width: 210px; }
+  .rabbit-artwork { height: 198px; }
   .section-heading { display: block; }
   .section-heading h2 { font-size: 42px; margin-top: 20px; }
   .overview-section, .feature-section, .plan-grid, .case-grid, .blog-list, .index-grid, .glossary-grid, .careers-grid { padding: 70px var(--gutter); }

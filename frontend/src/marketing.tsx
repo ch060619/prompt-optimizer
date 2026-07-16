@@ -120,7 +120,17 @@ export function HomePage() {
         </div>
         <a className="paper-preview" href="/prompt-management" aria-label="Open prompt workspace preview">
           <div className="ring-copy ring-copy-top">PROMPT MANAGEMENT · EVALUATION · VERSION CONTROL · </div>
-          <div className="artwork-slot" role="img" aria-label="Prompt Optimizer editorial illustration" />
+          <div className="artwork-slot">
+            <img
+              className="rabbit-artwork"
+              src="/rabbit-artwork.png"
+              alt="PromptLayer 风格复古版画兔兔插画"
+              width="643"
+              height="684"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
           <span className="paper-preview-label">OPEN THE PAPER / VIEW THE WORKSPACE <ArrowUpRight size={16} /></span>
         </a>
       </section>
