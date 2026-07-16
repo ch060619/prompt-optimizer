@@ -4,7 +4,7 @@
 - 状态：已完成
 - 负责人：Codex
 - 基线 Commit：`583848a`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`59ef81e`
 - 前置 RC：RC-016（按用户指示关闭并已记录）
 - 修改文件：`docs/research/codex-source-register.yml`、`docs/research/codex-source-boundaries.md`、`scripts/check_codex_source_register.py`
 - 用户可见行为：来源登记区分开源代码、公开文档和行为观察；桌面 GUI 不被视为可获取的完整开源源码。
