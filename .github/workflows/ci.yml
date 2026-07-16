@@ -41,6 +41,9 @@ jobs:
       # RC ID: RC-028
       - name: MIT analysis source audit
         run: python scripts/check_mit_analysis_source_audit.py
+      # RC ID: RC-030
+      - name: M0 clean-room decision record
+        run: python scripts/check_m0_clean_room_decision.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy

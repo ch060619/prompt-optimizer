@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 25 |
-| 最后完成项 | RC-029 |
-| 下一待执行项 | RC-030 |
+| 已完成项数 | 26 |
+| 最后完成项 | RC-030 |
+| 下一待执行项 | RC-031 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-029 已建立季度 Anthropic 授权变化监控、基线和 ADR 触发规则，准备执行 RC-030 |
-| 当前阻塞 | 无；条款/文档 URL 保持待确认，仓库 live metadata 与固定基线一致 |
-| 最近一次完整验证 | 2026-07-17：进度计数 Done=25/Pending=285/Total=310/UniqueIds=310；Anthropic 授权监控静态/live 校验通过；source-map denylist 136 个输入零命中；专有内容与 RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 04:45:35 +08:00 |
+| 当前状态 | RC-030 已提交 source-map clean-room 决策记录；M0 保持 blocked，技术/合规/法律签署待人工确认，准备执行 RC-031 |
+| 当前阻塞 | RC-030 M0 尚无技术负责人、合规负责人和合资格法律顾问签署；按会话规则记录待确认，不阻塞 RC-031 |
+| 最近一次完整验证 | 待完成 RC-030 状态记录后的进度计数与追踪检查 |
+| 最近更新时间 | 2026-07-17 04:47:16 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -59,6 +59,7 @@
 | RC-027 | 2026-07-17 04:34:55 +08:00 | `6743ade` | SUBMITTED WITH PENDING CONFIRMATION：自建 fixture 含 5 项抽象断言；官方 Claude Code 2.1.202 `--help` 断言通过并固定输出哈希；未发送模型请求，Rabbit Code 差异对照待确认 | `docs/evidence/RC-027/README.md` | 不保存完整官方输出或官方测试夹具；后续对照运行需明确授权、脱敏工作目录和可重复记录 |
 | RC-028 | 2026-07-17 04:41:07 +08:00 | `ed210b1` | PASS：两份 MIT 分析资料的固定 LICENSE/README 状态、代码围栏/外链计数和逆向/上游自述已审计；两份均标记 `restricted`；校验器与 Ruff 通过 | `docs/evidence/RC-028/README.md` | 未访问源码正文；MIT 元数据不批准还原/分析内容复用；只允许独立重新推导高层问题域 |
 | RC-029 | 2026-07-17 04:44:29 +08:00 | `0180f13` | PASS：季度监控登记、复核日志、GitHub Actions workflow 和 live API 检查已建立；Claude Code/SDK HEAD、分支、license、归档/禁用状态与基线一致；静态/Ruff 通过 | `docs/evidence/RC-029/README.md` | 条款/文档 URL 未作未经验证结论；任何变化要求新 ADR，复核前保持限制 |
+| RC-030 | 2026-07-17 04:47:16 +08:00 | `6483383` | SUBMITTED WITH PENDING CONFIRMATION：source-map clean-room 决策记录汇总事实、风险、临时允许/禁止范围、角色隔离、监控和 M0 触发条件；M0 校验为 blocked；未伪造签署 | `docs/evidence/RC-030/README.md` | 技术/合规/法律签署和决策编号待人工确认；在批准前默认禁止 source-map 正文访问、使用和分发 |
 
 ### 进度记录一致性检查
 
@@ -2395,7 +2396,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-027** 使用官方 Claude Code 可执行程序、公开文档和自建行为测试进行兼容性验证，不使用泄露源码测试文件作为 Rabbit Code 的 golden fixture。
 - [x] **RC-028** 对 MIT 分析资料做内容来源审计，区分作者原创分析、合理引用和可能仍受 Anthropic 版权保护的衍生内容。
 - [x] **RC-029** 若 Anthropic 后续正式开源、明确授权或发布可复用规范，再通过 ADR 重新评估复用范围；在此之前默认结论为“可研究事实，不可直接复用代码”。
-- [ ] **RC-030** 输出《Claude Code source map 事件调研与 Rabbit Code clean-room 决策记录》，作为 M0 和开源发布审计的必需材料。
+- [x] **RC-030** 输出《Claude Code source map 事件调研与 Rabbit Code clean-room 决策记录》，作为 M0 和开源发布审计的必需材料。
 
 - [ ] **RC-031** 调研 Gemma、Qwen2.5-Coder、Ollama、llama.cpp、Hugging Face 模型文件的代码许可证、模型许可证、再分发限制、署名和用户确认要求。
 - [ ] **RC-032** 为所有拟复用实现建立“来源、许可证、复用方式、修改内容、NOTICE 要求、替代方案”清单。
