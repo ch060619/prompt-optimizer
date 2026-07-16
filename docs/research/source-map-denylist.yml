@@ -34,3 +34,4 @@ evidence_only_files:
   - scripts/check_source_map_evidence.py
   - scripts/check_proprietary_content_policy.py
   - scripts/check_independent_design.py
+  - scripts/check_mit_analysis_source_audit.py

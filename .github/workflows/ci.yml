@@ -38,6 +38,9 @@ jobs:
       # RC ID: RC-027
       - name: Black-box fixture contract
         run: python scripts/check_claude_black_box_fixtures.py
+      # RC ID: RC-028
+      - name: MIT analysis source audit
+        run: python scripts/check_mit_analysis_source_audit.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy

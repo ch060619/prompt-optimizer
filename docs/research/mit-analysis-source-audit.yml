@@ -1,0 +1,40 @@
+schema_version: 1
+rc_id: RC-028
+captured_at: "2026-07-17"
+policy:
+  source_body_accessed: false
+  source_body_retained: false
+  implementation_reuse_approved: false
+  default_decision: restricted
+  citation_audit_scope: README metadata, link count, code-fence count, and upstream declarations only
+sources:
+  - id: comeonoliver-claude-code-analysis
+    repo: ComeOnOliver/claude-code-analysis
+    fixed_sha: c45730b02591b6992dfc8aaa3483fd01b213815e
+    license_url: https://github.com/ComeOnOliver/claude-code-analysis/blob/c45730b02591b6992dfc8aaa3483fd01b213815e/LICENSE
+    license_status: verified-200
+    license_spdx_metadata: MIT
+    readme_url: https://github.com/ComeOnOliver/claude-code-analysis/blob/c45730b02591b6992dfc8aaa3483fd01b213815e/README.md
+    readme_status: verified-200
+    readme_code_fences: 2
+    readme_external_links: 7
+    readme_reverse_engineering_language: true
+    readme_upstream_or_anthropic_language: true
+    content_decision: restricted
+    approved_abstractions: independent high-level problem descriptions only
+    rejected_uses: source, tests, snippets, prompts, constants, fixtures, and mechanically derived implementation
+  - id: dadiaomengmeimei-claude-code-sourcemap-learning-notebook
+    repo: dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+    fixed_sha: 6b8eea53c90457b89246581cd07481e26d05cb60
+    license_url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook/blob/6b8eea53c90457b89246581cd07481e26d05cb60/LICENSE
+    license_status: verified-200
+    license_spdx_metadata: MIT
+    readme_url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook/blob/6b8eea53c90457b89246581cd07481e26d05cb60/README.md
+    readme_status: verified-200
+    readme_code_fences: 0
+    readme_external_links: 9
+    readme_reverse_engineering_language: true
+    readme_upstream_or_anthropic_language: true
+    content_decision: restricted
+    approved_abstractions: independent high-level problem descriptions only
+    rejected_uses: source, tests, snippets, prompts, constants, fixtures, and mechanically derived implementation
