@@ -1,0 +1,50 @@
+{
+  "captured_at": "2026-07-16T17:14:58.597884+00:00",
+  "frontend_dist": {
+    "bytes": 895633,
+    "files": 5
+  },
+  "git_commit": "1f31f542edecd8a2817a4938f295e3b7e9f024f6",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "rc_id": "RC-046",
+  "sidecar": {
+    "alive_after_shutdown": false,
+    "exit_code": 1,
+    "host": "127.0.0.1",
+    "port": 63117,
+    "protocol": "rc-046-sidecar-prototype-v1",
+    "ready": true,
+    "shutdown_ms": 2,
+    "startup_ms": 1323
+  },
+  "sqlite": {
+    "count_read_ms": 0,
+    "rows": 5000,
+    "sqlite_version": "3.49.1",
+    "transactional_write_ms": 2
+  },
+  "typer_help": {
+    "available": true,
+    "elapsed_ms": 1335,
+    "summary": "Usage: python -m prompt_optimizer.cli [OPTIONS] COMMAND [ARGS]...             "
+  },
+  "versions": {
+    "docker_cli": {
+      "available": true,
+      "elapsed_ms": 97,
+      "summary": "Docker version 29.5.3, build d1c06ef"
+    },
+    "docker_server": {
+      "available": false,
+      "elapsed_ms": 363,
+      "summary": "exit 1"
+    },
+    "fastapi": "0.136.1",
+    "python": "3.12.10",
+    "react": "18.3.1",
+    "typer": "0.25.1",
+    "typescript": "5.9.3",
+    "uvicorn": "0.46.0",
+    "vite": "5.4.21"
+  }
+}
