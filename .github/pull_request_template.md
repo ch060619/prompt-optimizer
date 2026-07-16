@@ -1,6 +1,6 @@
 ## Traceability
 
-<!-- RC ID: RC-043. Traceability template. -->
+<!-- RC ID: RC-043, RC-024. Traceability and provenance template. -->
 
 - RC ID: RC-xxx
 - Issue:
@@ -15,4 +15,9 @@
 
 ## Provenance
 
-<List external sources and licenses, or state that no external source was used.>
+- RC-024 external sources: <None, or fixed URL and commit SHA.>
+- License and NOTICE review: <Result or None.>
+- Originality statement: <Explain independent authorship of code, tests, prompts, text, assets, constants, and fixtures.>
+- String scan: <Command and result.>
+- Similarity review: <Human reviewer, scope, date, and result. Do not claim automated legal clearance.>
+- Restrictions or follow-up: <List or None.>
