@@ -12,7 +12,7 @@ import type {
   VersionSummary
 } from "./types";
 import { SiteShell } from "./components/SiteShell";
-import { HomePage, SiteRoute } from "./marketing";
+import { AuthPage, HomePage, SiteRoute } from "./marketing";
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
@@ -27,6 +27,7 @@ const categoryLabels: Record<string, string> = {
 export function App() {
   const pathname = window.location.pathname;
   const isWorkspaceRoute = pathname === "/" || pathname === "/workspace";
+  const authMode = pathname === "/register" ? "register" : pathname === "/login" ? "login" : null;
   const [prompt, setPrompt] = useState("你是一名产品顾问，请帮我优化一个 SaaS 产品发布邮件。");
   const [category, setCategory] = useState("all");
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
@@ -204,6 +205,23 @@ export function App() {
   }
 
   if (!isWorkspaceRoute) {
+    if (authMode) {
+      return (
+        <SiteShell>
+          <AuthPage
+            mode={authMode}
+            username={username}
+            password={password}
+            loading={loading}
+            error={error}
+            user={user}
+            onUsernameChange={setUsername}
+            onPasswordChange={setPassword}
+            onSubmit={(event) => { event.preventDefault(); void runAuth(authMode); }}
+          />
+        </SiteShell>
+      );
+    }
     return (
       <SiteShell>
         <SiteRoute path={pathname} />
@@ -220,32 +238,38 @@ export function App() {
           <Sparkles size={22} />
           <span>Prompt Optimizer</span>
         </div>
-        <div className="auth-panel">
+        <form id="account-access" className="auth-panel" aria-label="Account access" onSubmit={(event) => { event.preventDefault(); void runAuth("login"); }}>
           {user ? (
             <>
               <strong>{user.username}</strong>
-              <button onClick={() => void logout()}>退出</button>
+              <button type="button" onClick={() => void logout()}>退出</button>
             </>
           ) : (
             <>
+              <label className="sr-only" htmlFor="auth-username">用户名</label>
               <input
+                id="auth-username"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 placeholder="用户名"
+                autoComplete="username"
               />
+              <label className="sr-only" htmlFor="auth-password">密码</label>
               <input
+                id="auth-password"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="密码"
+                autoComplete="current-password"
               />
               <div>
-                <button onClick={() => void runAuth("login")}>登录</button>
-                <button onClick={() => void runAuth("register")}>注册</button>
+                <button type="submit">登录</button>
+                <button type="button" onClick={() => void runAuth("register")}>注册</button>
               </div>
             </>
           )}
-        </div>
+        </form>
         <div className="section-title">
           <Library size={16} />
           <span>模板库</span>

@@ -1,5 +1,8 @@
 import { ArrowUpRight, Menu, X } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 
 const productLinks = [
   ["Prompt workspace", "/"],
@@ -17,19 +20,82 @@ const companyLinks = [
 
 export function SiteShell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.body.classList.toggle("menu-open", menuOpen);
     return () => document.body.classList.remove("menu-open");
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    const menuButton = menuButtonRef.current;
+    const focusFrame = window.requestAnimationFrame(() => menuRef.current?.focus());
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", closeOnEscape);
+      menuButton?.focus();
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function" || typeof window.requestAnimationFrame !== "function") {
+      return;
+    }
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      return;
+    }
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+    gsap.registerPlugin(ScrollTrigger);
+    const lenis = new Lenis({ autoRaf: false, lerp: 0.08 });
+    let frame = 0;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      frame = window.requestAnimationFrame(raf);
+    };
+    frame = window.requestAnimationFrame(raf);
+    const context = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>(".reveal-on-scroll").forEach((element) => {
+        gsap.fromTo(element, { autoAlpha: 0, y: 28 }, {
+          autoAlpha: 1,
+          duration: 0.7,
+          ease: "power2.out",
+          scrollTrigger: { once: true, start: "top 86%", trigger: element },
+          y: 0
+        });
+      });
+    }, frameRef);
+    ScrollTrigger.refresh();
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      context.revert();
+      lenis.destroy();
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
   return (
-    <div className="site-frame">
+    <div className="site-frame" ref={frameRef}>
       <ActivityBar />
-      <SiteHeader menuOpen={menuOpen} onMenuToggle={() => setMenuOpen((open) => !open)} />
+      <SiteHeader menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} />
       <div className="site-content">{children}</div>
       <SiteFooter />
-      {menuOpen ? <SiteMenu onClose={() => setMenuOpen(false)} /> : null}
+      {menuOpen ? <SiteMenu menuRef={menuRef} onClose={() => setMenuOpen(false)} /> : null}
     </div>
   );
 }
@@ -45,12 +111,13 @@ function ActivityBar() {
   );
 }
 
-function SiteHeader({ menuOpen, onMenuToggle }: { menuOpen: boolean; onMenuToggle: () => void }) {
+function SiteHeader({ menuOpen, menuButtonRef, onMenuToggle }: { menuOpen: boolean; menuButtonRef: RefObject<HTMLButtonElement>; onMenuToggle: () => void }) {
   return (
     <header className="site-header">
       <div className="site-menu-cell">
         <button
           className="menu-trigger"
+          ref={menuButtonRef}
           type="button"
           aria-expanded={menuOpen}
           aria-controls="site-navigation"
@@ -76,9 +143,9 @@ function SiteHeader({ menuOpen, onMenuToggle }: { menuOpen: boolean; onMenuToggl
   );
 }
 
-function SiteMenu({ onClose }: { onClose: () => void }) {
+function SiteMenu({ menuRef, onClose }: { menuRef: RefObject<HTMLElement>; onClose: () => void }) {
   return (
-    <aside id="site-navigation" className="site-menu" aria-label="Full-screen navigation">
+    <aside id="site-navigation" ref={menuRef} className="site-menu" role="dialog" aria-modal="true" aria-label="Full-screen navigation" tabIndex={-1}>
       <div className="site-menu-inner">
         <div className="site-menu-group">
           <span className="eyebrow">PRODUCTS</span>

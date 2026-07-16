@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, Check, ChevronDown, FileText, GitBranch, Search, Terminal, Workflow } from "lucide-react";
+import { ArrowDownRight, ArrowLeft, ArrowUpRight, Check, ChevronDown, FileText, GitBranch, Search, Terminal, Workflow } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 type ProductSpec = {
@@ -114,8 +114,8 @@ export function HomePage() {
           <h1>The workspace for prompts that need a second pass.</h1>
           <p>Analyze intent, iterate with rules, compare versions, and keep the result close to the work that produced it.</p>
           <div className="hero-actions">
-            <a className="action-button action-button-primary" href="/prompt-management">OPEN WORKSPACE <ArrowUpRight size={15} /></a>
-            <a className="action-button" href="#platform-overview">SEE PLATFORM OVERVIEW <ArrowDownRight size={15} /></a>
+            <a className="action-button action-button-primary" href="/login">LOGIN <ArrowUpRight size={15} /></a>
+            <a className="action-button" href="/register">REGISTER <ArrowUpRight size={15} /></a>
           </div>
         </div>
         <a className="paper-preview" href="/prompt-management" aria-label="Open prompt workspace preview">
@@ -134,7 +134,7 @@ export function HomePage() {
           <span className="paper-preview-label">OPEN THE PAPER / VIEW THE WORKSPACE <ArrowUpRight size={16} /></span>
         </a>
       </section>
-      <section id="platform-overview" className="overview-section">
+      <section id="platform-overview" className="overview-section reveal-on-scroll">
         <SectionHeading kicker="PLATFORM OVERVIEW" title="A deliberate path from rough prompt to useful record." />
         <div className="overview-grid">
           <OverviewCard index="01" title="Prompt management" text="Browse local templates, edit a prompt, and run analysis without leaving the workspace." />
@@ -142,10 +142,63 @@ export function HomePage() {
           <OverviewCard index="03" title="Version control" text="Save optimized prompts, compare history, and export the version in the format you need." />
         </div>
       </section>
-      <section className="home-statement">
+      <section className="home-statement reveal-on-scroll">
         <span className="eyebrow">THE LOCAL POSITION</span>
         <h2>Keep the thinking, the change, and the evidence in one place.</h2>
         <a className="text-link" href="/blog/architecture">READ THE ARCHITECTURE NOTES <ArrowUpRight size={15} /></a>
+      </section>
+    </main>
+  );
+}
+
+export type AuthMode = "login" | "register";
+
+export function AuthPage({ mode, username, password, loading, error, user, onUsernameChange, onPasswordChange, onSubmit }: {
+  mode: AuthMode;
+  username: string;
+  password: string;
+  loading: boolean;
+  error: string | null;
+  user: { username: string } | null;
+  onUsernameChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const isLogin = mode === "login";
+  return (
+    <main className="auth-page">
+      <section className="auth-art-panel">
+        <div className="auth-art-copy">
+          <span className="eyebrow">LOCAL PROMPT ENGINEERING / V3.0</span>
+          <h1>{isLogin ? "Return to the work that matters." : "Make room for a clearer first pass."}</h1>
+          <p>{isLogin ? "Continue shaping prompts, comparing versions, and keeping the evidence close to the edit." : "Create a local account for prompt history, saved versions, and an explainable optimization record."}</p>
+        </div>
+        <div className="auth-artwork-wrap">
+          <span className="auth-ring-label">PROMPT MANAGEMENT · EVALUATION · VERSION CONTROL ·</span>
+          <img className="auth-rabbit-artwork" src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="eager" decoding="async" />
+        </div>
+      </section>
+      <section className="auth-form-panel">
+        <a className="auth-back-link" href="/"><ArrowLeft size={15} /> BACK TO HOME</a>
+        <div className="auth-form-heading">
+          <span className="eyebrow">{isLogin ? "ACCOUNT LOGIN" : "NEW ACCOUNT"}</span>
+          <h2>{isLogin ? "Welcome back." : "Start a local record."}</h2>
+          <p>{isLogin ? "Sign in to continue with your saved prompt work." : "Register to keep prompt history and versions attached to your workspace."}</p>
+        </div>
+        {user ? (
+          <div className="auth-success" role="status">
+            <strong>Signed in as {user.username}.</strong>
+            <a className="action-button action-button-primary" href="/workspace">OPEN WORKSPACE <ArrowUpRight size={15} /></a>
+          </div>
+        ) : (
+          <form className="auth-page-form" onSubmit={onSubmit}>
+            <label htmlFor="auth-page-username">USERNAME<input id="auth-page-username" value={username} onChange={(event) => onUsernameChange(event.target.value)} autoComplete="username" required /></label>
+            <label htmlFor="auth-page-password">PASSWORD<input id="auth-page-password" type="password" value={password} onChange={(event) => onPasswordChange(event.target.value)} autoComplete={isLogin ? "current-password" : "new-password"} required /></label>
+            {error ? <p className="auth-error" role="alert">{error}</p> : null}
+            <button className="action-button action-button-primary auth-submit" type="submit" disabled={loading}>{isLogin ? "LOGIN" : "CREATE ACCOUNT"} <ArrowUpRight size={15} /></button>
+          </form>
+        )}
+        <p className="auth-switch">{isLogin ? "Need an account?" : "Already have an account?"} <a href={isLogin ? "/register" : "/login"}>{isLogin ? "REGISTER" : "LOGIN"} <ArrowUpRight size={13} /></a></p>
       </section>
     </main>
   );
@@ -164,7 +217,7 @@ function ProductPage({ spec }: { spec: ProductSpec }) {
         </div>
         <ProductMockup variant={spec.mockup} />
       </section>
-      <section id="features" className="feature-section">
+      <section id="features" className="feature-section reveal-on-scroll">
         <SectionHeading kicker="CAPABILITIES" title={spec.title.split(".")[0] + "."} />
         <div className="feature-grid">
           {spec.features.map((feature, index) => (
@@ -176,7 +229,7 @@ function ProductPage({ spec }: { spec: ProductSpec }) {
           ))}
         </div>
       </section>
-      <section className="split-story">
+      <section className="split-story reveal-on-scroll">
         <div>
           <span className="eyebrow">WHY IT MATTERS</span>
           <h2>{spec.narrativeTitle}</h2>
@@ -208,7 +261,7 @@ function PricingPage() {
         <h1>Use the system at the scale your work requires.</h1>
         <p>This repository is MIT-licensed and local-first. The comparison below describes the actual project surfaces, not a hosted billing plan.</p>
       </section>
-      <section className="plan-grid">
+      <section className="plan-grid reveal-on-scroll">
         {plans.map(([name, price, ...features], index) => (
           <article className={index === 0 ? "plan-card plan-card-highlight" : "plan-card"} key={name}>
             <span className="eyebrow">{name}</span>
@@ -237,7 +290,7 @@ function CaseStudiesPage() {
         <h1>Prompt work looks different in every room.</h1>
         <p>These examples are grounded in the repository's built-in templates and evaluation categories.</p>
       </section>
-      <section className="case-grid">
+      <section className="case-grid reveal-on-scroll">
         {cases.map(([kicker, title, text], index) => (
           <article className={`case-item case-item-${index + 1}`} key={title}>
             <span className="eyebrow">{kicker}</span>
@@ -259,7 +312,7 @@ function BlogIndexPage() {
         <h1>Notes from the local prompt workspace.</h1>
         <p>Project architecture, development decisions, performance method, and evaluation evidence.</p>
       </section>
-      <section className="blog-list">
+      <section className="blog-list reveal-on-scroll">
         {blogPosts.map(([kicker, title, slug], index) => (
           <a className={`blog-item blog-item-${index + 1}`} href={`/blog/${slug}`} key={slug}>
             <span className="eyebrow">{kicker}</span>
@@ -287,7 +340,7 @@ function ArticlePage({ slug }: { slug: string }) {
         <h1>{article[1]}</h1>
         <div className="article-meta"><span>Prompt Optimizer</span><span>LOCAL DOCUMENTATION</span><span>2026</span></div>
       </section>
-      <article className="article-body">
+      <article className="article-body reveal-on-scroll">
         {body.map((paragraph, index) => (
           <div key={paragraph}>
             <h2>{index + 1}. {index === 0 ? "The premise" : index === 1 ? "The record" : "The visual layer"}</h2>
@@ -315,7 +368,7 @@ function ModelsPage() {
         <p>The current registry always includes the offline provider and can construct an HTTP adapter from environment configuration.</p>
       </section>
       <AlphabetBar />
-      <section className="index-grid">
+      <section className="index-grid reveal-on-scroll">
         {providers.map(([slug, title, text], index) => (
           <a className="index-item" href={`/models/${slug}`} key={slug}>
             <span className="index-number">{String(index + 1).padStart(2, "0")}</span>
@@ -346,7 +399,7 @@ function GlossaryPage() {
         <p>The glossary follows the scoring dimensions used by the existing analyzer.</p>
       </section>
       <AlphabetBar />
-      <section className="glossary-grid">
+      <section className="glossary-grid reveal-on-scroll">
         {glossaryTerms.map(([title, text], index) => (
           <a className="glossary-item" href={`/glossary/${title.toLowerCase().replace(" ", "-")}`} key={title}>
             <span className="index-number">{String(index + 1).padStart(2, "0")}</span>
@@ -389,7 +442,7 @@ function CareersPage() {
         <h1>Build a clearer open-source prompt workflow.</h1>
         <p>This project is maintained as a local-first MIT codebase. There is no remote hiring pipeline configured in the application.</p>
       </section>
-      <section className="careers-grid">
+      <section className="careers-grid reveal-on-scroll">
         <div><GitBranch size={22} /><h2>Work in the repository</h2><p>Core rules, services, API, CLI, frontend, tests, docs, and CI are all visible in one place.</p></div>
         <div><Terminal size={22} /><h2>Keep claims executable</h2><p>Performance numbers and provider behavior stay tied to commands and local evidence.</p></div>
         <div><Workflow size={22} /><h2>Improve the loop</h2><p>Make the next prompt edit easier to understand, run, compare, and export.</p></div>
@@ -406,7 +459,7 @@ function ContactPage() {
   }
   return (
     <main className="template-page contact-page">
-      <section className="contact-grid">
+      <section className="contact-grid reveal-on-scroll">
         <div className="contact-copy"><span className="eyebrow">CONTACT</span><h1>Bring a prompt worth improving.</h1><p>This local build does not send outbound mail. Use the form to shape a draft, then move it to the repository issue or communication channel you already use.</p><div className="contact-note"><Search size={18} /><span>No external CMS or contact API is configured.</span></div></div>
         <form className="contact-form" onSubmit={submit}>
           <label>Name<input name="name" autoComplete="name" required /></label>
@@ -426,11 +479,11 @@ function NotFoundPage({ path }: { path: string }) {
 
 function ProductMockup({ variant }: { variant: ProductSpec["mockup"] }) {
   const labels = variant === "evaluation" ? ["clarity", "specificity", "context", "format"] : variant === "tasks" ? ["queued", "running", "saved", "latency"] : variant === "workflow" ? ["started", "analysis", "chunk", "completed"] : ["templates", "prompt", "score", "history"];
-  return <div className={`product-mockup mockup-${variant}`} aria-label="Prompt Optimizer interface preview"><div className="mockup-toolbar"><span /><span /><span /></div><div className="mockup-content"><div className="mockup-sidebar">{labels.map((label) => <span key={label}>{label}</span>)}</div><div className="mockup-main"><div className="mockup-heading">{variant === "evaluation" ? "Prompt score breakdown" : variant === "tasks" ? "Optimization run history" : variant === "workflow" ? "Stream events" : "Master prompt record"}</div><div className="mockup-lines"><i /><i /><i /><i /><i /></div><div className="mockup-data">{labels.map((label, index) => <div key={label}><b>{label}</b><span style={{ width: `${58 + index * 9}%` }} /></div>)}</div></div></div></div>;
+  return <div className={`product-mockup mockup-${variant}`} role="img" aria-label="Prompt Optimizer interface preview"><div className="mockup-toolbar"><span /><span /><span /></div><div className="mockup-content"><div className="mockup-sidebar">{labels.map((label) => <span key={label}>{label}</span>)}</div><div className="mockup-main"><div className="mockup-heading">{variant === "evaluation" ? "Prompt score breakdown" : variant === "tasks" ? "Optimization run history" : variant === "workflow" ? "Stream events" : "Master prompt record"}</div><div className="mockup-lines"><i /><i /><i /><i /><i /></div><div className="mockup-data">{labels.map((label, index) => <div key={label}><b>{label}</b><span style={{ width: `${58 + index * 9}%` }} /></div>)}</div></div></div></div>;
 }
 
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
-  return <div className="section-heading"><span className="eyebrow">{kicker}</span><h2>{title}</h2></div>;
+  return <div className="section-heading reveal-on-scroll"><span className="eyebrow">{kicker}</span><h2>{title}</h2></div>;
 }
 
 function OverviewCard({ index, title, text }: { index: string; title: string; text: string }) {
