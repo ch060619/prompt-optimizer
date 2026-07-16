@@ -1,0 +1,140 @@
+schema_version: 1
+rc_id: RC-015
+captured_at: "2026-07-17"
+api: https://api.github.com
+sources:
+  - id: openai-codex
+    repo: openai/codex
+    url: https://github.com/openai/codex
+    default_branch: main
+    head_sha: 78ba047bdae3db0342dee11d8d9ef5582fe8ce49
+    commit_url: https://github.com/openai/codex/commit/78ba047bdae3db0342dee11d8d9ef5582fe8ce49
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-16T19:34:19Z"
+    last_pushed: "2026-07-16T19:33:46Z"
+    license:
+      spdx: Apache-2.0
+      name: Apache License 2.0
+    archived: false
+    disabled: false
+    category: open-source
+  - id: anomalyco-opencode
+    repo: anomalyco/opencode
+    url: https://github.com/anomalyco/opencode
+    default_branch: dev
+    head_sha: 453b61e27b2f6c2752a60dd7d8412bdcf4e0aa3d
+    commit_url: https://github.com/anomalyco/opencode/commit/453b61e27b2f6c2752a60dd7d8412bdcf4e0aa3d
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-16T19:15:00Z"
+    last_pushed: "2026-07-16T19:32:09Z"
+    license:
+      spdx: MIT
+      name: MIT License
+    archived: false
+    disabled: false
+    category: open-source
+  - id: anthropics-claude-code
+    repo: anthropics/claude-code
+    url: https://github.com/anthropics/claude-code
+    default_branch: main
+    head_sha: c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab
+    commit_url: https://github.com/anthropics/claude-code/commit/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-16T19:25:01Z"
+    last_pushed: "2026-07-15T23:02:35Z"
+    license:
+      spdx: null
+      name: null
+    archived: false
+    disabled: false
+    category: behavior-only
+  - id: anthropics-claude-agent-sdk-python
+    repo: anthropics/claude-agent-sdk-python
+    url: https://github.com/anthropics/claude-agent-sdk-python
+    default_branch: main
+    head_sha: 02782876a00afbcab584d501e8851b5109907077
+    commit_url: https://github.com/anthropics/claude-agent-sdk-python/commit/02782876a00afbcab584d501e8851b5109907077
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-16T17:22:49Z"
+    last_pushed: "2026-07-16T17:22:17Z"
+    license:
+      spdx: MIT
+      name: MIT License
+    archived: false
+    disabled: false
+    category: open-source
+  - id: chinasiro-claude-code-sourcemap
+    repo: ChinaSiro/claude-code-sourcemap
+    url: https://github.com/ChinaSiro/claude-code-sourcemap
+    default_branch: main
+    head_sha: a8a678cb6244e6770e1e421767ff0987a1d95549
+    commit_url: https://github.com/ChinaSiro/claude-code-sourcemap/commit/a8a678cb6244e6770e1e421767ff0987a1d95549
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-16T17:33:16Z"
+    last_pushed: "2026-03-31T08:30:55Z"
+    license:
+      spdx: null
+      name: null
+    archived: false
+    disabled: false
+    category: research-only
+  - id: oboard-claude-code-rev
+    repo: oboard/claude-code-rev
+    url: https://github.com/oboard/claude-code-rev
+    default_branch: main
+    head_sha: 74a9a9387a0c60242e83bcaa201c4794e3cbd040
+    commit_url: https://github.com/oboard/claude-code-rev/commit/74a9a9387a0c60242e83bcaa201c4794e3cbd040
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-16T08:56:36Z"
+    last_pushed: "2026-04-08T14:58:25Z"
+    license:
+      spdx: null
+      name: null
+    archived: false
+    disabled: false
+    category: research-only
+  - id: ghuntley-claude-code-source-code-deobfuscation
+    repo: ghuntley/claude-code-source-code-deobfuscation
+    url: https://github.com/ghuntley/claude-code-source-code-deobfuscation
+    default_branch: main
+    head_sha: ced7586d06751d071490f91cab1de04490d969ba
+    commit_url: https://github.com/ghuntley/claude-code-source-code-deobfuscation/commit/ced7586d06751d071490f91cab1de04490d969ba
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-11T15:44:14Z"
+    last_pushed: "2025-03-01T15:22:16Z"
+    license:
+      spdx: null
+      name: null
+    archived: true
+    disabled: false
+    category: research-only
+  - id: comeonoliver-claude-code-analysis
+    repo: ComeOnOliver/claude-code-analysis
+    url: https://github.com/ComeOnOliver/claude-code-analysis
+    default_branch: main
+    head_sha: c45730b02591b6992dfc8aaa3483fd01b213815e
+    commit_url: https://github.com/ComeOnOliver/claude-code-analysis/commit/c45730b02591b6992dfc8aaa3483fd01b213815e
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-09T03:51:41Z"
+    last_pushed: "2026-03-31T17:45:05Z"
+    license:
+      spdx: MIT
+      name: MIT License
+    archived: false
+    disabled: false
+    category: research-only
+  - id: dadiaomengmeimei-claude-code-sourcemap-learning-notebook
+    repo: dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+    url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+    default_branch: main
+    head_sha: 6b8eea53c90457b89246581cd07481e26d05cb60
+    commit_url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook/commit/6b8eea53c90457b89246581cd07481e26d05cb60
+    observed_at: "2026-07-17"
+    last_updated: "2026-07-04T00:58:34Z"
+    last_pushed: "2026-04-02T02:12:03Z"
+    license:
+      spdx: MIT
+      name: MIT License
+    archived: false
+    disabled: false
+    category: research-only

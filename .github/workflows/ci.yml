@@ -21,6 +21,9 @@ jobs:
       # RC ID: RC-043
       - name: RC traceability
         run: python scripts/check_rc_traceability.py --check
+      # RC ID: RC-015
+      - name: Source baseline
+        run: python scripts/check_source_baselines.py --check
       - name: Ruff
         run: ruff check backend
       - name: Mypy
