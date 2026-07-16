@@ -1,0 +1,32 @@
+schema_version: 1
+rc_id: RC-029
+monitor_interval: quarterly
+last_review_date: "2026-07-17"
+next_review_date: "2026-10-01"
+default_policy: keep-restrictions-until-reviewed
+sources:
+  - id: anthropics-claude-code
+    repo: anthropics/claude-code
+    baseline_default_branch: main
+    baseline_head_sha: c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab
+    baseline_license_spdx: null
+    baseline_archived: false
+    baseline_disabled: false
+    on_change: create-adr-and-keep-restrictions
+  - id: anthropics-claude-agent-sdk-python
+    repo: anthropics/claude-agent-sdk-python
+    baseline_default_branch: main
+    baseline_head_sha: 02782876a00afbcab584d501e8851b5109907077
+    baseline_license_spdx: MIT
+    baseline_archived: false
+    baseline_disabled: false
+    on_change: create-adr-and-keep-restrictions
+watch_urls:
+  - id: anthropic-terms
+    url: https://www.anthropic.com/legal/terms
+    status: pending-confirmation
+    on_change: create-adr-and-keep-restrictions
+  - id: claude-code-docs
+    url: https://code.claude.com/docs/en/overview
+    status: pending-confirmation
+    on_change: create-adr-and-keep-restrictions
