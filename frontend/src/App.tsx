@@ -48,10 +48,10 @@ export function App() {
   const visibleTemplates = useMemo(() => templates, [templates]);
 
   useEffect(() => {
+    if (!isWorkspaceRoute) {
+      return;
+    }
     void withLoading(async () => {
-      if (!isWorkspaceRoute) {
-        return;
-      }
       if (api.getToken()) {
         setUser(await api.me());
       }

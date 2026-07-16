@@ -39,6 +39,7 @@ interface ResponseLike {
 afterEach(() => {
   vi.unstubAllGlobals();
   localStorage.clear();
+  window.history.replaceState({}, "", "/");
 });
 
 describe("App", () => {
@@ -47,6 +48,20 @@ describe("App", () => {
     render(<App />);
     expect(await screen.findByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
     expect(screen.getByText("优化并保存")).toBeInTheDocument();
+  });
+
+  it("renders a dedicated login page", () => {
+    window.history.replaceState({}, "", "/login");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Welcome back." })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "LOGIN" })).toBeInTheDocument();
+  });
+
+  it("renders a dedicated registration page", () => {
+    window.history.replaceState({}, "", "/register");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Start a local record." })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "CREATE ACCOUNT" })).toBeInTheDocument();
   });
 
   it("shows initialization errors from the API", async () => {
