@@ -50,6 +50,9 @@ jobs:
       # RC ID: RC-032
       - name: Third-party register
         run: python scripts/check_third_party_register.py --check
+      # RC ID: RC-033
+      - name: Clean-room rewrite workflow
+        run: python scripts/check_clean_room_rewrite.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy
