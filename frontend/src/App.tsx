@@ -14,6 +14,8 @@ import type {
 import { SiteShell } from "./components/SiteShell";
 import { AuthPage, SiteRoute } from "./marketing";
 
+// RC ID: RC-050. Surface offline-rule identity and fallback reasons in the workspace.
+
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
   all: "全部",
@@ -41,6 +43,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [streamStatus, setStreamStatus] = useState<string | null>(null);
   const [streamText, setStreamText] = useState("");
+  const [providerMetadata, setProviderMetadata] = useState<OptimizeResponse["metadata"] | null>(null);
   const [user, setUser] = useState<UserPublic | null>(null);
   const [username, setUsername] = useState("demo-user");
   const [password, setPassword] = useState("demo-password");
@@ -100,6 +103,7 @@ export function App() {
   async function runAnalyze() {
     await withLoading(async () => {
       setAnalysis(await api.analyze(prompt));
+      setProviderMetadata(null);
       setDiff(null);
     });
   }
@@ -118,6 +122,7 @@ export function App() {
   async function runStreamOptimize() {
     await withLoading(async () => {
       setStreamText("");
+      setProviderMetadata(null);
       setStreamStatus("准备优化");
       await api.streamOptimize(prompt, selectedTemplate, "offline", (event) => {
         if (event.event === "started") {
@@ -133,7 +138,13 @@ export function App() {
           setStreamText((current) => current + payload.text);
         }
         if (event.event === "fallback") {
-          setStreamStatus("模型失败，已降级到离线规则");
+          const metadata = event.data as OptimizeResponse["metadata"];
+          setProviderMetadata(metadata);
+          setStreamStatus(
+            metadata.error_summary
+              ? `已使用离线规则：${metadata.error_summary}`
+              : "已使用离线规则"
+          );
         }
         if (event.event === "saved") {
           const payload = event.data as { version_id: number };
@@ -178,6 +189,7 @@ export function App() {
   function applyOptimizeResult(result: OptimizeResponse) {
     setAnalysis(result.analysis);
     setActiveVersion(result.version_id);
+    setProviderMetadata(result.metadata);
   }
 
   async function runDiff(targetId: number) {
@@ -330,6 +342,14 @@ export function App() {
         ) : null}
         {analysis ? (
           <section className="result-panel">
+            {providerMetadata ? (
+              <div className={providerMetadata.fallback_used ? "provider-status fallback" : "provider-status"}>
+                <strong>{providerMetadata.provider_used === "offline" ? "离线规则" : providerMetadata.provider_used}</strong>
+                {providerMetadata.fallback_used && providerMetadata.error_summary ? (
+                  <span>降级原因：{providerMetadata.error_summary}</span>
+                ) : null}
+              </div>
+            ) : null}
             <div className="score-head">
               <span>总分</span>
               <strong>{analysis.score.total_score}</strong>

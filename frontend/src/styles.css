@@ -159,6 +159,10 @@ textarea { background: var(--paper-soft); font: 17px/1.6 var(--serif); min-heigh
 .result-panel, .stream-panel, .task-panel { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 18px; }
 .stream-panel, .task-panel { background: var(--paper-deep); padding: 14px; }
 .task-panel { align-items: center; display: flex; gap: 10px; }
+.provider-status { align-items: baseline; border-bottom: 1px solid var(--line); display: flex; gap: 10px; margin-bottom: 18px; padding-bottom: 10px; }
+.provider-status strong { font: 16px/1.1 var(--serif); }
+.provider-status span { color: var(--muted); font: 11px/1.35 var(--mono); }
+.provider-status.fallback strong { color: #8e3e2a; }
 .task-panel span, .diff-panel p { color: var(--muted); }
 .score-head { align-items: baseline; justify-content: space-between; }
 .score-head strong { font: 64px/0.9 var(--serif); }

@@ -6,9 +6,20 @@ from time import perf_counter
 from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.providers.base import ModelRequest, ModelResponse
 
+# RC ID: RC-050. Describe the offline rules backend without presenting it as a model.
+
 
 class OfflineRuleProvider:
     name = "offline"
+    display_name = "离线规则"
+    is_model = False
+    network_access = False
+    fallback_triggers = (
+        "provider_error",
+        "provider_timeout",
+        "provider_rate_limit",
+        "provider_unavailable",
+    )
 
     def __init__(self, optimizer: Optimizer | None = None) -> None:
         self.optimizer = optimizer or Optimizer()

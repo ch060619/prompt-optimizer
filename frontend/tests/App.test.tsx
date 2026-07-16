@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
 import { api } from "../src/api";
 
+// RC ID: RC-050. Verify the UI identifies offline rules instead of a model.
+
 function stubFetch(handler?: (url: string) => Promise<ResponseLike>) {
   vi.stubGlobal(
     "fetch",
@@ -135,10 +137,11 @@ describe("App", () => {
             version_id: null,
             analysis: { ...analysis, optimized_prompt: "优化后的提示词" },
             metadata: {
-              provider_requested: "offline",
-              provider_used: "offline",
-              fallback_used: false,
-              latency_ms: 1
+               provider_requested: "offline",
+               provider_used: "offline",
+               fallback_used: false,
+               latency_ms: 1,
+               error_summary: null
             }
           })}`
         ].join("\n\n");
@@ -161,6 +164,7 @@ describe("App", () => {
 
     expect(await screen.findByText("优化完成")).toBeInTheDocument();
     expect(screen.getAllByText("优化后的提示词").length).toBeGreaterThan(0);
+    expect(screen.getByText("离线规则")).toBeInTheDocument();
   });
 
   it("registers and stores an authenticated user", async () => {
