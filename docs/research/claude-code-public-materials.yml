@@ -1,0 +1,57 @@
+schema_version: 1
+rc_id: RC-019
+captured_at: "2026-07-17"
+source:
+  repo: anthropics/claude-code
+  url: https://github.com/anthropics/claude-code/tree/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab
+  default_branch: main
+  head_sha: c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab
+  commit_url: https://github.com/anthropics/claude-code/commit/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab
+  license_spdx: null
+  category: behavior-only
+  reuse_policy: no-core-code-no-commercial-materials
+materials:
+  - id: official-readme
+    evidence_class: document-fact
+    url: https://github.com/anthropics/claude-code/blob/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab/README.md
+    access_status: verified-200
+    statement: README describes a terminal coding agent that handles routine tasks, explanations, and Git workflows through natural-language commands.
+  - id: official-plugin-readme
+    evidence_class: document-fact
+    url: https://github.com/anthropics/claude-code/blob/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab/plugins/README.md
+    access_status: verified-200
+    statement: Plugin documentation describes commands, agents, hooks, and MCP servers as extension mechanisms.
+  - id: official-hooks-example
+    evidence_class: document-fact
+    url: https://github.com/anthropics/claude-code/blob/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab/examples/hooks/bash_command_validator_example.py
+    access_status: verified-200
+    statement: The fixed tree contains an official hooks example path; implementation details are not copied.
+  - id: official-settings-examples
+    evidence_class: document-fact
+    url: https://github.com/anthropics/claude-code/blob/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab/examples/settings/README.md
+    access_status: verified-200
+    statement: Settings examples describe hierarchy, managed permission rules, managed hooks, marketplace controls, and Bash-only sandbox scope.
+  - id: official-plugins-tree
+    evidence_class: document-fact
+    url: https://github.com/anthropics/claude-code/tree/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab/plugins
+    access_status: verified-tree
+    statement: The fixed tree contains official plugin examples and plugin metadata paths.
+  - id: official-docs-overview
+    evidence_class: document-fact
+    url: https://code.claude.com/docs/en/overview
+    access_status: pending-confirmation-404
+    statement: null
+  - id: official-docs-hooks
+    evidence_class: document-fact
+    url: https://code.claude.com/docs/en/hooks
+    access_status: pending-confirmation-404
+    statement: null
+observations:
+  - id: black-box-cli-gui-observation
+    evidence_class: black-box-observation
+    status: not-run
+    statement: null
+  - id: implementation-speculation
+    evidence_class: speculation
+    status: not-approved
+    statement: null
