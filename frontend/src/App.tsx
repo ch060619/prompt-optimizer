@@ -12,6 +12,7 @@ import type {
   VersionSummary
 } from "./types";
 import { SiteShell } from "./components/SiteShell";
+import { HomePage, SiteRoute } from "./marketing";
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
@@ -24,6 +25,8 @@ const categoryLabels: Record<string, string> = {
 };
 
 export function App() {
+  const pathname = window.location.pathname;
+  const isWorkspaceRoute = pathname === "/" || pathname === "/workspace";
   const [prompt, setPrompt] = useState("你是一名产品顾问，请帮我优化一个 SaaS 产品发布邮件。");
   const [category, setCategory] = useState("all");
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
@@ -45,12 +48,15 @@ export function App() {
 
   useEffect(() => {
     void withLoading(async () => {
+      if (!isWorkspaceRoute) {
+        return;
+      }
       if (api.getToken()) {
         setUser(await api.me());
       }
       await Promise.all([loadTemplates(category), loadHistory()]);
     });
-  }, [category]);
+  }, [category, isWorkspaceRoute]);
 
   async function runAuth(mode: "login" | "register") {
     await withLoading(async () => {
@@ -197,8 +203,17 @@ export function App() {
     }
   }
 
+  if (!isWorkspaceRoute) {
+    return (
+      <SiteShell>
+        <SiteRoute path={pathname} />
+      </SiteShell>
+    );
+  }
+
   return (
     <SiteShell>
+      {pathname === "/" ? <HomePage /> : null}
       <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">

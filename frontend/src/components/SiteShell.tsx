@@ -134,12 +134,6 @@ function SiteFooter() {
           <a href="/case-studies">Use cases</a>
           <a href="/contact">Contact</a>
         </div>
-        <div>
-          <span className="eyebrow">LEGAL</span>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-          <a href="/cookies">Cookies</a>
-        </div>
       </div>
       <div className="footer-bottomline">
         <span>LOCAL DATA / NO REMOTE MODEL REQUIRED</span>
