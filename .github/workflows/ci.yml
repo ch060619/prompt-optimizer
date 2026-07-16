@@ -35,6 +35,9 @@ jobs:
       # RC ID: RC-026
       - name: Independent design provenance
         run: python scripts/check_independent_design.py
+      # RC ID: RC-027
+      - name: Black-box fixture contract
+        run: python scripts/check_claude_black_box_fixtures.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy

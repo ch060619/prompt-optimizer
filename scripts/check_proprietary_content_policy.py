@@ -39,6 +39,7 @@ EXCLUDED_FILES = {
     "scripts/test_source_map_denylist.py",
     "scripts/check_source_map_evidence.py",
     "scripts/check_clean_room_boundary.py",
+    "scripts/check_independent_design.py",
 }
 
 

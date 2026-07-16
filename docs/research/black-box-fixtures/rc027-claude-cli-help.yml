@@ -1,0 +1,28 @@
+schema_version: 1
+rc_id: RC-027
+fixture_id: rc027-claude-cli-help-2026-07-17
+created_by: Codex
+created_at: "2026-07-17"
+source_basis:
+  - https://code.claude.com/docs/en/overview (public documentation link from official README; current page status is not used as a behavior claim)
+  - https://github.com/anthropics/claude-code/blob/c39cb0f14bfe8bb519bae5bfc55add6867c5e2ab/README.md
+command: claude --help
+observed_version: 2.1.202
+observed_output_sha256: e3fba9bfce4c126545eaa70c839fe2fbfe3abf02e1243aa846592d2a97dbb3bb
+raw_output_retained: false
+assertions:
+  - id: non-interactive-mode
+    contains: "-p, --print"
+    abstract: supports a non-interactive print mode
+  - id: structured-output
+    contains: "--output-format <format>"
+    abstract: exposes a selectable output format option
+  - id: permission-mode
+    contains: "--permission-mode <mode>"
+    abstract: exposes an explicit permission mode option
+  - id: session-fork
+    contains: "--fork-session"
+    abstract: exposes a session fork option when resuming
+  - id: hook-events
+    contains: "--include-hook-events"
+    abstract: exposes an option to include hook lifecycle events

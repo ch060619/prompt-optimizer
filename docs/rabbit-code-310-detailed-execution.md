@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 22 |
-| 最后完成项 | RC-026 |
-| 下一待执行项 | RC-027 |
+| 已完成项数 | 23 |
+| 最后完成项 | RC-027 |
+| 下一待执行项 | RC-028 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-026 已提交合法材料驱动的独立设计、双方案比较和 Provenance；准备执行 RC-027 |
-| 当前阻塞 | 无；RC-025 正式角色签署仍待人工确认，当前设计不依赖未签署权限 |
-| 最近一次完整验证 | 2026-07-17：进度计数 Done=22/Pending=288/Total=310/UniqueIds=310；独立设计、clean-room、专有内容和 source-map denylist 校验通过；134 个供应链输入零命中；Ruff 与 RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 04:31:52 +08:00 |
+| 当前状态 | RC-027 已提交自建黑盒 fixture、官方 CLI help 断言和差异报告；Rabbit Code 对照待确认，准备执行 RC-028 |
+| 当前阻塞 | RC-027 未发送模型请求，Rabbit Code 对照差异待确认；按会话规则记录待确认，不阻塞 RC-028 |
+| 最近一次完整验证 | 待完成 RC-027 状态记录后的进度计数与追踪检查 |
+| 最近更新时间 | 2026-07-17 04:34:55 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -56,6 +56,7 @@
 | RC-024 | 2026-07-17 04:21:42 +08:00 | `b252756` | PASS：专有内容禁止清单、Provenance 模板、PR 必填字段和产品输入字符串审计已建立；62 个产品输入零禁用字面量；人工 diff 相似性审查无外部实现；CI 与 Ruff 通过 | `docs/evidence/RC-024/README.md` | 零字符串命中不等于法律清除；后续相关 PR 仍必须填写来源声明并完成人工审查 |
 | RC-025 | 2026-07-17 04:24:53 +08:00 | `0170116` | SUBMITTED WITH PENDING CONFIRMATION：研究者/实现者/审查者角色、信息流、clean-room 规格模板和中立示例已提交；角色签署待人工分配；规格边界校验与 Ruff 通过 | `docs/evidence/RC-025/README.md` | 真实人员、权限和签署记录待确认；中立规格不得包含源文件名、原文或代码结构 |
 | RC-026 | 2026-07-17 04:30:28 +08:00 | `1c5b1eb` | PASS：独立 Agent 事件设计比较方案 A/B；Provenance 只引用 clean-room 规格、固定许可来源和官方 SDK 事实；独立设计校验、source-map denylist、专有内容政策和 clean-room 校验通过 | `docs/evidence/RC-026/README.md` | 正式核心模块 PR 仍必须填写 Provenance；设计采用方案 A，不复制外部实现 |
+| RC-027 | 2026-07-17 04:34:55 +08:00 | `6743ade` | SUBMITTED WITH PENDING CONFIRMATION：自建 fixture 含 5 项抽象断言；官方 Claude Code 2.1.202 `--help` 断言通过并固定输出哈希；未发送模型请求，Rabbit Code 差异对照待确认 | `docs/evidence/RC-027/README.md` | 不保存完整官方输出或官方测试夹具；后续对照运行需明确授权、脱敏工作目录和可重复记录 |
 
 ### 进度记录一致性检查
 
@@ -2389,7 +2390,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-024** 禁止复制其中的源码、System Prompt、内部文案、测试、资源、注释、私有协议常量、功能开关名称和未公开服务端点。
 - [x] **RC-025** 将调研人员与实现人员进行 clean-room 信息隔离：调研输出只描述问题、输入输出、状态转换、安全约束和可验证行为，不包含源文件名、代码结构复刻或原文片段。
 - [x] **RC-026** 实现人员只依据 clean-room 规格、Claude Code 官方文档/SDK、公开黑盒行为和许可证清晰的 Codex/OpenCode源码独立设计。
-- [ ] **RC-027** 使用官方 Claude Code 可执行程序、公开文档和自建行为测试进行兼容性验证，不使用泄露源码测试文件作为 Rabbit Code 的 golden fixture。
+- [x] **RC-027** 使用官方 Claude Code 可执行程序、公开文档和自建行为测试进行兼容性验证，不使用泄露源码测试文件作为 Rabbit Code 的 golden fixture。
 - [ ] **RC-028** 对 MIT 分析资料做内容来源审计，区分作者原创分析、合理引用和可能仍受 Anthropic 版权保护的衍生内容。
 - [ ] **RC-029** 若 Anthropic 后续正式开源、明确授权或发布可复用规范，再通过 ADR 重新评估复用范围；在此之前默认结论为“可研究事实，不可直接复用代码”。
 - [ ] **RC-030** 输出《Claude Code source map 事件调研与 Rabbit Code clean-room 决策记录》，作为 M0 和开源发布审计的必需材料。
