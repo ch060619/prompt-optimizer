@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "../src/App";
+import { api } from "../src/api";
 
 function stubFetch(handler?: (url: string) => Promise<ResponseLike>) {
   vi.stubGlobal(
@@ -38,18 +39,54 @@ interface ResponseLike {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  api.setToken(null);
   localStorage.clear();
+  window.history.replaceState({}, "", "/");
 });
 
+function visitWorkspace() {
+  window.history.replaceState({}, "", "/workspace");
+}
+
 describe("App", () => {
-  it("renders the local workspace", async () => {
+  it("renders the home page without the workspace controls", async () => {
+    render(<App />);
+    expect(screen.getByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
+    expect(screen.queryByText("优化并保存")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("renders the local workspace on its dedicated route", async () => {
+    visitWorkspace();
     stubFetch();
     render(<App />);
-    expect(await screen.findByText("Prompt Optimizer")).toBeInTheDocument();
-    expect(screen.getByText("优化并保存")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "优化" })).toBeInTheDocument();
+  });
+
+  it("renders a dedicated login page", () => {
+    window.history.replaceState({}, "", "/login");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Welcome back." })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "LOGIN" })).toBeInTheDocument();
+  });
+
+  it("renders a dedicated registration page", () => {
+    window.history.replaceState({}, "", "/register");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Start a local record." })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "CREATE ACCOUNT" })).toBeInTheDocument();
+  });
+
+  it("removes the footer while keeping a rabbit on marketing pages", () => {
+    window.history.replaceState({}, "", "/contact");
+    render(<App />);
+    expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+    expect(screen.getByAltText("PromptLayer 风格复古版画兔兔插画")).toBeInTheDocument();
   });
 
   it("shows initialization errors from the API", async () => {
+    visitWorkspace();
     stubFetch((url: string) => {
       if (url.startsWith("/api/templates")) {
         return Promise.resolve({
@@ -73,6 +110,7 @@ describe("App", () => {
   });
 
   it("shows streamed optimization output", async () => {
+    visitWorkspace();
     const analysis = {
       prompt: "帮我写销售话术",
       optimized_prompt: null,
@@ -93,9 +131,8 @@ describe("App", () => {
           `event: started\ndata: {"provider":"offline"}`,
           `event: analysis\ndata: ${JSON.stringify(analysis)}`,
           `event: chunk\ndata: {"text":"优化后的提示词"}`,
-          `event: saved\ndata: {"version_id":1}`,
           `event: completed\ndata: ${JSON.stringify({
-            version_id: 1,
+            version_id: null,
             analysis: { ...analysis, optimized_prompt: "优化后的提示词" },
             metadata: {
               provider_requested: "offline",
@@ -127,6 +164,7 @@ describe("App", () => {
   });
 
   it("registers and stores an authenticated user", async () => {
+    window.history.replaceState({}, "", "/register");
     let sawAuthHeader = false;
     stubFetch((url: string) => {
       if (url.startsWith("/api/templates")) {
@@ -153,13 +191,14 @@ describe("App", () => {
     });
     render(<App />);
 
-    fireEvent.click(await screen.findByText("注册"));
+    fireEvent.click(screen.getByRole("button", { name: "CREATE ACCOUNT" }));
 
-    expect(await screen.findByText("demo-user")).toBeInTheDocument();
+    expect(await screen.findByText(/Signed in as demo-user/)).toBeInTheDocument();
     expect(sawAuthHeader).toBe(true);
   });
 
   it("runs an optimize background task", async () => {
+    visitWorkspace();
     const analysis = {
       prompt: "帮我写销售话术",
       optimized_prompt: "后台优化后的提示词",
@@ -174,6 +213,12 @@ describe("App", () => {
       }
       if (url === "/api/history") {
         return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      if (url === "/api/auth/me") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ id: 1, username: "task-user", created_at: "2026-06-15T00:00:00Z" })
+        });
       }
       if (url === "/api/tasks/optimize") {
         return Promise.resolve({
@@ -213,9 +258,11 @@ describe("App", () => {
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
     });
+    api.setToken("token-task");
     render(<App />);
 
-    fireEvent.click(await screen.findByText("后台优化"));
+    await screen.findByText("task-user");
+    fireEvent.click(screen.getByText("后台优化"));
 
     expect(await screen.findByText("optimize · succeeded")).toBeInTheDocument();
     expect(screen.getByText("后台优化后的提示词")).toBeInTheDocument();

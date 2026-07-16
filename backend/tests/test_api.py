@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 from pytest import fixture
 
 from prompt_optimizer.api.app import create_app
+from prompt_optimizer.core.models import UserPublic
 from prompt_optimizer.export.service import ExportService
 from prompt_optimizer.providers import (
     ModelProviderError,
@@ -44,14 +46,33 @@ def test_api_templates(client: TestClient) -> None:
 
 
 def test_api_optimize_and_export(client: TestClient) -> None:
-    response = client.post("/api/optimize", json={"prompt": "帮我写销售话术"})
+    guest_response = client.post("/api/optimize", json={"prompt": "帮我写销售话术"})
+    assert guest_response.status_code == 200
+    assert guest_response.json()["version_id"] is None
+    assert client.get("/api/history").status_code == 401
+
+    token = client.post(
+        "/api/auth/register",
+        json={"username": "export-user", "password": "secret123"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post(
+        "/api/optimize",
+        json={"prompt": "帮我写销售话术"},
+        headers=headers,
+    )
     assert response.status_code == 200
     payload = response.json()
     version_id = payload["version_id"]
+    assert isinstance(version_id, int)
     assert payload["metadata"]["provider_used"] == "offline"
     assert payload["metadata"]["fallback_used"] is False
 
-    export_response = client.post("/api/export", json={"version_id": version_id, "format": "md"})
+    export_response = client.post(
+        "/api/export",
+        json={"version_id": version_id, "format": "md"},
+        headers=headers,
+    )
     assert export_response.status_code == 200
     assert "提示词优化结果" in export_response.text
 
@@ -124,6 +145,26 @@ def test_api_rejects_invalid_auth_header(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def test_api_rejects_token_for_missing_user(tmp_path: Path) -> None:
+    services = AppServices()
+    services.versions = VersionService(StorageService(tmp_path / "missing-user.sqlite3"))
+    token = services.auth.create_token(
+        UserPublic(id=999, username="missing-user", created_at=datetime.now(UTC))
+    )
+    headers = {"Authorization": f"Bearer {token}"}
+
+    with TestClient(create_app(services)) as test_client:
+        me_response = test_client.get("/api/auth/me", headers=headers)
+        optimize_response = test_client.post(
+            "/api/optimize",
+            json={"prompt": "帮我写销售话术"},
+            headers=headers,
+        )
+
+    assert me_response.status_code == 401
+    assert optimize_response.status_code == 401
+
+
 def test_api_optimize_task_succeeds(client: TestClient) -> None:
     token = client.post(
         "/api/auth/register",
@@ -151,11 +192,20 @@ def test_api_optimize_task_succeeds(client: TestClient) -> None:
 
 
 def test_api_export_task_requires_finished_task(client: TestClient) -> None:
-    response = client.post("/api/tasks/export", json={"version_id": 999, "format": "md"})
+    token = client.post(
+        "/api/auth/register",
+        json={"username": "export-worker", "password": "secret123"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post(
+        "/api/tasks/export",
+        json={"version_id": 999, "format": "md"},
+        headers=headers,
+    )
     assert response.status_code == 200
     task_id = response.json()["task_id"]
 
-    result_response = client.get(f"/api/tasks/{task_id}/result")
+    result_response = client.get(f"/api/tasks/{task_id}/result", headers=headers)
 
     assert result_response.status_code == 409
 
@@ -222,8 +272,8 @@ def test_api_optimize_stream_emits_sse_events(client: TestClient) -> None:
     assert "event: started" in body
     assert "event: analysis" in body
     assert "event: chunk" in body
-    assert "event: saved" in body
     assert "event: completed" in body
+    assert "\"version_id\": null" in body
 
 
 def test_api_optimize_stream_can_use_provider_chunks(tmp_path: Path) -> None:

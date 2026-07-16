@@ -43,12 +43,21 @@ class AppServices:
         return AuthResponse(access_token=self.auth.create_token(user), user=user)
 
     def get_user_from_token(self, token: str | None) -> UserPublic:
+        user = self.get_optional_user_from_token(token)
+        if user is None:
+            raise AuthError("需要登录。")
+        return user
+
+    def get_optional_user_from_token(self, token: str | None) -> UserPublic | None:
         if not token:
-            return self.versions.storage.ensure_demo_user()
+            return None
         if not token.startswith("Bearer "):
             raise AuthError("无效 token。")
         token_value = token.removeprefix("Bearer ").strip()
-        return self.versions.storage.get_user(self.auth.read_token(token_value))
+        try:
+            return self.versions.storage.get_user(self.auth.read_token(token_value))
+        except KeyError as exc:
+            raise AuthError("用户不存在。") from exc
 
     def optimize_and_save(
         self,
@@ -57,7 +66,7 @@ class AppServices:
         prompt: str,
         template: PromptTemplate | None,
         provider_name: str = "offline",
-        owner_id: int = 1,
+        owner_id: int | None = 1,
         project_id: int | None = None,
     ) -> OptimizeResponse:
         request = ModelRequest(prompt=prompt, template=template)
@@ -72,13 +81,15 @@ class AppServices:
             error_summary = str(exc)
             provider_response = self.providers.get("offline").optimize(request)
         analysis = provider_response.analysis
-        version_id = self.versions.create(
-            original_prompt=original_prompt,
-            optimized_prompt=analysis.optimized_prompt or prompt,
-            analysis=analysis,
-            owner_id=owner_id,
-            project_id=project_id,
-        )
+        version_id = None
+        if owner_id is not None:
+            version_id = self.versions.create(
+                original_prompt=original_prompt,
+                optimized_prompt=analysis.optimized_prompt or prompt,
+                analysis=analysis,
+                owner_id=owner_id,
+                project_id=project_id,
+            )
         metadata = OptimizeMetadata(
             provider_requested=provider_name,
             provider_used=provider_response.provider_used,
@@ -99,18 +110,20 @@ class AppServices:
         fallback_used: bool,
         latency_ms: int,
         error_summary: str | None,
-        owner_id: int = 1,
+        owner_id: int | None = 1,
         project_id: int | None = None,
     ) -> OptimizeResponse:
         analysis: PromptAnalysis = self.analyzer.analyze(optimized_prompt)
         analysis.optimized_prompt = optimized_prompt
-        version_id = self.versions.create(
-            original_prompt=original_prompt,
-            optimized_prompt=optimized_prompt or prompt,
-            analysis=analysis,
-            owner_id=owner_id,
-            project_id=project_id,
-        )
+        version_id = None
+        if owner_id is not None:
+            version_id = self.versions.create(
+                original_prompt=original_prompt,
+                optimized_prompt=optimized_prompt or prompt,
+                analysis=analysis,
+                owner_id=owner_id,
+                project_id=project_id,
+            )
         metadata = OptimizeMetadata(
             provider_requested=provider_requested,
             provider_used=provider_used,

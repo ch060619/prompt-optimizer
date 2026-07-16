@@ -54,7 +54,7 @@ export interface AuthResponse {
 }
 
 export interface OptimizeResponse {
-  version_id: number;
+  version_id: number | null;
   analysis: PromptAnalysis;
   metadata: {
     provider_requested: string;

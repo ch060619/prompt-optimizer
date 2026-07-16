@@ -11,6 +11,8 @@ import type {
   UserPublic,
   VersionSummary
 } from "./types";
+import { SiteShell } from "./components/SiteShell";
+import { AuthPage, SiteRoute } from "./marketing";
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
@@ -23,6 +25,10 @@ const categoryLabels: Record<string, string> = {
 };
 
 export function App() {
+  const pathname = window.location.pathname;
+  const isWorkspaceRoute = pathname === "/workspace";
+  const authMode = pathname === "/register" ? "register" : pathname === "/login" ? "login" : null;
+  const showSharedRabbit = !isWorkspaceRoute && pathname !== "/" && !authMode;
   const [prompt, setPrompt] = useState("你是一名产品顾问，请帮我优化一个 SaaS 产品发布邮件。");
   const [category, setCategory] = useState("all");
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
@@ -43,13 +49,21 @@ export function App() {
   const visibleTemplates = useMemo(() => templates, [templates]);
 
   useEffect(() => {
+    if (!isWorkspaceRoute) {
+      return;
+    }
     void withLoading(async () => {
       if (api.getToken()) {
         setUser(await api.me());
       }
-      await Promise.all([loadTemplates(category), loadHistory()]);
+      await loadTemplates(category);
+      if (api.getToken()) {
+        await loadHistory();
+      } else {
+        setHistory([]);
+      }
     });
-  }, [category]);
+  }, [category, isWorkspaceRoute]);
 
   async function runAuth(mode: "login" | "register") {
     await withLoading(async () => {
@@ -60,13 +74,17 @@ export function App() {
       api.setToken(result.access_token);
       setUser(result.user);
       await loadHistory();
+      if (authMode) {
+        window.location.assign("/workspace");
+      }
     });
   }
 
   async function logout() {
     api.setToken(null);
     setUser(null);
-    await loadHistory();
+    setHistory([]);
+    window.location.assign("/");
   }
 
   async function loadTemplates(nextCategory: string) {
@@ -91,7 +109,9 @@ export function App() {
       const result = await api.optimize(prompt, selectedTemplate);
       applyOptimizeResult(result);
       setDiff(null);
-      await loadHistory();
+      if (user) {
+        await loadHistory();
+      }
     });
   }
 
@@ -129,7 +149,9 @@ export function App() {
         }
       });
       setDiff(null);
-      await loadHistory();
+      if (user) {
+        await loadHistory();
+      }
     });
   }
 
@@ -196,39 +218,57 @@ export function App() {
     }
   }
 
+  if (!isWorkspaceRoute) {
+    if (authMode) {
+      return (
+        <SiteShell>
+          <AuthPage
+            mode={authMode}
+            username={username}
+            password={password}
+            loading={loading}
+            error={error}
+            user={user}
+            onUsernameChange={setUsername}
+            onPasswordChange={setPassword}
+            onSubmit={(event) => { event.preventDefault(); void runAuth(authMode); }}
+          />
+        </SiteShell>
+      );
+    }
+    return (
+      <SiteShell showSharedRabbit={showSharedRabbit}>
+        <SiteRoute path={pathname} />
+      </SiteShell>
+    );
+  }
+
   return (
-    <main className="app-shell">
+    <SiteShell authenticated={Boolean(user)} isWorkspace onSignOut={() => void logout()}>
+      <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
           <Sparkles size={22} />
           <span>Prompt Optimizer</span>
         </div>
-        <div className="auth-panel">
-          {user ? (
-            <>
-              <strong>{user.username}</strong>
-              <button onClick={() => void logout()}>退出</button>
-            </>
-          ) : (
-            <>
-              <input
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="用户名"
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="密码"
-              />
-              <div>
-                <button onClick={() => void runAuth("login")}>登录</button>
-                <button onClick={() => void runAuth("register")}>注册</button>
-              </div>
-            </>
-          )}
+        <div className="workspace-rabbit">
+          <img src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="eager" decoding="async" />
         </div>
+        {user ? (
+          <div className="workspace-account">
+            <strong>{user.username}</strong>
+            <span>ACCOUNT ACTIVE</span>
+          </div>
+        ) : (
+          <div className="workspace-account workspace-guest">
+            <strong>GUEST MODE</strong>
+            <span>HISTORY IS NOT SAVED</span>
+            <div className="guest-links">
+              <a href="/login">LOGIN</a>
+              <a href="/register">REGISTER</a>
+            </div>
+          </div>
+        )}
         <div className="section-title">
           <Library size={16} />
           <span>模板库</span>
@@ -264,11 +304,11 @@ export function App() {
       <section className="workspace">
         <div className="toolbar">
           <button onClick={runAnalyze} disabled={loading}>分析</button>
-          <button className="primary" onClick={runOptimize} disabled={loading}>优化并保存</button>
+          <button className="primary" onClick={runOptimize} disabled={loading}>{user ? "优化并保存" : "优化"}</button>
           <button onClick={() => void runStreamOptimize()} disabled={loading}>流式优化</button>
-          <button onClick={() => void runOptimizeTask()} disabled={loading}>后台优化</button>
+          <button onClick={() => void runOptimizeTask()} disabled={loading || !user}>后台优化</button>
           {["md", "json", "txt", "csv"].map((format) => (
-            <button key={format} onClick={() => void runExport(format)} title={`导出 ${format}`}>
+            <button key={format} onClick={() => void runExport(format)} title={`导出 ${format}`} disabled={loading || !user || !activeVersion}>
               <Download size={15} />
               {format.toUpperCase()}
             </button>
@@ -337,6 +377,7 @@ export function App() {
             </button>
           ))}
         </div>
+        {!user ? <div className="guest-note">GUEST MODE / HISTORY IS NOT SAVED <a href="/login">LOGIN TO SAVE</a></div> : null}
         {diff ? (
           <section className="diff-panel">
             <div className="section-title">
@@ -348,6 +389,7 @@ export function App() {
           </section>
         ) : null}
       </aside>
-    </main>
+      </main>
+    </SiteShell>
   );
 }
