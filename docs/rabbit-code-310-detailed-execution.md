@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 10 |
-| 最后完成项 | RC-055 |
-| 下一待执行项 | RC-015 |
+| 已完成项数 | 11 |
+| 最后完成项 | RC-015 |
+| 下一待执行项 | RC-016 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-055 V2 发布线保护与 Rabbit Code 3.0.0 独立版本线已完成，准备执行 RC-015 |
+| 当前状态 | RC-015 调研来源基线与 SHA 校验已完成，准备执行 RC-016 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：V2 两次干净归档哈希、Python wheel、前端 dist 哈希均一致；后端 31 passed；远端 V2 分支/标签保护已核对并启用 |
-| 最近更新时间 | 2026-07-17 03:32:37 +08:00 |
+| 最近一次完整验证 | 2026-07-17：9 个来源元数据校验通过；RC-055 后端 65 passed、Ruff/Mypy；前端 9 passed、Lint/Build；追踪检查通过 |
+| 最近更新时间 | 2026-07-17 03:38:00 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -44,6 +44,7 @@
 | RC-054 | 2026-07-17 02:49:55 +08:00 | `107df2c` | PASS：身份/路径/OpenAPI/sidecar 契约通过；后端 62 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI Rabbit Code 标题与 SHA-256 可复现；索引检查通过 | `docs/evidence/RC-054/README.md` | 兼容截止 3.0.0；安装包升级/卸载和兼容期结束后的删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 | RC-051 | 2026-07-17 02:56:28 +08:00 | `bfe7e47` | PASS：CLI 兼容契约 3 passed；后端 65 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 可复现；索引检查通过 | `docs/evidence/RC-051/README.md` | 安装包升级/卸载、CLI 独立二进制和兼容期结束后的旧入口删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 | RC-055 | 2026-07-17 03:32:37 +08:00 | `c04a528` | PASS：v2.0/v2.0-baseline 均剥离到 `8306d117`；V2 后端 31 passed；两次 Python wheel、前端 dist 和 Git archive 哈希一致；`release/v2.0` 分支保护与两个 V2 标签 Ruleset 已启用 | `docs/evidence/RC-055/README.md` | 标签签名/来源证明留给 RC-277；安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次 |
+| RC-015 | 2026-07-17 03:38:00 +08:00 | `5fc9361` | PASS：9 个 GitHub 来源的 URL、默认分支、HEAD SHA、commit URL、许可证元数据和状态已固定；YAML 校验器与 Ruff 通过；CI 已接入 source baseline 门禁 | `docs/evidence/RC-015/README.md` | 4 个来源无 SPDX 许可证，1 个来源已归档；仅保留研究元数据，法律和 clean-room 结论留给 RC-021 至 RC-030 |
 
 ### 进度记录一致性检查
 
@@ -2352,7 +2353,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### 2. 开源项目调研与可借鉴边界
 
-- [ ] **RC-015** 固定调研基线的仓库 URL、默认分支、Commit SHA、调研日期和许可证版本，避免只记录会移动的 `main` 或 `dev`。
+- [x] **RC-015** 固定调研基线的仓库 URL、默认分支、Commit SHA、调研日期和许可证版本，避免只记录会移动的 `main` 或 `dev`。
 - [ ] **RC-016** 调研 [openai/codex](https://github.com/openai/codex) 的 Apache-2.0 开源终端 Agent，重点覆盖 `core`、`cli`、`tui`、`app-server`、协议、权限、沙箱、MCP、配置、文件搜索、Git、会话和模型 Provider 模块。
 - [ ] **RC-017** 区分“Codex CLI/App Server 开源”与“Codex 桌面产品完整 GUI 源码可用”两件事；桌面端布局和交互只做产品行为研究，不预设可以获取或复制其专有实现。
 - [ ] **RC-018** 调研 [anomalyco/opencode](https://github.com/anomalyco/opencode) 的 MIT 开源实现，重点覆盖 `packages/opencode`、`cli`、`tui`、`desktop`、`app`、`server`、`protocol`、`llm`、`plugin`、`sdk` 和 `ui`。
