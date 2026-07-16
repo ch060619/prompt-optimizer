@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 8 |
-| 最后完成项 | RC-054 |
-| 下一待执行项 | RC-051 |
+| 已完成项数 | 9 |
+| 最后完成项 | RC-051 |
+| 下一待执行项 | RC-055 |
 | 当前里程碑 | W0：保护现有项目基线，为 M0 准备 |
-| 当前状态 | RC-054 Rabbit Code 产品标识与旧名称兼容期已完成，准备执行 RC-051 |
+| 当前状态 | RC-051 CLI 命令与旧 prompt-opt 兼容迁移已完成，准备执行 RC-055 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：后端 62 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；OpenAPI SHA-256 可复现；RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 02:49:55 +08:00 |
+| 最近一次完整验证 | 2026-07-17：后端 65 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；OpenAPI SHA-256 可复现；RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 02:56:28 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -42,6 +42,7 @@
 | RC-052 | 2026-07-17 02:20:55 +08:00 | `eea66e9` | PASS：身份边界 2 passed；后端 54 passed；Ruff/Mypy；前端 9 passed、Lint/Build；ADR Accepted；索引检查通过 | `docs/evidence/RC-052/README.md` | JWT 生产级本地认证、撤销和 OS 密钥库留给 RC-179/207 等安全门禁；既有前端 jsdom 警告保留 |
 | RC-053 | 2026-07-17 02:30:54 +08:00 | `994983f` | PASS：SQLite 备份/迁移/恢复契约 4 passed；后端 58 passed；Ruff/Mypy；前端 9 passed、Lint/Build；脚本检查和索引检查通过 | `docs/evidence/RC-053/README.md` | 备份加密、保留周期、跨设备灾备和并发写入协调不属于本项；既有前端 jsdom 警告保留 |
 | RC-054 | 2026-07-17 02:49:55 +08:00 | `107df2c` | PASS：身份/路径/OpenAPI/sidecar 契约通过；后端 62 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI Rabbit Code 标题与 SHA-256 可复现；索引检查通过 | `docs/evidence/RC-054/README.md` | 兼容截止 3.0.0；安装包升级/卸载和兼容期结束后的删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
+| RC-051 | 2026-07-17 02:56:28 +08:00 | `bfe7e47` | PASS：CLI 兼容契约 3 passed；后端 65 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 可复现；索引检查通过 | `docs/evidence/RC-051/README.md` | 安装包升级/卸载、CLI 独立二进制和兼容期结束后的旧入口删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 
 ### 进度记录一致性检查
 
@@ -2406,7 +2407,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-048** 复用现有 `/api/analyze`、`/api/optimize`、`/api/optimize/stream`、任务、认证、项目和版本接口的有效能力。
 - [ ] **RC-049** 将现有仅能基本处理 OpenAI Chat Completions 的通用 HTTP Provider 拆分为协议明确、能力可探测的 Provider Adapter。
 - [x] **RC-050** 保留 `OfflineRuleProvider` 作为无网络、模型未安装、模型加载失败时的最终可用降级，而不是把它误称为大模型。
-- [ ] **RC-051** 将现有 `prompt-opt` CLI 与 Rabbit Code Agent CLI 的命令空间、配置和存储进行兼容迁移。
+- [x] **RC-051** 将现有 `prompt-opt` CLI 与 Rabbit Code Agent CLI 的命令空间、配置和存储进行兼容迁移。
 - [x] **RC-052** 评估现有 JWT 本地用户体系是否仍有必要，区分“Rabbit Code 本地用户资料”与“第三方 API 凭据配置”。
 - [x] **RC-053** 为现有 SQLite 数据、提示词历史、模板和配置提供备份、迁移、回滚与损坏恢复方案。
 - [x] **RC-054** 更新产品名称、包名、环境变量、应用数据目录和 API 标题，同时提供旧名称兼容期。
