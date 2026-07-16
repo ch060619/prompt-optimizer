@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 9 |
-| 最后完成项 | RC-051 |
-| 下一待执行项 | RC-055 |
-| 当前里程碑 | W0：保护现有项目基线，为 M0 准备 |
-| 当前状态 | RC-051 CLI 命令与旧 prompt-opt 兼容迁移已完成，准备执行 RC-055 |
+| 已完成项数 | 10 |
+| 最后完成项 | RC-055 |
+| 下一待执行项 | RC-015 |
+| 当前里程碑 | W1：合法性、产品与来源冻结 |
+| 当前状态 | RC-055 V2 发布线保护与 Rabbit Code 3.0.0 独立版本线已完成，准备执行 RC-015 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：后端 65 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；OpenAPI SHA-256 可复现；RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 02:56:28 +08:00 |
+| 最近一次完整验证 | 2026-07-17：V2 两次干净归档哈希、Python wheel、前端 dist 哈希均一致；后端 31 passed；远端 V2 分支/标签保护已核对并启用 |
+| 最近更新时间 | 2026-07-17 03:32:37 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -43,6 +43,7 @@
 | RC-053 | 2026-07-17 02:30:54 +08:00 | `994983f` | PASS：SQLite 备份/迁移/恢复契约 4 passed；后端 58 passed；Ruff/Mypy；前端 9 passed、Lint/Build；脚本检查和索引检查通过 | `docs/evidence/RC-053/README.md` | 备份加密、保留周期、跨设备灾备和并发写入协调不属于本项；既有前端 jsdom 警告保留 |
 | RC-054 | 2026-07-17 02:49:55 +08:00 | `107df2c` | PASS：身份/路径/OpenAPI/sidecar 契约通过；后端 62 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI Rabbit Code 标题与 SHA-256 可复现；索引检查通过 | `docs/evidence/RC-054/README.md` | 兼容截止 3.0.0；安装包升级/卸载和兼容期结束后的删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 | RC-051 | 2026-07-17 02:56:28 +08:00 | `bfe7e47` | PASS：CLI 兼容契约 3 passed；后端 65 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 可复现；索引检查通过 | `docs/evidence/RC-051/README.md` | 安装包升级/卸载、CLI 独立二进制和兼容期结束后的旧入口删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
+| RC-055 | 2026-07-17 03:32:37 +08:00 | `c04a528` | PASS：v2.0/v2.0-baseline 均剥离到 `8306d117`；V2 后端 31 passed；两次 Python wheel、前端 dist 和 Git archive 哈希一致；`release/v2.0` 分支保护与两个 V2 标签 Ruleset 已启用 | `docs/evidence/RC-055/README.md` | 标签签名/来源证明留给 RC-277；安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次 |
 
 ### 进度记录一致性检查
 
@@ -2411,7 +2412,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-052** 评估现有 JWT 本地用户体系是否仍有必要，区分“Rabbit Code 本地用户资料”与“第三方 API 凭据配置”。
 - [x] **RC-053** 为现有 SQLite 数据、提示词历史、模板和配置提供备份、迁移、回滚与损坏恢复方案。
 - [x] **RC-054** 更新产品名称、包名、环境变量、应用数据目录和 API 标题，同时提供旧名称兼容期。
-- [ ] **RC-055** 不覆盖现有可复现的 V2 发布线，Rabbit Code 使用独立分支、版本和迁移说明。
+- [x] **RC-055** 不覆盖现有可复现的 V2 发布线，Rabbit Code 使用独立分支、版本和迁移说明。
 
 ### 5. 总体技术架构
 

@@ -1,9 +1,10 @@
 # RC-055 执行证据
 
 - RC ID: RC-055
-- 状态：执行中，待完成状态提交
+- 状态：已完成
 - 负责人：Codex
 - 基线 Commit：`319f2e4`
+- 完成 Commit：`c04a528`
 - 独立开发分支：`codex/rabbit-code`
 - 修改范围：版本元数据、V2/Rabbit Code 版本线迁移说明
 
@@ -40,4 +41,7 @@
 - `frontend/package.json`、`frontend/package-lock.json`：Rabbit Code Web 版本 `3.0.0`。
 - `docs/migrations/RC-055-v2-release-line.md`：记录 V2 引用、分支/版本关系、保护和复现命令。
 
-最终状态提交会补充真实完成 Commit，并更新主控计划的 RC-055 日志和下一指针。
+## 遗留边界
+
+- 标签签名、来源证明和 SBOM 仍属于 RC-277，不把当前未签名标签误报为已签名发布。
+- 安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次。

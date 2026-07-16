@@ -1,7 +1,7 @@
 # RC-055 V2 发布线与 Rabbit Code 版本线
 
 - RC ID: RC-055
-- 状态：执行中，待完成状态提交
+- 状态：已完成
 - V2 版本：`prompt-optimizer 2.0.0`
 - Rabbit Code 版本线：`3.0.x`
 - Rabbit Code 开发分支：`codex/rabbit-code`
@@ -57,8 +57,6 @@ python -m pip wheel --no-deps backend --wheel-dir  -> passed (twice)
 | Git archive `v2.0` | `3261E009A00878A1F9647044FD22E365A25EC987E73B1DBCB6DDDFD0D2601665` | `3261E009A00878A1F9647044FD22E365A25EC987E73B1DBCB6DDDFD0D2601665` | MATCH |
 | Python wheel `prompt_optimizer-2.0.0-py3-none-any.whl` | `B8DBDDBA87C34A83195A40C71E91BC8FAFD7F7CB5DE25D57ACD938C25458E575` | `B8DBDDBA87C34A83195A40C71E91BC8FAFD7F7CB5DE25D57ACD938C25458E575` | MATCH |
 | `frontend/dist` 文件哈希树 | `5DCF81B24AA939CD87C147C89980772A30A920B5D608D9BAC54F2E4B2ED26A0E` | `5DCF81B24AA939CD87C147C89980772A30A920B5D608D9BAC54F2E4B2ED26A0E` | MATCH |
-
-Python wheel 的第一次迁移记录曾把输出截断；当前表格和 `docs/evidence/RC-055/README.md` 均以完整校验和为准。
 
 ## 边界
 
