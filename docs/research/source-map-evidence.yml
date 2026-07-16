@@ -1,0 +1,96 @@
+schema_version: 1
+rc_id: RC-021
+captured_at: "2026-07-17"
+policy:
+  source_body_accessed: false
+  source_body_retained: false
+  source_body_run: false
+  default_risk: high
+  default_reuse: prohibited-until-legal-review
+  dmca_or_deletion_api_field: unavailable
+repositories:
+  - id: chinasiro-claude-code-sourcemap
+    repo: ChinaSiro/claude-code-sourcemap
+    url: https://github.com/ChinaSiro/claude-code-sourcemap
+    default_branch: main
+    head_sha: a8a678cb6244e6770e1e421767ff0987a1d95549
+    commit_url: https://github.com/ChinaSiro/claude-code-sourcemap/commit/a8a678cb6244e6770e1e421767ff0987a1d95549
+    api_status: 200
+    commit_url_status: 200
+    readme_url: https://github.com/ChinaSiro/claude-code-sourcemap/blob/a8a678cb6244e6770e1e421767ff0987a1d95549/README.md
+    readme_status: 200
+    license_spdx: null
+    archived: false
+    disabled: false
+    readme_summary: Unofficial reconstruction from a public npm package and source-map analysis; research-only disclaimer.
+    dmca_or_deletion_check: not-observed
+    risk: high
+    reuse: prohibited
+  - id: oboard-claude-code-rev
+    repo: oboard/claude-code-rev
+    url: https://github.com/oboard/claude-code-rev
+    default_branch: main
+    head_sha: 74a9a9387a0c60242e83bcaa201c4794e3cbd040
+    commit_url: https://github.com/oboard/claude-code-rev/commit/74a9a9387a0c60242e83bcaa201c4794e3cbd040
+    api_status: 200
+    commit_url_status: 200
+    readme_url: https://github.com/oboard/claude-code-rev/blob/74a9a9387a0c60242e83bcaa201c4794e3cbd040/README.md
+    readme_status: 200
+    license_spdx: null
+    archived: false
+    disabled: false
+    readme_summary: Restored source tree reconstructed from source maps with compatibility shims and degraded implementations.
+    dmca_or_deletion_check: not-observed
+    risk: high
+    reuse: prohibited
+  - id: ghuntley-claude-code-source-code-deobfuscation
+    repo: ghuntley/claude-code-source-code-deobfuscation
+    url: https://github.com/ghuntley/claude-code-source-code-deobfuscation
+    default_branch: main
+    head_sha: ced7586d06751d071490f91cab1de04490d969ba
+    commit_url: https://github.com/ghuntley/claude-code-source-code-deobfuscation/commit/ced7586d06751d071490f91cab1de04490d969ba
+    api_status: 200
+    commit_url_status: 200
+    readme_url: https://github.com/ghuntley/claude-code-source-code-deobfuscation/blob/ced7586d06751d071490f91cab1de04490d969ba/README.md
+    readme_status: 200
+    license_spdx: null
+    archived: true
+    disabled: false
+    readme_summary: Self-described cleanroom deobfuscation/research preview; not an Anthropic repository.
+    dmca_or_deletion_check: not-observed
+    risk: high
+    reuse: prohibited
+  - id: comeonoliver-claude-code-analysis
+    repo: ComeOnOliver/claude-code-analysis
+    url: https://github.com/ComeOnOliver/claude-code-analysis
+    default_branch: main
+    head_sha: c45730b02591b6992dfc8aaa3483fd01b213815e
+    commit_url: https://github.com/ComeOnOliver/claude-code-analysis/commit/c45730b02591b6992dfc8aaa3483fd01b213815e
+    api_status: 200
+    commit_url_status: 200
+    readme_url: https://github.com/ComeOnOliver/claude-code-analysis/blob/c45730b02591b6992dfc8aaa3483fd01b213815e/README.md
+    readme_status: 200
+    license_spdx: MIT
+    archived: false
+    disabled: false
+    readme_summary: Self-described reverse-engineering analysis with an MIT badge; badge and repository visibility do not authorize reconstructed source reuse.
+    dmca_or_deletion_check: not-observed
+    risk: high
+    reuse: prohibited
+  - id: dadiaomengmeimei-claude-code-sourcemap-learning-notebook
+    repo: dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+    url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+    default_branch: main
+    head_sha: 6b8eea53c90457b89246581cd07481e26d05cb60
+    commit_url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook/commit/6b8eea53c90457b89246581cd07481e26d05cb60
+    api_status: 200
+    commit_url_status: 200
+    readme_url: https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook/blob/6b8eea53c90457b89246581cd07481e26d05cb60/README.md
+    readme_status: 200
+    license_spdx: MIT
+    archived: false
+    disabled: false
+    readme_summary: Self-described source-map learning notebook and reverse-engineering analysis; MIT metadata does not authorize third-party reconstructed source reuse.
+    dmca_or_deletion_check: not-observed
+    risk: high
+    reuse: prohibited
