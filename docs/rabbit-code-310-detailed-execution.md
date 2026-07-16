@@ -63,7 +63,7 @@
 | RC-031 | 2026-07-17 04:52:51 +08:00 | `8e5ab1f` | SUBMITTED WITH PENDING CONFIRMATION：Ollama/llama.cpp 固定 MIT 运行器版本；Gemma/Qwen 固定 HF commit、模型许可、gated 状态和文件哈希/大小；manifest 校验与 Ruff 通过；权重未下载 | `docs/evidence/RC-031/README.md` | Gemma manual-gated 条款/模型卡正文待确认；默认不打包模型权重，下载前必须 UI 确认并校验哈希 |
 | RC-032 | 2026-07-17 05:00:51 +08:00 | `bb1f6b4` | SUBMITTED WITH PENDING CONFIRMATION：32 个直接/构建依赖全部登记；PyPI/npm 官方 metadata 已记录；THIRD_PARTY_NOTICES 可生成且对账通过；10 个条目仍 review-required | `docs/evidence/RC-032/README.md` | 未确认 license 和自定义 GSAP 条目不得发布；传递依赖/SBOM 逐层审计留给后续发布门禁 |
 | RC-033 | 2026-07-17 05:05:44 +08:00 | `7d8d455` | SUBMITTED WITH PENDING CONFIRMATION：clean-room 行为规格、双候选方案、独立测试、Provenance、实现者记录、原创历史和相似性门禁已定义；流程校验通过，正式实现 PR 待确认 | `docs/evidence/RC-033/README.md` | 未有核心实现需要重写；在角色签署和实现 PR 前维持 restricted 材料隔离 |
-| RC-034 | 2026-07-17 05:13:20 +08:00 | 待本项记录提交后固定 | SUBMITTED WITH PENDING CONFIRMATION：名称/渠道公开入口登记、保守的 404 风险校验和商标数据库待检索状态已提交；校验器与 Ruff 通过 | `docs/evidence/RC-034/README.md` | 具体商标检索、负责人/法务签署、域名/组织/包名控制权和应用商店核验待确认 |
+| RC-034 | 2026-07-17 05:13:20 +08:00 | `3b85662` | SUBMITTED WITH PENDING CONFIRMATION：名称/渠道公开入口登记、保守的 404 风险校验和商标数据库待检索状态已提交；校验器与 Ruff 通过 | `docs/evidence/RC-034/README.md` | 具体商标检索、负责人/法务签署、域名/组织/包名控制权和应用商店核验待确认 |
 
 ### 进度记录一致性检查
 
