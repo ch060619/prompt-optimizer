@@ -1,0 +1,101 @@
+schema_version: 1
+rc_id: RC-034
+captured_at: "2026-07-17"
+primary_name: Rabbit Code
+distribution_identifier: rabbit-code
+legacy_identifiers:
+  - prompt-optimizer
+  - prompt-opt
+signoff:
+  status: pending-human-legal-review
+  owner: pending
+  legal_reviewer: pending
+  decision_id: pending
+channels:
+  - channel: github-repository-candidate
+    identifier: rabbit-code/rabbit-code
+    check_url: https://api.github.com/repos/rabbit-code/rabbit-code
+    observed_status: 404
+    risk: not-found-at-check-time-not-availability-proof
+  - channel: github-organization-candidate
+    identifier: rabbit-code
+    check_url: https://api.github.com/orgs/rabbit-code
+    observed_status: 404
+    risk: not-found-at-check-time-not-availability-proof
+  - channel: github-current-repository
+    identifier: ch060619/prompt-optimizer
+    check_url: https://github.com/ch060619/prompt-optimizer
+    observed_status: controlled-current-origin
+    risk: legacy-repository-identity
+  - channel: pypi-candidate
+    identifier: rabbit-code
+    check_url: https://pypi.org/pypi/rabbit-code/json
+    observed_status: 404
+    risk: package-name-not-found-at-check-time-not-registration-proof
+  - channel: npm-candidate
+    identifier: rabbit-code
+    check_url: https://registry.npmjs.org/rabbit-code
+    observed_status: 404
+    risk: package-name-not-found-at-check-time-not-registration-proof
+  - channel: pypi-legacy
+    identifier: prompt-optimizer
+    check_url: https://pypi.org/pypi/prompt-optimizer/json
+    observed_status: 200
+    risk: existing-legacy-name
+  - channel: npm-legacy
+    identifier: prompt-optimizer
+    check_url: https://registry.npmjs.org/prompt-optimizer
+    observed_status: 200
+    risk: existing-legacy-name
+  - channel: domain
+    identifier: rabbitcode.dev
+    check_url: https://rabbitcode.dev
+    observed_status: 200
+    risk: possible-existing-control
+  - channel: domain
+    identifier: rabbitcode.app
+    check_url: https://rabbitcode.app
+    observed_status: 200
+    risk: possible-existing-control
+  - channel: domain
+    identifier: rabbit-code.dev
+    check_url: https://rabbit-code.dev
+    observed_status: unresolved
+    risk: manual-registrar-check-required
+  - channel: domain
+    identifier: rabbit-code.app
+    check_url: https://rabbit-code.app
+    observed_status: unresolved
+    risk: manual-registrar-check-required
+  - channel: microsoft-store-search
+    identifier: Rabbit Code
+    check_url: https://apps.microsoft.com/search?query=Rabbit%20Code
+    observed_status: 403
+    risk: manual-store-search-required
+  - channel: apple-store-search
+    identifier: Rabbit Code
+    check_url: https://apps.apple.com/us/search?term=Rabbit%20Code
+    observed_status: 404
+    risk: manual-store-search-required
+  - channel: flathub-search
+    identifier: Rabbit Code
+    check_url: https://flathub.org/apps/search?q=Rabbit%20Code
+    observed_status: 200
+    risk: search-result-must-be-manually-reviewed
+trademark_databases:
+  - id: uspto
+    url: https://tmsearch.uspto.gov/
+    observed_status: 200
+    search_status: not-run
+  - id: euipo
+    url: https://euipo.europa.eu/eSearch/
+    observed_status: 200
+    search_status: not-run
+  - id: cnipa
+    url: https://www.cnipa.gov.cn/
+    observed_status: 200
+    search_status: not-run
+backup_names:
+  - Rabbit Prompt
+  - Prompt Rabbit
+  - Local Prompt Studio

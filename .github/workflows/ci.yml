@@ -53,6 +53,9 @@ jobs:
       # RC ID: RC-033
       - name: Clean-room rewrite workflow
         run: python scripts/check_clean_room_rewrite.py
+      # RC ID: RC-034
+      - name: Name and channel audit
+        run: python scripts/check_name_channel_audit.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy
