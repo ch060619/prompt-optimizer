@@ -4,7 +4,7 @@
 - 状态：已完成（按用户指示关闭）
 - 负责人：Codex
 - 基线 Commit：`f88d8c2`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`79bf6db`
 - 前置 RC：RC-015（已完成并有证据）
 - 修改文件：主执行计划、RC-016 执行证据、追踪索引
 - 用户可见行为：RC-016 被标记为完成，下一项自动切换为 RC-017。
@@ -22,7 +22,9 @@
 | --- | --- | --- |
 | 用户状态指示 | PASS：明确要求 RC-016 当做已经完成 | 当前任务指令 |
 | 官方 Codex manual 获取 | BLOCKED：HTTP 403；未写入未经验证结论 | 当前任务上下文 |
-| 进度计数与追踪索引 | 待本项记录提交后运行 | `scripts/check_rc_traceability.py` |
+| PowerShell 进度计数 | PASS：Done=12、Pending=298、Total=310、UniqueIds=310 | `docs/rabbit-code-310-detailed-execution.md` |
+| `python scripts/check_rc_traceability.py --write` | PASS：反向追踪索引已更新，RC-016 为 GREEN | `docs/traceability/rc-index.md` |
+| `python scripts/check_source_baselines.py --check` | PASS：Validated 9 source baselines captured on 2026-07-17 | `docs/research/source-baselines.yml` |
 
 ## 回滚
 
