@@ -1,0 +1,13 @@
+cases:
+  - id: regression-tech-001
+    category: tech
+    prompt: "请生成一个 Python 函数，并给出输入输出示例和测试步骤。"
+    expected_focus: "代码任务、示例与测试"
+    manual_label: "可优化"
+    notes: "固定的技术类回归样本。"
+  - id: regression-business-001
+    category: business
+    prompt: "为管理层写项目周报，包含进展、风险和下一步，使用 Markdown 列表。"
+    expected_focus: "受众、结构与行动项"
+    manual_label: "较完整"
+    notes: "固定的业务类回归样本。"

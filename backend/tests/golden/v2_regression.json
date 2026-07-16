@@ -1,0 +1,671 @@
+{
+  "approval": {
+    "migration_note": "docs/migrations/RC-047-v2-regression-baseline.md",
+    "rc_id": "RC-047",
+    "reason": "Freeze current V2 behavior before Rabbit Code migration",
+    "source_commit": "493b352bcec9a24e07b699b1746657884ebb8fb7"
+  },
+  "snapshot": {
+    "analysis": {
+      "strong": {
+        "created_at": "<generated-at>",
+        "optimized_prompt": null,
+        "prompt": "你是一名资深 Python 工程师。目标：生成一个 FastAPI 接口。背景：用于本地工具。输出格式：Markdown 表格。限制：不要引入外部服务。请给出步骤、示例输入输出和测试用例。",
+        "score": {
+          "dimensions": [
+            {
+              "label": "清晰度",
+              "name": "clarity",
+              "reason": "清晰度表现良好，已有明确线索。",
+              "score": 81.0,
+              "weight": 1.2
+            },
+            {
+              "label": "具体性",
+              "name": "specificity",
+              "reason": "具体性表现良好，已有明确线索。",
+              "score": 81.0,
+              "weight": 1.1
+            },
+            {
+              "label": "上下文完整度",
+              "name": "context",
+              "reason": "上下文完整度已有部分信息，但仍缺少可执行细节。",
+              "score": 63.0,
+              "weight": 1.0
+            },
+            {
+              "label": "输出格式",
+              "name": "output_format",
+              "reason": "输出格式表现良好，已有明确线索。",
+              "score": 99.0,
+              "weight": 1.0
+            },
+            {
+              "label": "约束条件",
+              "name": "constraints",
+              "reason": "约束条件表现良好，已有明确线索。",
+              "score": 81.0,
+              "weight": 0.9
+            },
+            {
+              "label": "角色设定",
+              "name": "role",
+              "reason": "角色设定表现良好，已有明确线索。",
+              "score": 81.0,
+              "weight": 0.8
+            },
+            {
+              "label": "示例质量",
+              "name": "examples",
+              "reason": "示例质量表现良好，已有明确线索。",
+              "score": 97.0,
+              "weight": 0.8
+            },
+            {
+              "label": "可执行性",
+              "name": "actionability",
+              "reason": "可执行性表现良好，已有明确线索。",
+              "score": 100.0,
+              "weight": 1.2
+            }
+          ],
+          "total_score": 85.45
+        },
+        "strengths": [
+          "输出格式",
+          "示例质量",
+          "可执行性"
+        ],
+        "suggestions": [
+          {
+            "detail": "提供业务背景、用户画像、已有材料或限制条件。",
+            "dimension": "context",
+            "example": "背景：目标用户是没有编程经验的运营人员。",
+            "priority": "medium",
+            "title": "补充背景信息"
+          },
+          {
+            "detail": "说明希望模型完成什么任务，以及最终结果用于什么场景。",
+            "dimension": "clarity",
+            "example": "目标：为产品经理生成一份面向研发团队的需求说明。",
+            "priority": "low",
+            "title": "明确任务目标"
+          },
+          {
+            "detail": "添加数量、范围、受众、边界和必须覆盖的内容。",
+            "dimension": "specificity",
+            "example": "必须包含 3 个方案、优缺点对比和推荐结论。",
+            "priority": "low",
+            "title": "增加具体约束"
+          },
+          {
+            "detail": "写清哪些内容不能出现、字数范围、语气和合规要求。",
+            "dimension": "constraints",
+            "example": "限制：不超过 800 字，不使用夸张营销语。",
+            "priority": "low",
+            "title": "添加限制条件"
+          },
+          {
+            "detail": "指定模型以哪个角色、经验水平和工作方式响应。",
+            "dimension": "role",
+            "example": "你是一名资深后端架构师，关注可维护性和性能。",
+            "priority": "low",
+            "title": "设置专业角色"
+          }
+        ]
+      },
+      "weak": {
+        "created_at": "<generated-at>",
+        "optimized_prompt": null,
+        "prompt": "帮我写一封邮件",
+        "score": {
+          "dimensions": [
+            {
+              "label": "清晰度",
+              "name": "clarity",
+              "reason": "未检测到足够的清晰度信息。",
+              "score": 3.0,
+              "weight": 1.2
+            },
+            {
+              "label": "具体性",
+              "name": "specificity",
+              "reason": "未检测到足够的具体性信息。",
+              "score": 2.0,
+              "weight": 1.1
+            },
+            {
+              "label": "上下文完整度",
+              "name": "context",
+              "reason": "未检测到足够的上下文完整度信息。",
+              "score": 2.0,
+              "weight": 1.0
+            },
+            {
+              "label": "输出格式",
+              "name": "output_format",
+              "reason": "未检测到足够的输出格式信息。",
+              "score": 3.0,
+              "weight": 1.0
+            },
+            {
+              "label": "约束条件",
+              "name": "constraints",
+              "reason": "未检测到足够的约束条件信息。",
+              "score": 2.0,
+              "weight": 0.9
+            },
+            {
+              "label": "角色设定",
+              "name": "role",
+              "reason": "未检测到足够的角色设定信息。",
+              "score": 4.0,
+              "weight": 0.8
+            },
+            {
+              "label": "示例质量",
+              "name": "examples",
+              "reason": "未检测到足够的示例质量信息。",
+              "score": 2.0,
+              "weight": 0.8
+            },
+            {
+              "label": "可执行性",
+              "name": "actionability",
+              "reason": "未检测到足够的可执行性信息。",
+              "score": 2.0,
+              "weight": 1.2
+            }
+          ],
+          "total_score": 2.48
+        },
+        "strengths": [],
+        "suggestions": [
+          {
+            "detail": "说明希望模型完成什么任务，以及最终结果用于什么场景。",
+            "dimension": "clarity",
+            "example": "目标：为产品经理生成一份面向研发团队的需求说明。",
+            "priority": "high",
+            "title": "明确任务目标"
+          },
+          {
+            "detail": "添加数量、范围、受众、边界和必须覆盖的内容。",
+            "dimension": "specificity",
+            "example": "必须包含 3 个方案、优缺点对比和推荐结论。",
+            "priority": "high",
+            "title": "增加具体约束"
+          },
+          {
+            "detail": "提供业务背景、用户画像、已有材料或限制条件。",
+            "dimension": "context",
+            "example": "背景：目标用户是没有编程经验的运营人员。",
+            "priority": "high",
+            "title": "补充背景信息"
+          },
+          {
+            "detail": "明确要求模型使用 Markdown、JSON、表格或固定字段输出。",
+            "dimension": "output_format",
+            "example": "输出格式：使用 Markdown 表格，列为问题、原因、建议。",
+            "priority": "high",
+            "title": "指定输出格式"
+          },
+          {
+            "detail": "写清哪些内容不能出现、字数范围、语气和合规要求。",
+            "dimension": "constraints",
+            "example": "限制：不超过 800 字，不使用夸张营销语。",
+            "priority": "high",
+            "title": "添加限制条件"
+          },
+          {
+            "detail": "指定模型以哪个角色、经验水平和工作方式响应。",
+            "dimension": "role",
+            "example": "你是一名资深后端架构师，关注可维护性和性能。",
+            "priority": "high",
+            "title": "设置专业角色"
+          },
+          {
+            "detail": "给出至少一个期望风格或格式的样例，降低理解偏差。",
+            "dimension": "examples",
+            "example": "示例输出：问题 -> 影响 -> 修复建议。",
+            "priority": "high",
+            "title": "提供输入输出示例"
+          },
+          {
+            "detail": "将笼统要求拆成可操作步骤，并说明验收标准。",
+            "dimension": "actionability",
+            "example": "请先列出问题，再给出修改后的完整版本，最后说明改动理由。",
+            "priority": "high",
+            "title": "强化可执行步骤"
+          }
+        ]
+      }
+    },
+    "diff": {
+      "diff_lines": [
+        "--- version-1",
+        "+++ version-2",
+        "@@ -1,6 +1,6 @@",
+        " 请基于以下要求完成任务：",
+        " ",
+        "-目标：帮我写一封邮件",
+        "+目标：你是一名资深 Python 工程师。目标：生成一个 FastAPI 接口。背景：用于本地工具。输出格式：Markdown 表格。限制：不要引入外部服务。请给出步骤、示例输入输出和测试用例。",
+        " ",
+        " 上下文：说明任务背景、受众、使用场景和重要限制。",
+        " ",
+        "@@ -8,12 +8,12 @@",
+        " ",
+        " 质量标准：内容准确、具体、可验证；必要时说明假设和风险。",
+        " ",
+        "+改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。",
+        "+",
+        " 改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。",
+        " ",
+        " 改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。",
+        " ",
+        "-改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。",
+        "+改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+        " ",
+        "-改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。",
+        "-",
+        "-改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+        "+改进点 - 设置专业角色：你是一名资深后端架构师，关注可维护性和性能。"
+      ],
+      "new_id": 2,
+      "new_score": 97.89,
+      "old_id": 1,
+      "old_score": 88.53,
+      "score_delta": 9.36
+    },
+    "evaluation": "# Prompt Optimizer 评测报告\n\n数据集：`backend/tests/fixtures/v2_evaluation.yml`\n样本数：2\n平均分数变化：62.54\n\n| ID | 分类 | 优化前 | 优化后 | 变化 | 人工标签 | Provider | 降级 | 耗时(ms) |\n| --- | --- | ---: | ---: | ---: | --- | --- | --- | ---: |\n| regression-tech-001 | tech | 35.62 | 91.9 | 56.28 | 可优化 | offline | False | <latency-ms> |\n| regression-business-001 | business | 21.4 | 90.2 | 68.8 | 较完整 | offline | False | <latency-ms> |\n\n## 误判与人工备注\n\n- `regression-tech-001` 代码任务、示例与测试；备注：固定的技术类回归样本。\n- `regression-business-001` 受众、结构与行动项；备注：固定的业务类回归样本。",
+    "exports": {
+      "csv": "version_id,score,original_prompt,optimized_prompt\r\n1,88.53,帮我写一封邮件,\"请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。\"\r\n\r\ndimension,score,reason\r\n清晰度,100.0,清晰度表现良好，已有明确线索。\r\n具体性,99.0,具体性表现良好，已有明确线索。\r\n上下文完整度,100.0,上下文完整度表现良好，已有明确线索。\r\n输出格式,100.0,输出格式表现良好，已有明确线索。\r\n约束条件,81.0,约束条件表现良好，已有明确线索。\r\n角色设定,45.0,未检测到足够的角色设定信息。\r\n示例质量,63.0,示例质量已有部分信息，但仍缺少可执行细节。\r\n可执行性,100.0,可执行性表现良好，已有明确线索。\r\n",
+      "json": {
+        "analysis": {
+          "created_at": "<generated-at>",
+          "optimized_prompt": "请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+          "prompt": "请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+          "score": {
+            "dimensions": [
+              {
+                "label": "清晰度",
+                "name": "clarity",
+                "reason": "清晰度表现良好，已有明确线索。",
+                "score": 100.0,
+                "weight": 1.2
+              },
+              {
+                "label": "具体性",
+                "name": "specificity",
+                "reason": "具体性表现良好，已有明确线索。",
+                "score": 99.0,
+                "weight": 1.1
+              },
+              {
+                "label": "上下文完整度",
+                "name": "context",
+                "reason": "上下文完整度表现良好，已有明确线索。",
+                "score": 100.0,
+                "weight": 1.0
+              },
+              {
+                "label": "输出格式",
+                "name": "output_format",
+                "reason": "输出格式表现良好，已有明确线索。",
+                "score": 100.0,
+                "weight": 1.0
+              },
+              {
+                "label": "约束条件",
+                "name": "constraints",
+                "reason": "约束条件表现良好，已有明确线索。",
+                "score": 81.0,
+                "weight": 0.9
+              },
+              {
+                "label": "角色设定",
+                "name": "role",
+                "reason": "未检测到足够的角色设定信息。",
+                "score": 45.0,
+                "weight": 0.8
+              },
+              {
+                "label": "示例质量",
+                "name": "examples",
+                "reason": "示例质量已有部分信息，但仍缺少可执行细节。",
+                "score": 63.0,
+                "weight": 0.8
+              },
+              {
+                "label": "可执行性",
+                "name": "actionability",
+                "reason": "可执行性表现良好，已有明确线索。",
+                "score": 100.0,
+                "weight": 1.2
+              }
+            ],
+            "total_score": 88.53
+          },
+          "strengths": [
+            "清晰度",
+            "具体性",
+            "上下文完整度",
+            "输出格式",
+            "可执行性"
+          ],
+          "suggestions": [
+            {
+              "detail": "指定模型以哪个角色、经验水平和工作方式响应。",
+              "dimension": "role",
+              "example": "你是一名资深后端架构师，关注可维护性和性能。",
+              "priority": "medium",
+              "title": "设置专业角色"
+            },
+            {
+              "detail": "给出至少一个期望风格或格式的样例，降低理解偏差。",
+              "dimension": "examples",
+              "example": "示例输出：问题 -> 影响 -> 修复建议。",
+              "priority": "medium",
+              "title": "提供输入输出示例"
+            },
+            {
+              "detail": "写清哪些内容不能出现、字数范围、语气和合规要求。",
+              "dimension": "constraints",
+              "example": "限制：不超过 800 字，不使用夸张营销语。",
+              "priority": "low",
+              "title": "添加限制条件"
+            }
+          ]
+        },
+        "created_at": "<generated-at>",
+        "id": 1,
+        "optimized_prompt": "请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+        "original_prompt": "帮我写一封邮件",
+        "owner_id": 1,
+        "project_id": 1
+      },
+      "md": "# 提示词优化结果\n\n版本 ID：1\n\n总分：88.53\n\n## 原始提示词\n\n帮我写一封邮件\n\n## 优化后提示词\n\n请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。\n\n## 优化建议\n\n- **设置专业角色**（medium）：指定模型以哪个角色、经验水平和工作方式响应。\n  示例：你是一名资深后端架构师，关注可维护性和性能。\n- **提供输入输出示例**（medium）：给出至少一个期望风格或格式的样例，降低理解偏差。\n  示例：示例输出：问题 -> 影响 -> 修复建议。\n- **添加限制条件**（low）：写清哪些内容不能出现、字数范围、语气和合规要求。\n  示例：限制：不超过 800 字，不使用夸张营销语。\n",
+      "txt": "版本 ID: 1\n总分: 88.53\n\n原始提示词:\n帮我写一封邮件\n\n优化后提示词:\n请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。\n"
+    },
+    "history": [
+      {
+        "id": 2,
+        "optimized_preview": "请基于以下要求完成任务：\n\n目标：你是一名资深 Python 工程师。目标：生成一个 FastAPI 接口。背景：用于本地工具。输出格式：Markdown 表格",
+        "original_preview": "你是一名资深 Python 工程师。目标：生成一个 FastAPI 接口。背景：用于本地工具。输出格式：Markdown 表格。限制：不要引入外部服务。请给出步",
+        "score": 97.89
+      },
+      {
+        "id": 1,
+        "optimized_preview": "请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n",
+        "original_preview": "帮我写一封邮件",
+        "score": 88.53
+      }
+    ],
+    "optimization": {
+      "created_at": "<generated-at>",
+      "optimized_prompt": "请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+      "prompt": "请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。",
+      "score": {
+        "dimensions": [
+          {
+            "label": "清晰度",
+            "name": "clarity",
+            "reason": "清晰度表现良好，已有明确线索。",
+            "score": 100.0,
+            "weight": 1.2
+          },
+          {
+            "label": "具体性",
+            "name": "specificity",
+            "reason": "具体性表现良好，已有明确线索。",
+            "score": 99.0,
+            "weight": 1.1
+          },
+          {
+            "label": "上下文完整度",
+            "name": "context",
+            "reason": "上下文完整度表现良好，已有明确线索。",
+            "score": 100.0,
+            "weight": 1.0
+          },
+          {
+            "label": "输出格式",
+            "name": "output_format",
+            "reason": "输出格式表现良好，已有明确线索。",
+            "score": 100.0,
+            "weight": 1.0
+          },
+          {
+            "label": "约束条件",
+            "name": "constraints",
+            "reason": "约束条件表现良好，已有明确线索。",
+            "score": 81.0,
+            "weight": 0.9
+          },
+          {
+            "label": "角色设定",
+            "name": "role",
+            "reason": "未检测到足够的角色设定信息。",
+            "score": 45.0,
+            "weight": 0.8
+          },
+          {
+            "label": "示例质量",
+            "name": "examples",
+            "reason": "示例质量已有部分信息，但仍缺少可执行细节。",
+            "score": 63.0,
+            "weight": 0.8
+          },
+          {
+            "label": "可执行性",
+            "name": "actionability",
+            "reason": "可执行性表现良好，已有明确线索。",
+            "score": 100.0,
+            "weight": 1.2
+          }
+        ],
+        "total_score": 88.53
+      },
+      "strengths": [
+        "清晰度",
+        "具体性",
+        "上下文完整度",
+        "输出格式",
+        "可执行性"
+      ],
+      "suggestions": [
+        {
+          "detail": "指定模型以哪个角色、经验水平和工作方式响应。",
+          "dimension": "role",
+          "example": "你是一名资深后端架构师，关注可维护性和性能。",
+          "priority": "medium",
+          "title": "设置专业角色"
+        },
+        {
+          "detail": "给出至少一个期望风格或格式的样例，降低理解偏差。",
+          "dimension": "examples",
+          "example": "示例输出：问题 -> 影响 -> 修复建议。",
+          "priority": "medium",
+          "title": "提供输入输出示例"
+        },
+        {
+          "detail": "写清哪些内容不能出现、字数范围、语气和合规要求。",
+          "dimension": "constraints",
+          "example": "限制：不超过 800 字，不使用夸张营销语。",
+          "priority": "low",
+          "title": "添加限制条件"
+        }
+      ]
+    },
+    "rules": [
+      {
+        "id": "clarity",
+        "keywords": [
+          "目标",
+          "任务",
+          "请",
+          "需要",
+          "明确",
+          "说明"
+        ],
+        "label": "清晰度",
+        "min_length": 60,
+        "suggestion_detail": "说明希望模型完成什么任务，以及最终结果用于什么场景。",
+        "suggestion_example": "目标：为产品经理生成一份面向研发团队的需求说明。",
+        "suggestion_title": "明确任务目标",
+        "weight": 1.2
+      },
+      {
+        "id": "specificity",
+        "keywords": [
+          "具体",
+          "包含",
+          "必须",
+          "至少",
+          "步骤",
+          "示例"
+        ],
+        "label": "具体性",
+        "min_length": 80,
+        "suggestion_detail": "添加数量、范围、受众、边界和必须覆盖的内容。",
+        "suggestion_example": "必须包含 3 个方案、优缺点对比和推荐结论。",
+        "suggestion_title": "增加具体约束",
+        "weight": 1.1
+      },
+      {
+        "id": "context",
+        "keywords": [
+          "背景",
+          "上下文",
+          "受众",
+          "场景",
+          "行业",
+          "现状"
+        ],
+        "label": "上下文完整度",
+        "min_length": 90,
+        "suggestion_detail": "提供业务背景、用户画像、已有材料或限制条件。",
+        "suggestion_example": "背景：目标用户是没有编程经验的运营人员。",
+        "suggestion_title": "补充背景信息",
+        "weight": 1.0
+      },
+      {
+        "id": "output_format",
+        "keywords": [
+          "格式",
+          "表格",
+          "json",
+          "markdown",
+          "列表",
+          "结构"
+        ],
+        "label": "输出格式",
+        "min_length": 70,
+        "suggestion_detail": "明确要求模型使用 Markdown、JSON、表格或固定字段输出。",
+        "suggestion_example": "输出格式：使用 Markdown 表格，列为问题、原因、建议。",
+        "suggestion_title": "指定输出格式",
+        "weight": 1.0
+      },
+      {
+        "id": "constraints",
+        "keywords": [
+          "限制",
+          "不要",
+          "避免",
+          "不能",
+          "约束",
+          "字数"
+        ],
+        "label": "约束条件",
+        "min_length": 80,
+        "suggestion_detail": "写清哪些内容不能出现、字数范围、语气和合规要求。",
+        "suggestion_example": "限制：不超过 800 字，不使用夸张营销语。",
+        "suggestion_title": "添加限制条件",
+        "weight": 0.9
+      },
+      {
+        "id": "role",
+        "keywords": [
+          "你是",
+          "扮演",
+          "专家",
+          "顾问",
+          "工程师",
+          "老师"
+        ],
+        "label": "角色设定",
+        "min_length": 50,
+        "suggestion_detail": "指定模型以哪个角色、经验水平和工作方式响应。",
+        "suggestion_example": "你是一名资深后端架构师，关注可维护性和性能。",
+        "suggestion_title": "设置专业角色",
+        "weight": 0.8
+      },
+      {
+        "id": "examples",
+        "keywords": [
+          "例如",
+          "示例",
+          "样例",
+          "参考",
+          "输入",
+          "输出"
+        ],
+        "label": "示例质量",
+        "min_length": 100,
+        "suggestion_detail": "给出至少一个期望风格或格式的样例，降低理解偏差。",
+        "suggestion_example": "示例输出：问题 -> 影响 -> 修复建议。",
+        "suggestion_title": "提供输入输出示例",
+        "weight": 0.8
+      },
+      {
+        "id": "actionability",
+        "keywords": [
+          "步骤",
+          "检查",
+          "生成",
+          "输出",
+          "给出",
+          "评估",
+          "改进"
+        ],
+        "label": "可执行性",
+        "min_length": 90,
+        "suggestion_detail": "将笼统要求拆成可操作步骤，并说明验收标准。",
+        "suggestion_example": "请先列出问题，再给出修改后的完整版本，最后说明改动理由。",
+        "suggestion_title": "强化可执行步骤",
+        "weight": 1.2
+      }
+    ],
+    "templates": {
+      "categories": [
+        "business",
+        "creative",
+        "education",
+        "general",
+        "tech"
+      ],
+      "rendered": "你是一名资深 Python 工程师。请实现 分页 API。\n背景：说明现有系统、输入输出和调用场景。\n约束：只使用标准库并提供测试\n输出格式：先给实现方案，再给完整代码，最后给测试用例。\n",
+      "selected": {
+        "best_practices": [
+          "明确语言、框架和版本。",
+          "描述输入输出、异常和测试要求。"
+        ],
+        "category": "tech",
+        "description": "生成可维护、可测试的代码实现。",
+        "id": "tech-code-generation",
+        "name": "代码生成",
+        "tags": [
+          "代码",
+          "开发",
+          "实现"
+        ],
+        "template": "你是一名资深 {language} 工程师。请实现 {feature}。\n背景：说明现有系统、输入输出和调用场景。\n约束：{constraints}\n输出格式：先给实现方案，再给完整代码，最后给测试用例。\n",
+        "variables": [
+          "language",
+          "feature",
+          "constraints"
+        ]
+      }
+    }
+  }
+}
