@@ -4,7 +4,7 @@
 - 状态：已提交（待人工法律复核）
 - 负责人：Codex
 - 基线 Commit：`87421ae`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`9b6bbaf`
 - 前置 RC：RC-021（已提交并有证据）
 - 修改文件：`docs/legal/claude-source-map-legal-review.md`、`scripts/check_source_map_legal_review.py`
 - 用户可见行为：法律意见缺失时，source-map 还原源码及衍生内容保持禁止访问、运行、复制和分发。
