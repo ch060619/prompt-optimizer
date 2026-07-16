@@ -26,8 +26,8 @@
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
 | 当前状态 | RC-032 已建立第三方登记册、生成 THIRD_PARTY_NOTICES 并完成 manifest 对账；10 个许可证条目待确认，准备执行 RC-033 |
 | 当前阻塞 | RC-032 部分 PyPI license 字段为空、GSAP 为自定义 license；已标记 review-required，不阻塞 RC-033 |
-| 最近一次完整验证 | 待完成 RC-032 状态记录后的进度计数与追踪检查 |
-| 最近更新时间 | 2026-07-17 05:00:51 +08:00 |
+| 最近一次完整验证 | 2026-07-17：进度计数 Done=28/Pending=282/Total=310/UniqueIds=310；第三方登记册 32 条无未登记依赖；THIRD_PARTY_NOTICES 对账通过；source-map denylist 140 个输入零命中；Ruff 与 RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 05:03:33 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
