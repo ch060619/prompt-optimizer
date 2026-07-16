@@ -24,6 +24,11 @@ jobs:
       # RC ID: RC-015
       - name: Source baseline
         run: python scripts/check_source_baselines.py --check
+      # RC ID: RC-023
+      - name: Source-map denylist
+        run: |
+          python scripts/check_source_map_denylist.py
+          python scripts/test_source_map_denylist.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy

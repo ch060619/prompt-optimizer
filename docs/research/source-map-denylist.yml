@@ -1,0 +1,34 @@
+schema_version: 1
+rc_id: RC-023
+blocked_urls:
+  - https://github.com/ChinaSiro/claude-code-sourcemap
+  - https://github.com/oboard/claude-code-rev
+  - https://github.com/ghuntley/claude-code-source-code-deobfuscation
+  - https://github.com/ComeOnOliver/claude-code-analysis
+  - https://github.com/dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+blocked_repositories:
+  - ChinaSiro/claude-code-sourcemap
+  - oboard/claude-code-rev
+  - ghuntley/claude-code-source-code-deobfuscation
+  - ComeOnOliver/claude-code-analysis
+  - dadiaomengmeimei/claude-code-sourcemap-learning-notebook
+blocked_artifact_names:
+  - claude-code-sourcemap
+  - claude-code-rev
+  - claude-code-source-code-deobfuscation
+  - claude-code-analysis
+  - claude-code-sourcemap-learning-notebook
+blocked_hashes:
+  - a8a678cb6244e6770e1e421767ff0987a1d95549
+  - 74a9a9387a0c60242e83bcaa201c4794e3cbd040
+  - ced7586d06751d071490f91cab1de04490d969ba
+  - c45730b02591b6992dfc8aaa3483fd01b213815e
+  - 6b8eea53c90457b89246581cd07481e26d05cb60
+evidence_only_roots:
+  - docs/research
+  - docs/evidence
+  - docs/legal
+  - docs/rabbit-code-310-detailed-execution.md
+  - docs/traceability
+evidence_only_files:
+  - scripts/check_source_map_evidence.py

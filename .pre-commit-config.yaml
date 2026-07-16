@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: source-map-denylist
+        name: RC-023 source-map denylist
+        entry: python scripts/check_source_map_denylist.py
+        language: system
+        pass_filenames: false
