@@ -77,6 +77,13 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "CREATE ACCOUNT" })).toBeInTheDocument();
   });
 
+  it("removes the footer while keeping a rabbit on marketing pages", () => {
+    window.history.replaceState({}, "", "/contact");
+    render(<App />);
+    expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+    expect(screen.getByAltText("PromptLayer 风格复古版画兔兔插画")).toBeInTheDocument();
+  });
+
   it("shows initialization errors from the API", async () => {
     visitWorkspace();
     stubFetch((url: string) => {

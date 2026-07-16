@@ -28,6 +28,7 @@ export function App() {
   const pathname = window.location.pathname;
   const isWorkspaceRoute = pathname === "/workspace";
   const authMode = pathname === "/register" ? "register" : pathname === "/login" ? "login" : null;
+  const showSharedRabbit = !isWorkspaceRoute && pathname !== "/" && !authMode;
   const [prompt, setPrompt] = useState("你是一名产品顾问，请帮我优化一个 SaaS 产品发布邮件。");
   const [category, setCategory] = useState("all");
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
@@ -236,7 +237,7 @@ export function App() {
       );
     }
     return (
-      <SiteShell>
+      <SiteShell showSharedRabbit={showSharedRabbit}>
         <SiteRoute path={pathname} />
       </SiteShell>
     );

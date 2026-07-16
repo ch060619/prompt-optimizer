@@ -16,7 +16,7 @@ const companyLinks = [
   ["Contact", "/contact"]
 ] as const;
 
-export function SiteShell({ children, authenticated = false, isWorkspace = false, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; onSignOut?: () => void }) {
+export function SiteShell({ children, authenticated = false, isWorkspace = false, showSharedRabbit = false, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; showSharedRabbit?: boolean; onSignOut?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLElement>(null);
@@ -91,8 +91,10 @@ export function SiteShell({ children, authenticated = false, isWorkspace = false
     <div className="site-frame" ref={frameRef}>
       <ActivityBar />
       <SiteHeader authenticated={authenticated} isWorkspace={isWorkspace} menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} onSignOut={onSignOut} />
-      <div className="site-content">{children}</div>
-      <SiteFooter />
+      <div className="site-content">
+        {showSharedRabbit ? <SharedRabbit /> : null}
+        {children}
+      </div>
       {menuOpen ? <SiteMenu menuRef={menuRef} onClose={() => setMenuOpen(false)} /> : null}
     </div>
   );
@@ -179,36 +181,11 @@ function SiteMenu({ menuRef, onClose }: { menuRef: RefObject<HTMLElement>; onClo
   );
 }
 
-function SiteFooter() {
+function SharedRabbit() {
   return (
-    <footer className="site-footer">
-      <div className="footer-topline">
-        <span className="eyebrow">PROMPT OPTIMIZER / V3.0</span>
-        <ServiceStatus />
-      </div>
-      <div className="footer-brandline">
-        <p>Build better prompts. Keep the work close.</p>
-        <img className="footer-rabbit" src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="lazy" decoding="async" />
-        <a href="/" className="footer-mark">Prompt Optimizer</a>
-      </div>
-      <div className="footer-links">
-        <div>
-          <span className="eyebrow">PRODUCTS</span>
-          <a href="/prompt-management">Workspace</a>
-          <a href="/evaluations">Evaluations</a>
-          <a href="/prompt-chaining">Tasks & exports</a>
-        </div>
-        <div>
-          <span className="eyebrow">PROJECT</span>
-          <a href="/blog">Build notes</a>
-          <a href="/contact">Contact</a>
-        </div>
-      </div>
-      <div className="footer-bottomline">
-        <span>LOCAL DATA / NO REMOTE MODEL REQUIRED</span>
-        <span>© 2026 PROMPT OPTIMIZER CONTRIBUTORS</span>
-      </div>
-    </footer>
+    <div className="shared-rabbit-mark">
+      <img src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="eager" decoding="async" />
+    </div>
   );
 }
 
