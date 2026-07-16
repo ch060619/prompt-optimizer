@@ -1,0 +1,52 @@
+schema_version: 1
+rc_id: RC-020
+captured_at: "2026-07-17"
+source:
+  repo: anthropics/claude-agent-sdk-python
+  url: https://github.com/anthropics/claude-agent-sdk-python/tree/02782876a00afbcab584d501e8851b5109907077
+  default_branch: main
+  head_sha: 02782876a00afbcab584d501e8851b5109907077
+  commit_url: https://github.com/anthropics/claude-agent-sdk-python/commit/02782876a00afbcab584d501e8851b5109907077
+  sdk_license: MIT
+  sdk_reuse_policy: file-level-notice-review-required
+  bundled_cli_status: declared-by-readme
+  bundled_cli_rights: separate-and-not-approved-for-distribution
+components:
+  - id: messages-and-query
+    paths: [src/claude_agent_sdk/query.py, src/claude_agent_sdk/types.py]
+    evidence: README query section and fixed tree
+    decision: reference-interface-only
+  - id: interactive-client
+    paths: [src/claude_agent_sdk/client.py]
+    evidence: README ClaudeSDKClient section and fixed tree
+    decision: reference-interface-only
+  - id: custom-tools-and-mcp
+    paths: [examples/mcp_calculator.py, src/claude_agent_sdk]
+    evidence: README custom tools and MCP sections
+    decision: reference-interface-only
+  - id: hooks
+    paths: [examples/hooks.py, src/claude_agent_sdk]
+    evidence: README hooks section and fixed tree
+    decision: reference-interface-only
+  - id: permissions
+    paths: [examples/tool_permission_callback.py, src/claude_agent_sdk/types.py]
+    evidence: README permissions section and fixed tree
+    decision: reference-interface-only
+  - id: sessions-and-forking
+    paths: [src/claude_agent_sdk/_internal/session_resume.py, src/claude_agent_sdk/_internal/session_mutations.py, src/claude_agent_sdk/_internal/session_store.py]
+    evidence: fixed tree and README release note
+    decision: behavior-review-pending
+  - id: cli-transport
+    paths: [src/claude_agent_sdk/_internal/transport/subprocess_cli.py, src/claude_agent_sdk/_bundled]
+    evidence: README bundled CLI note and fixed tree
+    decision: do-not-bundle-or-distribute
+  - id: official-documentation
+    paths: []
+    evidence: README links to official documentation
+    decision: pending-confirmation
+    access_status: pending-confirmation-404
+rights_boundary:
+  sdk_code: MIT-declared-sdk-only
+  bundled_cli: not-covered-by-sdk-license-assumption
+  commercial_terms: not-imported
+  rabbit_code_default: do-not-bundle-or-download-claude-code-cli
