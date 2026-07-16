@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 4 |
-| 最后完成项 | RC-048 |
-| 下一待执行项 | RC-050 |
+| 已完成项数 | 5 |
+| 最后完成项 | RC-050 |
+| 下一待执行项 | RC-052 |
 | 当前里程碑 | W0：保护现有项目基线，为 M0 准备 |
-| 当前状态 | RC-048 FastAPI 兼容接口与版本化 OpenAPI 契约已完成，准备执行 RC-050 |
+| 当前状态 | RC-050 离线规则最终降级与用户可见元数据已完成，准备执行 RC-052 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：OpenAPI 36 paths/22 schemas 且 SHA-256 可复现；后端 49 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 02:04:39 +08:00 |
+| 最近一次完整验证 | 2026-07-17：后端 52 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；OpenAPI SHA-256 保持可复现；RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 02:15:33 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -38,6 +38,7 @@
 | RC-046 | 2026-07-17 01:20:40 +08:00 | `4429c82` | PASS：sidecar 3 passed；后端 39 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-046/README.md` | Windows 强制终止退出码 1；Docker Engine 未运行；跨平台/生产生命周期留给 RC-057/067 |
 | RC-047 | 2026-07-17 01:39:57 +08:00 | `f009f66` | PASS：V2 回归 4 passed；后端 43 passed；Ruff/Mypy；前端 9 passed、Lint/Build；黄金 SHA-256 可复现 | `docs/evidence/RC-047/README.md` | 基线审批尚未加签名/CODEOWNERS 门禁；既有前端 jsdom 警告保留 |
 | RC-048 | 2026-07-17 02:04:39 +08:00 | `424b135` | PASS：版本化 OpenAPI 36 paths/22 schemas 且 SHA-256 可复现；契约与既有 API 共 49 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-048/README.md` | 旧 `/api/*` 入口仍按兼容期保留；生成客户端与 CI 差异门禁留给 RC-062；既有前端 jsdom 警告保留 |
+| RC-050 | 2026-07-17 02:15:33 +08:00 | `46485ac` | PASS：离线回退契约 3 passed；后端 52 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 保持可复现；索引检查通过 | `docs/evidence/RC-050/README.md` | Provider Adapter 拆分留给 RC-049；真实本地模型安装与运行器不属于本项；既有前端 jsdom 警告保留 |
 
 ### 进度记录一致性检查
 
@@ -2401,7 +2402,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-047** 复用并回归验证现有评分、建议、规则、模板、优化、版本 diff、历史、导出和评测模块。
 - [x] **RC-048** 复用现有 `/api/analyze`、`/api/optimize`、`/api/optimize/stream`、任务、认证、项目和版本接口的有效能力。
 - [ ] **RC-049** 将现有仅能基本处理 OpenAI Chat Completions 的通用 HTTP Provider 拆分为协议明确、能力可探测的 Provider Adapter。
-- [ ] **RC-050** 保留 `OfflineRuleProvider` 作为无网络、模型未安装、模型加载失败时的最终可用降级，而不是把它误称为大模型。
+- [x] **RC-050** 保留 `OfflineRuleProvider` 作为无网络、模型未安装、模型加载失败时的最终可用降级，而不是把它误称为大模型。
 - [ ] **RC-051** 将现有 `prompt-opt` CLI 与 Rabbit Code Agent CLI 的命令空间、配置和存储进行兼容迁移。
 - [ ] **RC-052** 评估现有 JWT 本地用户体系是否仍有必要，区分“Rabbit Code 本地用户资料”与“第三方 API 凭据配置”。
 - [ ] **RC-053** 为现有 SQLite 数据、提示词历史、模板和配置提供备份、迁移、回滚与损坏恢复方案。
