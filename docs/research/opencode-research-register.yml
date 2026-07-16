@@ -1,0 +1,62 @@
+schema_version: 1
+rc_id: RC-018
+captured_at: "2026-07-17"
+source:
+  id: anomalyco-opencode
+  repo: anomalyco/opencode
+  url: https://github.com/anomalyco/opencode/tree/453b61e27b2f6c2752a60dd7d8412bdcf4e0aa3d
+  default_branch: dev
+  head_sha: 453b61e27b2f6c2752a60dd7d8412bdcf4e0aa3d
+  commit_url: https://github.com/anomalyco/opencode/commit/453b61e27b2f6c2752a60dd7d8412bdcf4e0aa3d
+  license: MIT
+  access_status: verified
+  reuse_policy: concepts-only-no-upstream-code
+modules:
+  - name: agent
+    paths: [packages/opencode/src/agent]
+    decision: adopt-concept
+    boundary: lifecycle-and-state-ideas-only
+  - name: cli
+    paths: [packages/cli]
+    decision: adopt-concept
+    boundary: command-boundary-only
+  - name: tui
+    paths: [packages/opencode/src/cli/tui, packages/tui]
+    decision: adopt-concept
+    boundary: terminal-rendering-boundary-only
+  - name: desktop
+    paths: [packages/desktop]
+    decision: skip
+    boundary: no-desktop-implementation-or-assets
+  - name: app
+    paths: [packages/app]
+    decision: adopt-concept
+    boundary: workflow-separation-only
+  - name: server
+    paths: [packages/server, packages/opencode/src/server]
+    decision: adopt-concept
+    boundary: service-boundary-only
+  - name: protocol
+    paths: [packages/protocol]
+    decision: adopt-concept
+    boundary: schema-first-boundary-only
+  - name: llm
+    paths: [packages/llm]
+    decision: adopt-concept
+    boundary: provider-capability-boundary-only
+  - name: plugin
+    paths: [packages/plugin]
+    decision: adopt-concept
+    boundary: extension-boundary-only
+  - name: sdk
+    paths: [packages/sdk, packages/sdk-next, sdks/vscode]
+    decision: adopt-concept
+    boundary: client-contract-boundary-only
+  - name: ui
+    paths: [packages/ui, packages/app/src/components/ui, packages/tui/src/ui]
+    decision: skip
+    boundary: rabbit-code-design-system-only
+prototype:
+  path: scripts/opencode_boundary_prototype.py
+  kind: original-synthetic-boundary
+  reuses_upstream_code: false
