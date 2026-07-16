@@ -4,7 +4,7 @@
 - 状态：已提交（含待确认项）
 - 负责人：Codex
 - 基线 Commit：`ced7b45`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`8463586`
 - 前置 RC：RC-019（已提交并有证据）
 - 修改文件：Claude Agent SDK 研究登记、中立规格、权利边界 ADR 和校验器
 - 用户可见行为：SDK 能力与捆绑 CLI 的权利边界被单独记录；默认构建不下载或分发 Claude Code CLI。
