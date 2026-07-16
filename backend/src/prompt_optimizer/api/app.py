@@ -32,11 +32,13 @@ from prompt_optimizer.core.models import (
     UserPublic,
     VersionSummary,
 )
+from prompt_optimizer.identity import PRODUCT_NAME
 from prompt_optimizer.paths import PROJECT_ROOT
 from prompt_optimizer.providers import ModelProviderError, ModelRequest
 from prompt_optimizer.services import AppServices
 
 # RC ID: RC-048. Preserve the V2 API while exposing the versioned compatibility surface.
+# RC ID: RC-054. Expose Rabbit Code as the canonical API product identity.
 
 services = AppServices()
 logger = logging.getLogger("prompt_optimizer.api")
@@ -45,7 +47,7 @@ logger = logging.getLogger("prompt_optimizer.api")
 def create_app(app_services: AppServices | None = None) -> FastAPI:
     current_services = app_services or services
     app = FastAPI(
-        title="Prompt Optimizer",
+        title=PRODUCT_NAME,
         version="2.0.0",
         openapi_tags=[
             {"name": "legacy", "description": "V2 兼容入口，供现有客户端继续使用。"},

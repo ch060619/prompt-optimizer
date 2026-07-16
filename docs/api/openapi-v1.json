@@ -784,7 +784,7 @@
   },
   "info": {
     "description": "新客户端使用 /api/v1；/api 保留为现有客户端兼容入口。",
-    "title": "Prompt Optimizer",
+    "title": "Rabbit Code",
     "version": "2.0.0"
   },
   "openapi": "3.1.0",

@@ -1,6 +1,10 @@
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, ChevronDown, FileText, Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
+import { PRODUCT_NAME } from "./brand";
+
+// RC ID: RC-054. Render the Rabbit Code brand across the public shell.
+
 type ProductSpec = {
   path: string;
   kicker: string;
@@ -253,7 +257,7 @@ function BlogIndexPage() {
 function ArticlePage({ slug }: { slug: string }) {
   const article = blogPosts.find(([, , postSlug]) => postSlug === slug) ?? blogPosts[0];
   const body = article[2] === "architecture"
-    ? ["Prompt Optimizer uses a local-first split between a Python package and a React web workspace.", "The analyzer scores a prompt, the suggestion engine turns low dimensions into edits, and the version service stores the result in SQLite.", "The frontend talks to FastAPI through a small typed API boundary. That boundary is the reason the visual shell can change without changing the business workflow."]
+    ? [`${PRODUCT_NAME} uses a local-first split between a Python package and a React web workspace.`, "The analyzer scores a prompt, the suggestion engine turns low dimensions into edits, and the version service stores the result in SQLite.", "The frontend talks to FastAPI through a small typed API boundary. That boundary is the reason the visual shell can change without changing the business workflow."]
     : article[2] === "development-plan"
       ? ["The project grew in layers: core rules, storage and export, CLI and API, then the web UI.", "Each layer keeps its own tests and reuses the same services where possible.", "The V3.0 visual work follows that same constraint: the visual system is shared, while prompt operations stay in the existing workspace."]
       : ["The repository includes more than fifty evaluation samples across technical, business, education, creative, support, data analysis, and long-form scenarios.", "The report records before and after scores, provider, fallback state, and local timing.", "Those records are useful because they show how a prompt changed, not just whether the final text looks different."];
@@ -263,7 +267,7 @@ function ArticlePage({ slug }: { slug: string }) {
         <a className="back-link" href="/blog"><ArrowUpRight size={15} className="back-icon" /> BACK TO BUILD NOTES</a>
         <span className="eyebrow">{article[0]}</span>
         <h1>{article[1]}</h1>
-        <div className="article-meta"><span>Prompt Optimizer</span><span>LOCAL DOCUMENTATION</span><span>2026</span></div>
+        <div className="article-meta"><span>{PRODUCT_NAME}</span><span>LOCAL DOCUMENTATION</span><span>2026</span></div>
       </section>
       <article className="article-body reveal-on-scroll">
         {body.map((paragraph, index) => (
@@ -306,7 +310,7 @@ function NotFoundPage({ path }: { path: string }) {
 
 function ProductMockup({ variant }: { variant: ProductSpec["mockup"] }) {
   const labels = variant === "evaluation" ? ["clarity", "specificity", "context", "format"] : variant === "tasks" ? ["queued", "running", "saved", "latency"] : variant === "workflow" ? ["started", "analysis", "chunk", "completed"] : ["templates", "prompt", "score", "history"];
-  return <div className={`product-mockup mockup-${variant}`} role="img" aria-label="Prompt Optimizer interface preview"><div className="mockup-toolbar"><span /><span /><span /></div><div className="mockup-content"><div className="mockup-sidebar">{labels.map((label) => <span key={label}>{label}</span>)}</div><div className="mockup-main"><div className="mockup-heading">{variant === "evaluation" ? "Prompt score breakdown" : variant === "tasks" ? "Optimization run history" : variant === "workflow" ? "Stream events" : "Master prompt record"}</div><div className="mockup-lines"><i /><i /><i /><i /><i /></div><div className="mockup-data">{labels.map((label, index) => <div key={label}><b>{label}</b><span style={{ width: `${58 + index * 9}%` }} /></div>)}</div></div></div></div>;
+  return <div className={`product-mockup mockup-${variant}`} role="img" aria-label={`${PRODUCT_NAME} interface preview`}><div className="mockup-toolbar"><span /><span /><span /></div><div className="mockup-content"><div className="mockup-sidebar">{labels.map((label) => <span key={label}>{label}</span>)}</div><div className="mockup-main"><div className="mockup-heading">{variant === "evaluation" ? "Prompt score breakdown" : variant === "tasks" ? "Optimization run history" : variant === "workflow" ? "Stream events" : "Master prompt record"}</div><div className="mockup-lines"><i /><i /><i /><i /><i /></div><div className="mockup-data">{labels.map((label, index) => <div key={label}><b>{label}</b><span style={{ width: `${58 + index * 9}%` }} /></div>)}</div></div></div></div>;
 }
 
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {

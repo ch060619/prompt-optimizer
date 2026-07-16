@@ -14,7 +14,7 @@ DEFAULT_OUTPUT = ROOT / "docs" / "api" / "openapi-v1.json"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Export the versioned Prompt Optimizer OpenAPI contract.")
+    parser = argparse.ArgumentParser(description="Export the versioned Rabbit Code OpenAPI contract.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 

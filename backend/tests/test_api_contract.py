@@ -63,6 +63,7 @@ def test_openapi_contains_legacy_and_versioned_paths(client: TestClient) -> None
     document = client.get("/openapi.json").json()
 
     assert document["openapi"].startswith("3.")
+    assert document["info"]["title"] == "Rabbit Code"
     assert document["info"]["version"] == "2.0.0"
     assert document["x-api-version"] == "v1"
     assert set(document["components"]["schemas"]) >= {

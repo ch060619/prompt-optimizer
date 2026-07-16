@@ -4,12 +4,14 @@ import base64
 import hashlib
 import hmac
 import json
-import os
 import secrets
 from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 
 from prompt_optimizer.core.models import UserPublic
+from prompt_optimizer.identity import compatible_env
+
+# RC ID: RC-054. Prefer Rabbit Code JWT configuration with a legacy fallback.
 
 
 class AuthError(RuntimeError):
@@ -18,7 +20,7 @@ class AuthError(RuntimeError):
 
 class AuthService:
     def __init__(self, secret: str | None = None) -> None:
-        self.secret = secret or os.getenv("PROMPT_OPTIMIZER_JWT_SECRET") or "dev-secret-change-me"
+        self.secret = secret or compatible_env("JWT_SECRET") or "dev-secret-change-me"
 
     def hash_password(self, password: str, salt: str | None = None) -> str:
         current_salt = salt or secrets.token_hex(16)

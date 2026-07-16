@@ -4,6 +4,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 
+import { PRODUCT_NAME } from "../brand";
+
+// RC ID: RC-054. Render the Rabbit Code brand while retaining route compatibility.
+
 const productLinks = [
   ["Prompt workspace", "/workspace"],
   ["Evaluations", "/evaluations"],
@@ -115,8 +119,8 @@ function SiteHeader({ authenticated, isWorkspace, menuOpen, menuButtonRef, onMen
           {menuOpen ? <X size={23} strokeWidth={1.5} /> : <Menu size={23} strokeWidth={1.5} />}
         </button>
       </div>
-      <a className="site-logo" href="/" aria-label="Prompt Optimizer home">
-        Prompt Optimizer
+      <a className="site-logo" href="/" aria-label={`${PRODUCT_NAME} home`}>
+        {PRODUCT_NAME}
       </a>
       <nav className="site-nav" aria-label="Primary navigation">
         <a href="/prompt-management">WORKSPACE</a>

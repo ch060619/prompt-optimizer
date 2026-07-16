@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """RC ID: RC-047. Generate the approved Prompt Optimizer V2 regression baseline."""
 
+# RC ID: RC-054. Use the canonical Rabbit Code environment during generation.
+
 from __future__ import annotations
 
 import argparse
@@ -81,7 +83,7 @@ def build_snapshot(repository_root: Path) -> dict[str, Any]:
     template = templates.get("tech-code-generation")
 
     with tempfile.TemporaryDirectory(prefix="v2-regression-") as directory:
-        with _temporary_environment("PROMPT_OPTIMIZER_HOME", directory):
+        with _temporary_environment("RABBIT_CODE_HOME", directory):
             services = AppServices()
             first_id = services.versions.create(
                 WEAK_PROMPT,

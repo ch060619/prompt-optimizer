@@ -6,6 +6,7 @@ cd /d "%~dp0"
 set "APP_HOST=127.0.0.1"
 set "APP_PORT=8000"
 set "FRONTEND_PORT=5173"
+set "APP_NAME=Rabbit Code"
 set "APP_VERSION=2.0"
 set "RUN_MODE=%~1"
 if "%RUN_MODE%"=="" set "RUN_MODE=local"
@@ -16,7 +17,7 @@ if defined MACHINE_PATH set "PATH=%MACHINE_PATH%;%PATH%"
 if defined USER_PATH set "PATH=%USER_PATH%;%PATH%"
 if exist "%ProgramFiles%\Docker\Docker\resources\bin" set "PATH=%ProgramFiles%\Docker\Docker\resources\bin;%PATH%"
 
-echo Prompt Optimizer V%APP_VERSION% startup mode: %RUN_MODE%
+echo %APP_NAME% V%APP_VERSION% startup mode: %RUN_MODE%
 if /i "%RUN_MODE%"=="docker" goto docker_mode
 if /i not "%RUN_MODE%"=="local" (
   echo ERROR: Unknown startup mode "%RUN_MODE%".
@@ -100,7 +101,7 @@ if errorlevel 1 (
 )
 cd ..
 
-echo [7/7] Starting Prompt Optimizer...
+echo [7/7] Starting %APP_NAME%...
 echo Open http://%APP_HOST%:%APP_PORT% in your browser.
 python -m prompt_optimizer.cli serve --host %APP_HOST% --port %APP_PORT%
 
@@ -122,21 +123,21 @@ if errorlevel 1 (
 )
 docker --version
 
-echo [2/4] Stopping old Prompt Optimizer Docker container...
-docker rm -f prompt-optimizer-v2 >nul 2>nul
+echo [2/4] Stopping old %APP_NAME% Docker containers...
+docker rm -f rabbit-code-v2 prompt-optimizer-v2 >nul 2>nul
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(%APP_PORT%); $ownerPids=Get-NetTCPConnection -LocalPort $ports -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($ownerPid in $ownerPids) { if ($ownerPid -and $ownerPid -ne $PID) { $proc=Get-Process -Id $ownerPid -ErrorAction SilentlyContinue; if ($proc -and $proc.ProcessName -match 'python|node') { Write-Host ('Stopping PID {0} ({1}) on app port' -f $ownerPid,$proc.ProcessName); Stop-Process -Id $ownerPid -Force -ErrorAction SilentlyContinue } } }"
 
 echo [3/4] Building V2.0 Docker image...
-docker build -t prompt-optimizer:v2.0 -t prompt-optimizer:local .
+docker build -t rabbit-code:v2.0 -t rabbit-code:local -t prompt-optimizer:v2.0 -t prompt-optimizer:local .
 if errorlevel 1 (
   echo ERROR: Docker image build failed.
   pause
   exit /b 1
 )
 
-echo [4/4] Starting Prompt Optimizer V2.0 Docker container...
+echo [4/4] Starting Rabbit Code V2.0 Docker container...
 echo Open http://%APP_HOST%:%APP_PORT% in your browser.
-docker run --rm --name prompt-optimizer-v2 -p %APP_PORT%:8000 prompt-optimizer:v2.0
+docker run --rm --name rabbit-code-v2 -p %APP_PORT%:8000 rabbit-code:v2.0
 
 :end_success
 endlocal

@@ -9,7 +9,7 @@ from prompt_optimizer.storage.backup import backup_database, read_schema_version
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Back up a Prompt Optimizer SQLite database.")
+    parser = argparse.ArgumentParser(description="Back up a Rabbit Code SQLite database.")
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--config", type=Path)

@@ -9,7 +9,7 @@ from prompt_optimizer.storage.backup import restore_database, verify_database
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Verify or restore a Prompt Optimizer SQLite backup.")
+    parser = argparse.ArgumentParser(description="Verify or restore a Rabbit Code SQLite backup.")
     parser.add_argument("--backup", type=Path, required=True)
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--check-only", action="store_true")

@@ -5,6 +5,7 @@ import { App } from "../src/App";
 import { api } from "../src/api";
 
 // RC ID: RC-050. Verify the UI identifies offline rules instead of a model.
+// RC ID: RC-054. Verify the public UI uses the Rabbit Code identity.
 
 function stubFetch(handler?: (url: string) => Promise<ResponseLike>) {
   vi.stubGlobal(
@@ -53,7 +54,7 @@ function visitWorkspace() {
 describe("App", () => {
   it("renders the home page without the workspace controls", async () => {
     render(<App />);
-    expect(screen.getByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rabbit Code home" })).toBeInTheDocument();
     expect(screen.queryByText("优化并保存")).not.toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
@@ -62,7 +63,7 @@ describe("App", () => {
     visitWorkspace();
     stubFetch();
     render(<App />);
-    expect(await screen.findByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Rabbit Code home" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "优化" })).toBeInTheDocument();
   });
 

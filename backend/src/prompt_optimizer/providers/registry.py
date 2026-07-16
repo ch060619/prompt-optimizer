@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import os
-
 from prompt_optimizer.core.optimizer import Optimizer
+from prompt_optimizer.identity import compatible_env
 from prompt_optimizer.providers.base import ModelProvider, ProviderConfig
 from prompt_optimizer.providers.http import HttpChatProvider
 from prompt_optimizer.providers.offline import OfflineRuleProvider
+
+# RC ID: RC-054. Prefer Rabbit Code Provider environment names with a legacy fallback.
 
 
 class ProviderRegistry:
@@ -28,13 +29,14 @@ class ProviderRegistry:
 
     @staticmethod
     def _config_from_env(name: str) -> ProviderConfig:
-        prefix = f"PROMPT_OPTIMIZER_{name.upper()}"
         return ProviderConfig(
             name=name,
-            base_url=os.getenv(f"{prefix}_BASE_URL"),
-            api_key=os.getenv(f"{prefix}_API_KEY"),
-            model=os.getenv(f"{prefix}_MODEL"),
-            timeout_seconds=float(os.getenv(f"{prefix}_TIMEOUT_SECONDS", "20")),
-            max_retries=int(os.getenv(f"{prefix}_MAX_RETRIES", "2")),
-            rate_limit_per_minute=int(os.getenv(f"{prefix}_RATE_LIMIT_PER_MINUTE", "30")),
+            base_url=compatible_env(f"{name.upper()}_BASE_URL"),
+            api_key=compatible_env(f"{name.upper()}_API_KEY"),
+            model=compatible_env(f"{name.upper()}_MODEL"),
+            timeout_seconds=float(compatible_env(f"{name.upper()}_TIMEOUT_SECONDS") or "20"),
+            max_retries=int(compatible_env(f"{name.upper()}_MAX_RETRIES") or "2"),
+            rate_limit_per_minute=int(
+                compatible_env(f"{name.upper()}_RATE_LIMIT_PER_MINUTE") or "30"
+            ),
         )

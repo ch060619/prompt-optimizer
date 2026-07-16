@@ -67,9 +67,10 @@ def run_probe(
     timeout_seconds: float = 10.0,
 ) -> ProbeResult:
     """Start, probe, and stop one isolated App Server process."""
+    # RC ID: RC-054. Sidecar launches the canonical Rabbit Code data environment.
     port = _reserve_loopback_port()
     environment = os.environ.copy()
-    environment["PROMPT_OPTIMIZER_HOME"] = str(data_dir)
+    environment["RABBIT_CODE_HOME"] = str(data_dir)
     command = [
         python_executable,
         "-m",

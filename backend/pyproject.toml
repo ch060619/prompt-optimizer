@@ -3,9 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "prompt-optimizer"
+# RC ID: RC-054. The distribution is Rabbit Code; prompt_optimizer remains the module compatibility path.
+name = "rabbit-code"
 version = "2.0.0"
-description = "离线优先的提示词分析、优化、模板管理与版本对比工具"
+description = "Rabbit Code：离线优先的提示词分析、优化、模板管理与版本对比工具"
 readme = "../README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
@@ -31,6 +32,7 @@ dev = [
 ]
 
 [project.scripts]
+rabbit = "prompt_optimizer.cli.app:app"
 prompt-opt = "prompt_optimizer.cli.app:app"
 
 [tool.hatch.build.targets.wheel]

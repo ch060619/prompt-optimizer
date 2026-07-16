@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 # RC ID: RC-046. Validate the stack decision and the minimal sidecar lifecycle.
+# RC ID: RC-054. Validate the canonical Rabbit Code sidecar data directory.
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 PROTOTYPE_PATH = REPOSITORY_ROOT / "scripts" / "prototypes" / "sidecar_probe.py"
 SPEC = importlib.util.spec_from_file_location("sidecar_probe", PROTOTYPE_PATH)
@@ -29,7 +30,7 @@ def test_sidecar_starts_on_loopback_and_stops_without_a_residual_process(
     assert result["ready"] is True
     assert result["startup_ms"] < 10_000
     assert result["alive_after_shutdown"] is False
-    assert (tmp_path / "prompt_optimizer.sqlite3").is_file()
+    assert (tmp_path / "rabbit-code.sqlite3").is_file()
 
 
 def test_stack_adr_covers_required_decisions_and_alternatives() -> None:

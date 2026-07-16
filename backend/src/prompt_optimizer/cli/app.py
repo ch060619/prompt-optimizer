@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Annotated
 
@@ -11,16 +12,37 @@ from rich.table import Table
 from prompt_optimizer.api.app import create_app
 from prompt_optimizer.core.models import ExportFormat, ModelProviderName, PromptAnalysis
 from prompt_optimizer.evaluation import EvaluationService
+from prompt_optimizer.identity import (
+    CLI_NAME,
+    LEGACY_CLI_NAME,
+    LEGACY_COMPATIBILITY_CUTOFF,
+    PRODUCT_NAME,
+)
 from prompt_optimizer.services import AppServices
 
-app = typer.Typer(help="离线提示词分析、优化、模板管理和版本对比工具。")
+app = typer.Typer(
+    name=CLI_NAME,
+    help=f"{PRODUCT_NAME}：离线提示词分析、优化、模板管理和版本对比工具。",
+)
 templates_app = typer.Typer(help="模板库管理。")
 history_app = typer.Typer(help="版本历史与对比。")
 app.add_typer(templates_app, name="templates")
 app.add_typer(history_app, name="history")
 
 console = Console()
+stderr_console = Console(stderr=True)
 services = AppServices()
+
+# RC ID: RC-054. Provide the rabbit CLI while warning on the prompt-opt alias.
+
+
+@app.callback()
+def compatibility_notice() -> None:
+    if Path(sys.argv[0]).stem.lower().startswith(LEGACY_CLI_NAME):
+        stderr_console.print(
+            f"[yellow]提示：{LEGACY_CLI_NAME} 已弃用，请迁移到 {CLI_NAME}；"
+            f"兼容截止 Rabbit Code {LEGACY_COMPATIBILITY_CUTOFF}。[/yellow]"
+        )
 
 
 @app.command()

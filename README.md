@@ -1,6 +1,6 @@
-# Prompt Optimizer 提示词优化工具
+# Rabbit Code 提示词工程工具
 
-Prompt Optimizer 是一个离线优先的提示词分析、优化、模板管理、版本对比与导出工具。项目包含 Python 后端核心库、命令行界面、本地 FastAPI 服务和 React Web 工作台，不依赖外部 AI API，适合本地使用和开源二次开发。
+Rabbit Code 是一个离线优先的提示词分析、优化、模板管理、版本对比与导出工具。项目保留 `prompt_optimizer` Python 模块路径作为兼容层，包含 Python 后端核心库、命令行界面、本地 FastAPI 服务和 React Web 工作台，不依赖外部 AI API，适合本地使用和开源二次开发。
 
 ## V2.0 版本状态
 
@@ -12,7 +12,7 @@ V2.0 聚焦 AI 工程化能力补强：模型 Provider 抽象、SSE 流式优化
 
 - 后端测试覆盖率：`81%`，来自 `pytest --cov=prompt_optimizer --cov-report=term-missing`。
 - 评测集：`55` 条样本，报告由 CLI 生成在 [docs/evaluation-report.md](docs/evaluation-report.md)。
-- Docker：已通过 `docker build -t prompt-optimizer:local .` 构建，并完成容器内 `/docs`、`/openapi.json`、`/api/templates`、`/api/analyze`、`/api/auth/register`、`/api/auth/login`、`/api/optimize` 冒烟验证。
+- Docker：已通过 `docker build -t rabbit-code:local .` 构建，并完成容器内 `/docs`、`/openapi.json`、`/api/templates`、`/api/analyze`、`/api/auth/register`、`/api/auth/login`、`/api/optimize` 冒烟验证。
 
 ## 核心功能
 
@@ -50,7 +50,7 @@ start.bat local
 start.bat docker
 ```
 
-`start.bat docker` 会检查 Docker Desktop 是否运行，构建 `prompt-optimizer:v2.0` 和 `prompt-optimizer:local` 镜像，并以前台容器方式启动服务。
+`start.bat docker` 会检查 Docker Desktop 是否运行，构建 `rabbit-code:v2.0` 和 `rabbit-code:local` 镜像，并以前台容器方式启动服务；旧 `prompt-optimizer:*` 标签仍作为兼容别名生成。
 
 ## 安装步骤
 
@@ -73,21 +73,21 @@ npm install
 ## 命令行使用
 
 ```bash
-prompt-opt analyze "你是一名老师，请解释机器学习，输出格式为列表。"
-prompt-opt optimize "帮我写一封商务邮件"
-prompt-opt optimize "帮我写一封商务邮件" --provider offline
-prompt-opt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
-prompt-opt templates list --category tech
-prompt-opt templates show tech-code-generation
-prompt-opt history list
-prompt-opt history diff 1 2
-prompt-opt export 1 --format md --output result.md
+  rabbit analyze "你是一名老师，请解释机器学习，输出格式为列表。"
+  rabbit optimize "帮我写一封商务邮件"
+  rabbit optimize "帮我写一封商务邮件" --provider offline
+  rabbit evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
+  rabbit templates list --category tech
+  rabbit templates show tech-code-generation
+  rabbit history list
+  rabbit history diff 1 2
+  rabbit export 1 --format md --output result.md
 ```
 
 启动本地 Web 服务：
 
 ```bash
-prompt-opt serve --host 127.0.0.1 --port 8000
+  rabbit serve --host 127.0.0.1 --port 8000
 ```
 
 开发模式前端：
@@ -118,7 +118,7 @@ Dockerfile                多阶段 Docker 构建
 项目内置 50+ 条多场景提示词评测样本，覆盖技术、商务、教育、创意、客服、数据分析和长文本场景。运行以下命令可生成本地评测报告：
 
 ```bash
-prompt-opt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
+  rabbit evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
 ```
 
 报告记录优化前后得分、人工标签、规则误判备注、Provider、降级状态和本地耗时。仓库中的 [评测报告](docs/evaluation-report.md) 由上述命令生成，简历中的 QPS、耗时、覆盖率等数字应只引用实际运行结果。
@@ -131,12 +131,14 @@ prompt-opt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluati
 
 ## 本地数据
 
-默认 SQLite 数据库保存到系统应用数据目录。可通过环境变量覆盖：
+默认 SQLite 数据库保存到系统应用数据目录。新安装使用 Rabbit Code 名称；升级时会自动发现旧 `prompt-optimizer` 目录。新环境变量优先，旧变量在 Rabbit Code 3.0.0 前兼容并发出弃用警告：
 
 ```bash
-set PROMPT_OPTIMIZER_HOME=<your-data-dir>
-set PROMPT_OPTIMIZER_DB=<your-data-dir>\prompt_optimizer.sqlite3
+set RABBIT_CODE_HOME=<your-data-dir>
+set RABBIT_CODE_DB=<your-data-dir>\rabbit-code.sqlite3
 ```
+
+旧变量 `PROMPT_OPTIMIZER_HOME`、`PROMPT_OPTIMIZER_DB`、`PROMPT_OPTIMIZER_CONFIG`、`PROMPT_OPTIMIZER_JWT_SECRET` 和 `PROMPT_OPTIMIZER_<PROVIDER>_*` 仅作为迁移回退。发行包名为 `rabbit-code`，Python 模块路径和 `prompt-opt` 命令在兼容期保留；新客户端和脚本使用 `rabbit`。
 
 ## 测试与质量检查
 
@@ -155,8 +157,8 @@ npm run build
 Docker 验证：
 
 ```bash
-docker build -t prompt-optimizer:local .
-docker run --rm --name prompt-optimizer-smoke -p 8000:8000 prompt-optimizer:local
+docker build -t rabbit-code:local .
+docker run --rm --name rabbit-code-smoke -p 8000:8000 rabbit-code:local
 ```
 
 ## 贡献指南

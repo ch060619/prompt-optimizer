@@ -2,6 +2,7 @@ import { Download, GitCompare, History, Library, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { api } from "./api";
+import { PRODUCT_NAME } from "./brand";
 import type {
   DiffResult,
   OptimizeResponse,
@@ -15,6 +16,7 @@ import { SiteShell } from "./components/SiteShell";
 import { AuthPage, SiteRoute } from "./marketing";
 
 // RC ID: RC-050. Surface offline-rule identity and fallback reasons in the workspace.
+// RC ID: RC-054. Use Rabbit Code as the canonical workspace identity.
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
 const categoryLabels: Record<string, string> = {
@@ -261,7 +263,7 @@ export function App() {
       <aside className="sidebar">
         <div className="brand">
           <Sparkles size={22} />
-          <span>Prompt Optimizer</span>
+          <span>{PRODUCT_NAME}</span>
         </div>
         <div className="workspace-rabbit">
           <img src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="eager" decoding="async" />

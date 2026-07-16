@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,8 +16,11 @@ from prompt_optimizer.core.models import (
     UserPublic,
     VersionSummary,
 )
+from prompt_optimizer.identity import compatible_env
 from prompt_optimizer.paths import default_db_path
 from prompt_optimizer.storage.backup import BackupResult, backup_database, read_schema_version
+
+# RC ID: RC-054. Prefer Rabbit Code configuration with a legacy fallback.
 
 DEMO_USERNAME = "demo"
 DEMO_PASSWORD_HASH = AuthService().hash_password("demo-password", "demo-salt")
@@ -36,7 +38,7 @@ class StorageService:
         self.db_path = db_path or default_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.backup_dir = backup_dir or self.db_path.parent / "backups"
-        configured_path = config_path or os.getenv("PROMPT_OPTIMIZER_CONFIG")
+        configured_path = config_path or compatible_env("CONFIG")
         self.config_path = Path(configured_path).expanduser() if configured_path else None
         self.last_backup: BackupResult | None = None
         self._backup_before_migration()
