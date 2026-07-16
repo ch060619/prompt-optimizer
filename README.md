@@ -73,21 +73,21 @@ npm install
 ## 命令行使用
 
 ```bash
-  rabbit analyze "你是一名老师，请解释机器学习，输出格式为列表。"
-  rabbit optimize "帮我写一封商务邮件"
-  rabbit optimize "帮我写一封商务邮件" --provider offline
-  rabbit evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
-  rabbit templates list --category tech
-  rabbit templates show tech-code-generation
-  rabbit history list
-  rabbit history diff 1 2
-  rabbit export 1 --format md --output result.md
+  rabbit prompt analyze "你是一名老师，请解释机器学习，输出格式为列表。"
+  rabbit prompt optimize "帮我写一封商务邮件"
+  rabbit prompt optimize "帮我写一封商务邮件" --provider offline
+  rabbit prompt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
+  rabbit prompt templates list --category tech
+  rabbit prompt templates show tech-code-generation
+  rabbit prompt history list
+  rabbit prompt history diff 1 2
+  rabbit prompt export 1 --format md --output result.md
 ```
 
 启动本地 Web 服务：
 
 ```bash
-  rabbit serve --host 127.0.0.1 --port 8000
+  rabbit prompt serve --host 127.0.0.1 --port 8000
 ```
 
 开发模式前端：
@@ -118,7 +118,7 @@ Dockerfile                多阶段 Docker 构建
 项目内置 50+ 条多场景提示词评测样本，覆盖技术、商务、教育、创意、客服、数据分析和长文本场景。运行以下命令可生成本地评测报告：
 
 ```bash
-  rabbit evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
+  rabbit prompt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
 ```
 
 报告记录优化前后得分、人工标签、规则误判备注、Provider、降级状态和本地耗时。仓库中的 [评测报告](docs/evaluation-report.md) 由上述命令生成，简历中的 QPS、耗时、覆盖率等数字应只引用实际运行结果。

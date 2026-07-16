@@ -24,10 +24,14 @@ app = typer.Typer(
     name=CLI_NAME,
     help=f"{PRODUCT_NAME}：离线提示词分析、优化、模板管理和版本对比工具。",
 )
+prompt_app = typer.Typer(help="Rabbit Code 提示词工作流兼容命令组。")
 templates_app = typer.Typer(help="模板库管理。")
 history_app = typer.Typer(help="版本历史与对比。")
 app.add_typer(templates_app, name="templates")
 app.add_typer(history_app, name="history")
+app.add_typer(prompt_app, name="prompt")
+prompt_app.add_typer(templates_app, name="templates")
+prompt_app.add_typer(history_app, name="history")
 
 console = Console()
 stderr_console = Console(stderr=True)
@@ -46,6 +50,7 @@ def compatibility_notice() -> None:
 
 
 @app.command()
+@prompt_app.command()
 def analyze(prompt: Annotated[str, typer.Argument(help="待分析的提示词")]) -> None:
     """分析提示词质量并输出评分与建议。"""
     try:
@@ -56,6 +61,7 @@ def analyze(prompt: Annotated[str, typer.Argument(help="待分析的提示词")]
 
 
 @app.command()
+@prompt_app.command()
 def optimize(
     prompt: Annotated[str, typer.Argument(help="待优化的提示词")],
     template_id: Annotated[str | None, typer.Option("--template-id", "-t")] = None,
@@ -146,6 +152,7 @@ def diff_history(
 
 
 @app.command("export")
+@prompt_app.command("export")
 def export_version(
     version_id: Annotated[int, typer.Argument(help="版本 ID")],
     format: Annotated[ExportFormat, typer.Option("--format", "-f")] = "md",
@@ -165,6 +172,7 @@ def export_version(
 
 
 @app.command()
+@prompt_app.command()
 def evaluate(
     dataset: Annotated[Path, typer.Option("--dataset", "-d")],
     output: Annotated[Path, typer.Option("--output", "-o")],
@@ -181,6 +189,7 @@ def evaluate(
 
 
 @app.command()
+@prompt_app.command()
 def serve(
     host: Annotated[str, typer.Option("--host")] = "127.0.0.1",
     port: Annotated[int, typer.Option("--port")] = 8000,
