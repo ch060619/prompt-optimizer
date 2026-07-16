@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,16 +18,28 @@ from prompt_optimizer.core.models import (
     VersionSummary,
 )
 from prompt_optimizer.paths import default_db_path
+from prompt_optimizer.storage.backup import BackupResult, backup_database, read_schema_version
 
 DEMO_USERNAME = "demo"
 DEMO_PASSWORD_HASH = AuthService().hash_password("demo-password", "demo-salt")
 DEFAULT_PROJECT_NAME = "默认项目"
+SCHEMA_VERSION = 1
 
 
 class StorageService:
-    def __init__(self, db_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        db_path: Path | None = None,
+        backup_dir: Path | None = None,
+        config_path: Path | None = None,
+    ) -> None:
         self.db_path = db_path or default_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.backup_dir = backup_dir or self.db_path.parent / "backups"
+        configured_path = config_path or os.getenv("PROMPT_OPTIMIZER_CONFIG")
+        self.config_path = Path(configured_path).expanduser() if configured_path else None
+        self.last_backup: BackupResult | None = None
+        self._backup_before_migration()
         self._init_db()
 
     def save_version(
@@ -344,6 +357,7 @@ class StorageService:
 
     def _init_db(self) -> None:
         with self._connect() as connection:
+            connection.execute("PRAGMA foreign_keys = ON")
             connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS users (
@@ -425,6 +439,7 @@ class StorageService:
                 )
                 """
             )
+            connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
         demo = self.ensure_demo_user()
         default_project = self.ensure_default_project(demo.id)
         with self._connect() as connection:
@@ -435,6 +450,23 @@ class StorageService:
                 WHERE owner_id IS NULL OR owner_id = 1
                 """,
                 (demo.id, default_project.id),
+            )
+
+    def _backup_before_migration(self) -> None:
+        if not self.db_path.exists():
+            return
+        current_version = read_schema_version(self.db_path)
+        if current_version > SCHEMA_VERSION:
+            raise RuntimeError(
+                f"数据库版本 {current_version} 高于当前支持版本 {SCHEMA_VERSION}。"
+            )
+        if current_version < SCHEMA_VERSION:
+            self.last_backup = backup_database(
+                self.db_path,
+                self.backup_dir,
+                schema_version=current_version,
+                target_schema_version=SCHEMA_VERSION,
+                config_path=self.config_path,
             )
 
     @staticmethod
