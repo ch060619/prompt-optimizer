@@ -1,0 +1,42 @@
+schema_version: 1
+rc_id: RC-017
+captured_at: "2026-07-17"
+categories:
+  - open-source
+  - public-doc
+  - behavior-only
+sources:
+  - id: openai-codex-cli-app-server
+    category: open-source
+    url: https://github.com/openai/codex/tree/78ba047bdae3db0342dee11d8d9ef5582fe8ce49
+    immutable_ref: 78ba047bdae3db0342dee11d8d9ef5582fe8ce49
+    license: Apache-2.0
+    access_status: verified
+    reuse_policy: license-review-required
+    evidence: docs/research/source-baselines.yml
+  - id: openai-codex-repository-docs
+    category: public-doc
+    url: https://github.com/openai/codex/blob/78ba047bdae3db0342dee11d8d9ef5582fe8ce49/README.md
+    immutable_ref: 78ba047bdae3db0342dee11d8d9ef5582fe8ce49
+    license: Apache-2.0
+    access_status: verified
+    reuse_policy: facts-only
+    evidence: docs/evidence/RC-017/README.md
+  - id: openai-codex-official-manual
+    category: public-doc
+    url: https://developers.openai.com/codex/
+    immutable_ref: null
+    license: null
+    access_status: verified
+    reuse_policy: facts-only
+    checked_at: "2026-07-17"
+    evidence: docs/evidence/RC-017/README.md
+  - id: codex-desktop-public-behavior
+    category: behavior-only
+    url: null
+    immutable_ref: null
+    license: null
+    access_status: observation-boundary
+    reuse_policy: no-source-or-assets
+    capture_artifact: none-retained
+    evidence: docs/research/codex-source-boundaries.md

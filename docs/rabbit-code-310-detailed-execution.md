@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 12 |
-| 最后完成项 | RC-016 |
-| 下一待执行项 | RC-017 |
+| 已完成项数 | 13 |
+| 最后完成项 | RC-017 |
+| 下一待执行项 | RC-018 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-016 按用户指示关闭；官方 Codex manual 获取 HTTP 403，未写入未经验证结论，准备执行 RC-017 |
-| 当前阻塞 | RC-016 官方 Codex manual 获取 HTTP 403；已按用户指示关闭，仅保留限制，不阻塞 RC-017 |
-| 最近一次完整验证 | 2026-07-17：进度计数 Done=12/Pending=298/Total=310/UniqueIds=310；RC-015 source baseline 校验通过；RC 追踪索引已更新 |
-| 最近更新时间 | 2026-07-17 03:51:58 +08:00 |
+| 当前状态 | RC-017 已完成来源分类与 Codex CLI/App Server / 桌面 GUI 边界审计，准备执行 RC-018 |
+| 当前阻塞 | 无 |
+| 最近一次完整验证 | 待完成 RC-017 状态记录后的进度计数与追踪检查 |
+| 最近更新时间 | 2026-07-17 03:56:37 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -46,6 +46,7 @@
 | RC-055 | 2026-07-17 03:32:37 +08:00 | `c04a528` | PASS：v2.0/v2.0-baseline 均剥离到 `8306d117`；V2 后端 31 passed；两次 Python wheel、前端 dist 和 Git archive 哈希一致；`release/v2.0` 分支保护与两个 V2 标签 Ruleset 已启用 | `docs/evidence/RC-055/README.md` | 标签签名/来源证明留给 RC-277；安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次 |
 | RC-015 | 2026-07-17 03:38:00 +08:00 | `5fc9361` | PASS：9 个 GitHub 来源的 URL、默认分支、HEAD SHA、commit URL、许可证元数据和状态已固定；YAML 校验器与 Ruff 通过；CI 已接入 source baseline 门禁 | `docs/evidence/RC-015/README.md` | 4 个来源无 SPDX 许可证，1 个来源已归档；仅保留研究元数据，法律和 clean-room 结论留给 RC-021 至 RC-030 |
 | RC-016 | 2026-07-17 03:50:47 +08:00 | `f88d8c2` | CLOSED BY USER：按用户指示将 RC-016 视为已完成；官方 Codex manual 获取 HTTP 403，未写入未经验证结论 | `docs/evidence/RC-016/README.md` | 未验证的 manual 结论不纳入本项目；本限制已记录，不阻塞 RC-017 |
+| RC-017 | 2026-07-17 03:56:37 +08:00 | `583848a` | PASS：来源登记包含 `open-source`、`public-doc`、`behavior-only`；固定 Codex SHA、README 与 manual 均已核对；manual HEAD/GET 均 HTTP 200；来源校验器与 Ruff 通过；无新增 Codex GUI 源码/资产 | `docs/evidence/RC-017/README.md` | 公开文档只按事实使用；桌面 GUI 继续按 behavior-only 处理，不复制专有源码或资产 |
 
 ### 进度记录一致性检查
 
@@ -2356,7 +2357,7 @@ git diff --exit-code -- frontend\src\generated
 
 - [x] **RC-015** 固定调研基线的仓库 URL、默认分支、Commit SHA、调研日期和许可证版本，避免只记录会移动的 `main` 或 `dev`。
 - [x] **RC-016** 调研 [openai/codex](https://github.com/openai/codex) 的 Apache-2.0 开源终端 Agent，重点覆盖 `core`、`cli`、`tui`、`app-server`、协议、权限、沙箱、MCP、配置、文件搜索、Git、会话和模型 Provider 模块。
-- [ ] **RC-017** 区分“Codex CLI/App Server 开源”与“Codex 桌面产品完整 GUI 源码可用”两件事；桌面端布局和交互只做产品行为研究，不预设可以获取或复制其专有实现。
+- [x] **RC-017** 区分“Codex CLI/App Server 开源”与“Codex 桌面产品完整 GUI 源码可用”两件事；桌面端布局和交互只做产品行为研究，不预设可以获取或复制其专有实现。
 - [ ] **RC-018** 调研 [anomalyco/opencode](https://github.com/anomalyco/opencode) 的 MIT 开源实现，重点覆盖 `packages/opencode`、`cli`、`tui`、`desktop`、`app`、`server`、`protocol`、`llm`、`plugin`、`sdk` 和 `ui`。
 - [ ] **RC-019** 调研 [anthropics/claude-code](https://github.com/anthropics/claude-code) 的公开仓库、文档、示例、插件、Hooks、工具和权限行为；该仓库核心程序受 Anthropic 商业条款约束，不作为可复制的开源核心源码。
 - [ ] **RC-020** 调研 [anthropics/claude-agent-sdk-python](https://github.com/anthropics/claude-agent-sdk-python) 的消息流、交互会话、自定义工具、MCP、Hooks、权限和会话分叉接口，同时单独审核 SDK 代码许可证、捆绑 Claude Code CLI 和商业条款之间的边界。
