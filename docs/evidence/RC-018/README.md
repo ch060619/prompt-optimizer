@@ -4,7 +4,7 @@
 - 状态：已完成
 - 负责人：Codex
 - 基线 Commit：`b8dcceb`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`bbcd3c1`
 - 前置 RC：RC-017（已完成并有证据）
 - 修改文件：OpenCode 来源登记、模块对照、ADR、隔离原型和校验器
 - 用户可见行为：OpenCode 的可借鉴范围被限制为抽象边界；Rabbit Code 不引入 OpenCode 上游代码或资产。
