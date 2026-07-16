@@ -32,6 +32,9 @@ jobs:
       # RC ID: RC-024
       - name: Proprietary-content policy
         run: python scripts/check_proprietary_content_policy.py
+      # RC ID: RC-026
+      - name: Independent design provenance
+        run: python scripts/check_independent_design.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy
