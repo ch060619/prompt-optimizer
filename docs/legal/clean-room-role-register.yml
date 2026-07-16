@@ -1,0 +1,41 @@
+schema_version: 1
+rc_id: RC-025
+status: pending-human-signoff
+roles:
+  - id: researcher
+    allowed_inputs:
+      - official public documentation
+      - metadata and license records
+      - legally available black-box observations
+    allowed_outputs:
+      - neutral behavior specifications
+      - inputs, outputs, states, constraints, and uncertainty
+    prohibited:
+      - source-map reconstructed source
+      - raw source text, private prompts, internal tests, or proprietary assets
+      - source filenames or copied code structure in clean-room specifications
+  - id: implementer
+    allowed_inputs:
+      - approved clean-room behavior specifications
+      - official documentation and SDKs
+      - license-cleared source with provenance
+    prohibited:
+      - access to source-map repositories or reconstructed source
+      - raw research transcripts containing restricted material
+      - mechanical rewrites or copied implementation structure
+  - id: reviewer
+    allowed_inputs:
+      - role register
+      - clean-room specifications
+      - provenance and audit reports
+    responsibilities:
+      - verify no restricted material entered the implementation path
+      - record review date, scope, and unresolved questions
+communication:
+  channel: issue-or-pull-request
+  allowed: neutral specifications, provenance, decisions, and audit results
+  prohibited: raw source, long quotations, private prompts, internal tests, and proprietary assets
+signoffs:
+  researcher: pending-human-assignment
+  implementer: pending-human-assignment
+  reviewer: pending-human-assignment

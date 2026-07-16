@@ -33,7 +33,12 @@ def load_denylist() -> dict[str, list[str]]:
 
 def scan_paths(paths: Iterable[Path], tokens: dict[str, list[str]]) -> list[tuple[str, str]]:
     hits: list[tuple[str, str]] = []
-    blocked = [token for values in tokens.values() for token in values]
+    blocked = [
+        token
+        for field, values in tokens.items()
+        if field != "evidence_only_files"
+        for token in values
+    ]
     for path in paths:
         try:
             content = path.read_text(encoding="utf-8")

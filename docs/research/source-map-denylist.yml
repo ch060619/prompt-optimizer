@@ -32,3 +32,4 @@ evidence_only_roots:
   - docs/traceability
 evidence_only_files:
   - scripts/check_source_map_evidence.py
+  - scripts/check_proprietary_content_policy.py
