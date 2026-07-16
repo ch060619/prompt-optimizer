@@ -4,7 +4,7 @@
 - 状态：已提交（待技术/合规/法律批准）
 - 负责人：Codex
 - 基线 Commit：`6483383`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`a5b1dc7`
 - 前置 RC：RC-029（已完成并有季度监控）
 - 修改文件：`docs/legal/claude-source-map-clean-room.md`、`scripts/check_m0_clean_room_decision.py`、CI
 - 用户可见行为：M0 未批准时 source-map 内容保持禁止，允许范围不会因文档存在而扩大。
