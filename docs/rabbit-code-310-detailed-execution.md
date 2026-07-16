@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 6 |
-| 最后完成项 | RC-052 |
-| 下一待执行项 | RC-053 |
+| 已完成项数 | 7 |
+| 最后完成项 | RC-053 |
+| 下一待执行项 | RC-054 |
 | 当前里程碑 | W0：保护现有项目基线，为 M0 准备 |
-| 当前状态 | RC-052 本地 JWT 与 Provider 凭据边界 ADR 已接受，准备执行 RC-053 |
+| 当前状态 | RC-053 SQLite Schema 版本化、备份、迁移和恢复已完成，准备执行 RC-054 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：后端 54 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 02:20:55 +08:00 |
+| 最近一次完整验证 | 2026-07-17：后端 58 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 02:30:54 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -40,6 +40,7 @@
 | RC-048 | 2026-07-17 02:04:39 +08:00 | `424b135` | PASS：版本化 OpenAPI 36 paths/22 schemas 且 SHA-256 可复现；契约与既有 API 共 49 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-048/README.md` | 旧 `/api/*` 入口仍按兼容期保留；生成客户端与 CI 差异门禁留给 RC-062；既有前端 jsdom 警告保留 |
 | RC-050 | 2026-07-17 02:15:33 +08:00 | `46485ac` | PASS：离线回退契约 3 passed；后端 52 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 保持可复现；索引检查通过 | `docs/evidence/RC-050/README.md` | Provider Adapter 拆分留给 RC-049；真实本地模型安装与运行器不属于本项；既有前端 jsdom 警告保留 |
 | RC-052 | 2026-07-17 02:20:55 +08:00 | `eea66e9` | PASS：身份边界 2 passed；后端 54 passed；Ruff/Mypy；前端 9 passed、Lint/Build；ADR Accepted；索引检查通过 | `docs/evidence/RC-052/README.md` | JWT 生产级本地认证、撤销和 OS 密钥库留给 RC-179/207 等安全门禁；既有前端 jsdom 警告保留 |
+| RC-053 | 2026-07-17 02:30:54 +08:00 | `994983f` | PASS：SQLite 备份/迁移/恢复契约 4 passed；后端 58 passed；Ruff/Mypy；前端 9 passed、Lint/Build；脚本检查和索引检查通过 | `docs/evidence/RC-053/README.md` | 备份加密、保留周期、跨设备灾备和并发写入协调不属于本项；既有前端 jsdom 警告保留 |
 
 ### 进度记录一致性检查
 
@@ -2406,7 +2407,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-050** 保留 `OfflineRuleProvider` 作为无网络、模型未安装、模型加载失败时的最终可用降级，而不是把它误称为大模型。
 - [ ] **RC-051** 将现有 `prompt-opt` CLI 与 Rabbit Code Agent CLI 的命令空间、配置和存储进行兼容迁移。
 - [x] **RC-052** 评估现有 JWT 本地用户体系是否仍有必要，区分“Rabbit Code 本地用户资料”与“第三方 API 凭据配置”。
-- [ ] **RC-053** 为现有 SQLite 数据、提示词历史、模板和配置提供备份、迁移、回滚与损坏恢复方案。
+- [x] **RC-053** 为现有 SQLite 数据、提示词历史、模板和配置提供备份、迁移、回滚与损坏恢复方案。
 - [ ] **RC-054** 更新产品名称、包名、环境变量、应用数据目录和 API 标题，同时提供旧名称兼容期。
 - [ ] **RC-055** 不覆盖现有可复现的 V2 发布线，Rabbit Code 使用独立分支、版本和迁移说明。
 
