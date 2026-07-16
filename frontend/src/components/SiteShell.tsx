@@ -5,20 +5,18 @@ import Lenis from "lenis";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 
 const productLinks = [
-  ["Prompt workspace", "/"],
+  ["Prompt workspace", "/workspace"],
   ["Evaluations", "/evaluations"],
   ["Templates", "/prompt-management"],
-  ["History & diff", "/models"],
-  ["Background tasks", "/workflows"]
+  ["Background tasks", "/prompt-chaining"]
 ] as const;
 
 const companyLinks = [
   ["Documentation", "/blog"],
-  ["About this project", "/case-studies"],
   ["Contact", "/contact"]
 ] as const;
 
-export function SiteShell({ children }: { children: ReactNode }) {
+export function SiteShell({ children, authenticated = false, isWorkspace = false, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; onSignOut?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLElement>(null);
@@ -92,7 +90,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div className="site-frame" ref={frameRef}>
       <ActivityBar />
-      <SiteHeader menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} />
+      <SiteHeader authenticated={authenticated} isWorkspace={isWorkspace} menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} onSignOut={onSignOut} />
       <div className="site-content">{children}</div>
       <SiteFooter />
       {menuOpen ? <SiteMenu menuRef={menuRef} onClose={() => setMenuOpen(false)} /> : null}
@@ -111,7 +109,7 @@ function ActivityBar() {
   );
 }
 
-function SiteHeader({ menuOpen, menuButtonRef, onMenuToggle }: { menuOpen: boolean; menuButtonRef: RefObject<HTMLButtonElement>; onMenuToggle: () => void }) {
+function SiteHeader({ authenticated, isWorkspace, menuOpen, menuButtonRef, onMenuToggle, onSignOut }: { authenticated: boolean; isWorkspace: boolean; menuOpen: boolean; menuButtonRef: RefObject<HTMLButtonElement>; onMenuToggle: () => void; onSignOut?: () => void }) {
   return (
     <header className="site-header">
       <div className="site-menu-cell">
@@ -136,9 +134,13 @@ function SiteHeader({ menuOpen, menuButtonRef, onMenuToggle }: { menuOpen: boole
         <a href="/blog">BUILD NOTES</a>
         <a href="/contact">CONTACT</a>
       </nav>
-      <a className="header-action" href="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-        OPEN WORKSPACE <ArrowUpRight size={14} aria-hidden="true" />
-      </a>
+      {authenticated ? (
+        <button className="header-action" type="button" onClick={onSignOut}>SIGN OUT <ArrowUpRight size={14} aria-hidden="true" /></button>
+      ) : (
+        <a className="header-action" href={isWorkspace ? "/login" : "/workspace"}>
+          {isWorkspace ? "LOGIN" : "OPEN WORKSPACE"} <ArrowUpRight size={14} aria-hidden="true" />
+        </a>
+      )}
     </header>
   );
 }
@@ -186,6 +188,7 @@ function SiteFooter() {
       </div>
       <div className="footer-brandline">
         <p>Build better prompts. Keep the work close.</p>
+        <img className="footer-rabbit" src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="lazy" decoding="async" />
         <a href="/" className="footer-mark">Prompt Optimizer</a>
       </div>
       <div className="footer-links">
@@ -193,12 +196,11 @@ function SiteFooter() {
           <span className="eyebrow">PRODUCTS</span>
           <a href="/prompt-management">Workspace</a>
           <a href="/evaluations">Evaluations</a>
-          <a href="/workflows">Tasks & exports</a>
+          <a href="/prompt-chaining">Tasks & exports</a>
         </div>
         <div>
           <span className="eyebrow">PROJECT</span>
           <a href="/blog">Build notes</a>
-          <a href="/case-studies">Use cases</a>
           <a href="/contact">Contact</a>
         </div>
       </div>

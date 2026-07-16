@@ -107,7 +107,7 @@ class OptimizeMetadata(BaseModel):
 
 
 class OptimizeResponse(BaseModel):
-    version_id: int
+    version_id: int | None = None
     analysis: PromptAnalysis
     metadata: OptimizeMetadata
 

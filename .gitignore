@@ -11,6 +11,7 @@ htmlcov/
 node_modules/
 frontend/dist/
 frontend/coverage/
+output/playwright/
 .env
 .env.*
 !.env.example

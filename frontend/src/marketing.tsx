@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowLeft, ArrowUpRight, Check, ChevronDown, FileText, GitBranch, Search, Terminal, Workflow } from "lucide-react";
+import { ArrowDownRight, ArrowLeft, ArrowUpRight, ChevronDown, FileText, Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 type ProductSpec = {
@@ -77,30 +77,12 @@ const blogPosts = [
   ["Evaluation report", "What the repository's evaluation dataset measures", "evaluation-report"]
 ] as const;
 
-const glossaryTerms = [
-  ["Clarity", "A prompt's intent is understandable without guesswork."],
-  ["Specificity", "The requested task has concrete scope and constraints."],
-  ["Context", "The model receives the information needed to act."],
-  ["Output format", "The response shape is explicit and testable."],
-  ["Constraints", "Boundaries prevent avoidable drift."],
-  ["Role", "The prompt gives the task an appropriate point of view."],
-  ["Examples", "Representative inputs or outputs remove ambiguity."],
-  ["Executability", "The request can be acted on without missing steps."]
-] as const;
-
 export function SiteRoute({ path }: { path: string }) {
   const normalized = path.length > 1 ? path.replace(/\/$/, "") : path;
   if (productSpecs[normalized]) return <ProductPage spec={productSpecs[normalized]} />;
   if (normalized === "/") return <HomePage />;
-  if (normalized === "/pricing") return <PricingPage />;
-  if (normalized === "/case-studies") return <CaseStudiesPage />;
   if (normalized === "/blog") return <BlogIndexPage />;
   if (normalized.startsWith("/blog/")) return <ArticlePage slug={normalized.slice("/blog/".length)} />;
-  if (normalized === "/models") return <ModelsPage />;
-  if (normalized.startsWith("/models/")) return <ProviderDetailPage slug={normalized.slice("/models/".length)} />;
-  if (normalized === "/glossary") return <GlossaryPage />;
-  if (normalized.startsWith("/glossary/")) return <GlossaryDetailPage slug={normalized.slice("/glossary/".length)} />;
-  if (normalized === "/careers") return <CareersPage />;
   if (normalized === "/contact") return <ContactPage />;
   return <NotFoundPage path={normalized} />;
 }
@@ -212,7 +194,7 @@ function ProductPage({ spec }: { spec: ProductSpec }) {
         <h1>{spec.title}</h1>
         <p>{spec.description}</p>
         <div className="hero-actions hero-actions-centered">
-          <a className="action-button action-button-primary" href="/">USE THE WORKSPACE <ArrowUpRight size={15} /></a>
+          <a className="action-button action-button-primary" href="/workspace">USE THE WORKSPACE <ArrowUpRight size={15} /></a>
           <a className="action-button" href="#features">VIEW FEATURES <ArrowDownRight size={15} /></a>
         </div>
         <ProductMockup variant={spec.mockup} />
@@ -239,67 +221,10 @@ function ProductPage({ spec }: { spec: ProductSpec }) {
           <ul>
             {spec.details.map((detail) => <li key={detail}>{detail}</li>)}
           </ul>
-          <a className="text-link" href="/">TRY IT WITH A REAL PROMPT <ArrowUpRight size={15} /></a>
+          <a className="text-link" href="/workspace">TRY IT WITH A REAL PROMPT <ArrowUpRight size={15} /></a>
         </div>
       </section>
-      <FAQList title="Frequently asked questions" items={faqFor(spec.path)} />
-    </main>
-  );
-}
-
-function PricingPage() {
-  const plans = [
-    ["LOCAL", "$0", "SQLite history", "Offline rules", "Markdown / JSON / TXT / CSV"],
-    ["DEVELOPMENT", "OPEN", "Vite + React", "FastAPI proxy", "Tests and type checks"],
-    ["PROVIDER", "CONFIGURED", "HTTP adapter", "Environment keys", "Offline fallback"],
-    ["DEPLOYMENT", "YOUR HOST", "Docker image", "Static frontend", "Port 8000 service"]
-  ];
-  return (
-    <main className="template-page pricing-page">
-      <section className="template-hero compact-hero">
-        <span className="eyebrow">PROJECT SETUP</span>
-        <h1>Use the system at the scale your work requires.</h1>
-        <p>This repository is MIT-licensed and local-first. The comparison below describes the actual project surfaces, not a hosted billing plan.</p>
-      </section>
-      <section className="plan-grid reveal-on-scroll">
-        {plans.map(([name, price, ...features], index) => (
-          <article className={index === 0 ? "plan-card plan-card-highlight" : "plan-card"} key={name}>
-            <span className="eyebrow">{name}</span>
-            <h2>{price}</h2>
-            <ul>{features.map((feature) => <li key={feature}><Check size={14} />{feature}</li>)}</ul>
-            <a className="text-link" href={index === 0 ? "/" : "/blog/architecture"}>READ THE NOTES <ArrowUpRight size={14} /></a>
-          </article>
-        ))}
-      </section>
-      <FAQList title="Questions about the setup" items={faqFor("/pricing")} />
-    </main>
-  );
-}
-
-function CaseStudiesPage() {
-  const cases = [
-    ["ENGINEERING", "Code review", "Turn a vague request into a prompt with constraints, edge cases, and a testable output shape."],
-    ["BUSINESS", "Sales and planning", "Keep tone, audience, goal, and action request visible before the first rewrite."],
-    ["EDUCATION", "Course design", "Move from an audience and topic to learning goals, activities, homework, and assessment."],
-    ["CREATIVE", "Story and campaign work", "Compare iterations without losing the first draft or the reason for the change."]
-  ];
-  return (
-    <main className="template-page case-page">
-      <section className="template-hero compact-hero">
-        <span className="eyebrow">USE CASES</span>
-        <h1>Prompt work looks different in every room.</h1>
-        <p>These examples are grounded in the repository's built-in templates and evaluation categories.</p>
-      </section>
-      <section className="case-grid reveal-on-scroll">
-        {cases.map(([kicker, title, text], index) => (
-          <article className={`case-item case-item-${index + 1}`} key={title}>
-            <span className="eyebrow">{kicker}</span>
-            <h2>{title}</h2>
-            <p>{text}</p>
-            <span className="case-arrow"><ArrowUpRight size={20} /></span>
-          </article>
-        ))}
-      </section>
+      <FAQList title="Frequently asked questions" items={faqFor()} />
     </main>
   );
 }
@@ -353,104 +278,6 @@ function ArticlePage({ slug }: { slug: string }) {
   );
 }
 
-function ModelsPage() {
-  const providers = [
-    ["offline", "Offline rules", "The default provider uses the optimizer and analyzer locally."],
-    ["http-adapter", "HTTP provider adapter", "Remote providers are configured from environment variables when needed."],
-    ["fallback", "Fallback path", "A provider failure can return to the offline rule provider."],
-    ["stream", "Streaming path", "The SSE endpoint exposes analysis, chunks, saved, and completed events."]
-  ];
-  return (
-    <main className="template-page index-page">
-      <section className="template-hero compact-hero">
-        <span className="eyebrow">PROVIDER INDEX</span>
-        <h1>Model access without losing local control.</h1>
-        <p>The current registry always includes the offline provider and can construct an HTTP adapter from environment configuration.</p>
-      </section>
-      <AlphabetBar />
-      <section className="index-grid reveal-on-scroll">
-        {providers.map(([slug, title, text], index) => (
-          <a className="index-item" href={`/models/${slug}`} key={slug}>
-            <span className="index-number">{String(index + 1).padStart(2, "0")}</span>
-            <h2>{title}</h2>
-            <p>{text}</p>
-            <span className="square-arrow"><ArrowUpRight size={15} /></span>
-          </a>
-        ))}
-      </section>
-    </main>
-  );
-}
-
-function ProviderDetailPage({ slug }: { slug: string }) {
-  const title = slug === "offline" ? "Offline rules" : slug === "http-adapter" ? "HTTP provider adapter" : slug === "fallback" ? "Fallback path" : "Streaming path";
-  const paragraphs = slug === "offline"
-    ? ["The offline provider combines the analyzer and optimizer already present in the backend.", "It is the default for local development and remains available when remote provider configuration is absent."]
-    : ["The provider registry creates an HTTP adapter from environment variables named for the requested provider.", "The service records provider requested, provider used, latency, and fallback metadata alongside the saved version."];
-  return <DetailPage kicker="PROVIDER DETAIL" title={title} definition="A documented entry in the Prompt Optimizer provider boundary." paragraphs={paragraphs} related={["Prompt workspace", "Evaluations", "Background tasks"]} />;
-}
-
-function GlossaryPage() {
-  return (
-    <main className="template-page index-page glossary-page">
-      <section className="template-hero compact-hero">
-        <span className="eyebrow">PROMPT GLOSSARY</span>
-        <h1>Eight dimensions for a prompt worth iterating.</h1>
-        <p>The glossary follows the scoring dimensions used by the existing analyzer.</p>
-      </section>
-      <AlphabetBar />
-      <section className="glossary-grid reveal-on-scroll">
-        {glossaryTerms.map(([title, text], index) => (
-          <a className="glossary-item" href={`/glossary/${title.toLowerCase().replace(" ", "-")}`} key={title}>
-            <span className="index-number">{String(index + 1).padStart(2, "0")}</span>
-            <h2>{title}</h2>
-            <p>{text}</p>
-            <span className="square-arrow"><ArrowUpRight size={15} /></span>
-          </a>
-        ))}
-      </section>
-    </main>
-  );
-}
-
-function GlossaryDetailPage({ slug }: { slug: string }) {
-  const term = glossaryTerms.find(([title]) => title.toLowerCase().replace(" ", "-") === slug) ?? glossaryTerms[0];
-  return <DetailPage kicker="GLOSSARY DETAIL" title={term[0]} definition={term[1]} paragraphs={[`${term[0]} is one of the dimensions returned by the analyzer and shown in the workspace score breakdown.`, "The purpose of a dimension is to give the next edit a name, a reason, and a measurable place in the history record."]} related={glossaryTerms.slice(0, 3).map(([title]) => title)} />;
-}
-
-function DetailPage({ kicker, title, definition, paragraphs, related }: { kicker: string; title: string; definition: string; paragraphs: string[]; related: string[] }) {
-  return (
-    <main className="template-page detail-page">
-      <section className="detail-hero">
-        <span className="eyebrow">{kicker}</span>
-        <h1>{title}</h1>
-        <p>{definition}</p>
-      </section>
-      <article className="detail-body">
-        {paragraphs.map((paragraph, index) => <div key={paragraph}><h2>{index + 1}. {index === 0 ? "What it means" : "How it appears in the system"}</h2><p>{paragraph}</p></div>)}
-        <div className="related-terms"><span className="eyebrow">RELATED ENTRIES</span>{related.map((entry) => <a href="/glossary" key={entry}>{entry} <ArrowUpRight size={13} /></a>)}</div>
-      </article>
-    </main>
-  );
-}
-
-function CareersPage() {
-  return (
-    <main className="template-page careers-page">
-      <section className="template-hero compact-hero">
-        <span className="eyebrow">CONTRIBUTORS</span>
-        <h1>Build a clearer open-source prompt workflow.</h1>
-        <p>This project is maintained as a local-first MIT codebase. There is no remote hiring pipeline configured in the application.</p>
-      </section>
-      <section className="careers-grid reveal-on-scroll">
-        <div><GitBranch size={22} /><h2>Work in the repository</h2><p>Core rules, services, API, CLI, frontend, tests, docs, and CI are all visible in one place.</p></div>
-        <div><Terminal size={22} /><h2>Keep claims executable</h2><p>Performance numbers and provider behavior stay tied to commands and local evidence.</p></div>
-        <div><Workflow size={22} /><h2>Improve the loop</h2><p>Make the next prompt edit easier to understand, run, compare, and export.</p></div>
-      </section>
-    </main>
-  );
-}
-
 function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -490,17 +317,12 @@ function OverviewCard({ index, title, text }: { index: string; title: string; te
   return <article className="overview-card"><span className="feature-index">{index}</span><h3>{title}</h3><p>{text}</p><ArrowUpRight size={18} /></article>;
 }
 
-function AlphabetBar() {
-  return <nav className="alphabet-bar" aria-label="Alphabetical index">{"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => <a href={`#letter-${letter}`} key={letter}>{letter}</a>)}</nav>;
-}
-
 function FAQList({ title, items }: { title: string; items: string[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   return <section className="faq-section"><div className="faq-heading"><span className="eyebrow">FAQ</span><h2>{title}</h2></div><div className="faq-list">{items.map((question, index) => { const answerId = `faq-answer-${index}`; const open = index === openIndex; return <div className="faq-item" key={question}><button type="button" aria-expanded={open} aria-controls={answerId} onClick={() => setOpenIndex(open ? null : index)}><span>{question}</span><ChevronDown size={17} className={open ? "faq-chevron open" : "faq-chevron"} /></button><div id={answerId} className={open ? "faq-answer open" : "faq-answer"} role="region"><p>{faqAnswer(question)}</p></div></div>; })}</div></section>;
 }
 
-function faqFor(path: string) {
-  if (path === "/pricing") return ["What does local-first mean here?", "Can I configure a remote provider?", "Where does history live?", "How are exports generated?"];
+function faqFor() {
   return ["Where does the prompt data go?", "Can the workspace run without a remote model?", "How is an optimized version saved?", "What happens when a provider fails?"];
 }
 

@@ -104,14 +104,14 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         authorization: str | None = Header(default=None),
     ) -> object:
         try:
-            user = _current_user(current_services, authorization)
+            user = _optional_user(current_services, authorization)
             prompt, template = _prepare_prompt(current_services, request)
             return current_services.optimize_and_save(
                 original_prompt=request.prompt,
                 prompt=prompt,
                 template=template,
                 provider_name=request.provider,
-                owner_id=user.id,
+                owner_id=user.id if user else None,
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -125,7 +125,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
     ) -> StreamingResponse:
         def events() -> Iterator[str]:
             try:
-                user = _current_user(current_services, authorization)
+                user = _optional_user(current_services, authorization)
                 yield _sse("started", {"provider": request.provider})
                 prompt, template = _prepare_prompt(current_services, request)
                 preview = current_services.analyzer.analyze(prompt)
@@ -135,15 +135,16 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
                     request,
                     prompt,
                     template,
-                    user.id,
+                    user.id if user else None,
                 )
-                yield _sse(
-                    "saved",
-                    {
-                        "version_id": result.version_id,
-                        "metadata": result.metadata.model_dump(mode="json"),
-                    },
-                )
+                if result.version_id is not None:
+                    yield _sse(
+                        "saved",
+                        {
+                            "version_id": result.version_id,
+                            "metadata": result.metadata.model_dump(mode="json"),
+                        },
+                    )
                 yield _sse("completed", result.model_dump(mode="json"))
             except (KeyError, ValueError) as exc:
                 yield _sse("error", {"detail": str(exc)})
@@ -298,6 +299,13 @@ def _current_user(current_services: AppServices, authorization: str | None) -> U
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
 
+def _optional_user(current_services: AppServices, authorization: str | None) -> UserPublic | None:
+    try:
+        return current_services.get_optional_user_from_token(authorization)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+
 def _run_optimize_task(
     current_services: AppServices,
     task_id: str,
@@ -372,7 +380,7 @@ def _stream_provider_result(
     request: OptimizeRequest,
     prompt: str,
     template: PromptTemplate | None,
-    owner_id: int,
+    owner_id: int | None,
 ) -> Generator[str, None, OptimizeResponse]:
     started = perf_counter()
     streamed_chunks: list[str] = []
