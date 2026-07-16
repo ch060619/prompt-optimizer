@@ -56,6 +56,9 @@ jobs:
       # RC ID: RC-034
       - name: Name and channel audit
         run: python scripts/check_name_channel_audit.py
+      # RC ID: RC-035
+      - name: Rabbit artwork license gate
+        run: python scripts/check_rabbit_art_license.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy

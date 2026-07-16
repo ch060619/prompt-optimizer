@@ -1,0 +1,29 @@
+schema_version: 1
+rc_id: RC-035
+captured_at: "2026-07-17"
+status: pending-human-confirmation
+source:
+  requested_path: "C:\\Users\\10735\\Desktop\\提示词\\兔兔素材.png"
+  present_at_capture: false
+  observed_status: missing
+repository_candidate:
+  path: frontend/public/rabbit-artwork.png
+  sha256: 1DDE71742091C82D85EDB403449AF8DE843D5F61DCA8CBF65B59AEBD9B90E599
+  size_bytes: 550885
+  provenance: unknown
+authorization:
+  rights_holder: unknown
+  written_statement: null
+  license: unknown
+  evidence_path: null
+  permissions:
+    commercial_use: pending
+    open_source_use: pending
+    modification: pending
+    derivative_works: pending
+    redistribution: pending
+    attribution: pending
+release:
+  allowed: false
+  status: blocked
+  block_reason: missing-source-file-and-written-authorization
