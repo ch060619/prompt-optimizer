@@ -1,7 +1,7 @@
 FROM node:20-alpine AS frontend
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
@@ -14,5 +14,8 @@ COPY README.md LICENSE ./
 COPY --from=frontend /app/frontend/dist ./frontend/dist
 RUN python -m pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -e backend
+ENV PROMPT_OPTIMIZER_ENV=production \
+    PROMPT_OPTIMIZER_DB=/data/prompt_optimizer.sqlite3
+VOLUME ["/data"]
 EXPOSE 8000
 CMD ["uvicorn", "prompt_optimizer.api.app:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,6 +1,6 @@
 {
   "name": "prompt-optimizer-web",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,18 +9,19 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "generate:api": "python ../scripts/generate_openapi.py && openapi-typescript .openapi.json -o src/generated/api.ts",
     "lint": "eslint . --ext ts,tsx --max-warnings 0",
     "test": "vitest run"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.0",
-    "typescript": "^5.5.4",
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.14",
+    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "lucide-react": "^0.468.0",
-    "gsap": "^3.12.5",
-    "lenis": "^1.1.14"
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.8",
@@ -33,6 +34,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.9",
     "jsdom": "^24.1.1",
+    "openapi-typescript": "^7.8.0",
     "vitest": "^2.0.5"
   }
 }

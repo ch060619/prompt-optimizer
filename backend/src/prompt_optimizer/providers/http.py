@@ -9,12 +9,15 @@ import httpx
 
 from prompt_optimizer.core.analyzer import Analyzer
 from prompt_optimizer.providers.base import (
+    ModelProviderError,
     ModelRequest,
     ModelResponse,
     ProviderConfig,
     ProviderRateLimitError,
     ProviderTimeoutError,
 )
+
+MAX_STREAM_BYTES = 2 * 1024 * 1024
 
 
 class HttpChatProvider:
@@ -61,27 +64,40 @@ class HttpChatProvider:
         self._check_rate_limit()
         if not self.config.base_url or not self.config.api_key or not self.config.model:
             raise RuntimeError(f"{self.name} 缺少 base_url、api_key 或 model 配置。")
-        with self.client.stream(
-            "POST",
-            self.config.base_url,
-            headers={"Authorization": f"Bearer {self.config.api_key}"},
-            json={
-                "model": self.config.model,
-                "stream": True,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "你是一名提示词优化专家，请只返回优化后的完整提示词。",
-                    },
-                    {"role": "user", "content": self._build_prompt(request)},
-                ],
-            },
-        ) as response:
-            response.raise_for_status()
-            for line in response.iter_lines():
-                chunk = self._extract_stream_line(line)
-                if chunk:
-                    yield chunk
+        try:
+            with self.client.stream(
+                "POST",
+                self.config.base_url,
+                headers={"Authorization": f"Bearer {self.config.api_key}"},
+                json={
+                    "model": self.config.model,
+                    "stream": True,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "你是一名提示词优化专家，请只返回优化后的完整提示词。",
+                        },
+                        {"role": "user", "content": self._build_prompt(request)},
+                    ],
+                },
+            ) as response:
+                response.raise_for_status()
+                total_bytes = 0
+                for line in response.iter_lines():
+                    chunk = self._extract_stream_line(line)
+                    if chunk:
+                        total_bytes += len(chunk.encode("utf-8"))
+                        if total_bytes > MAX_STREAM_BYTES:
+                            raise ModelProviderError("流式模型输出超过大小限制。")
+                        yield chunk
+        except httpx.TimeoutException as exc:
+            raise ProviderTimeoutError(f"{self.name} 请求超时。") from exc
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 429:
+                raise ProviderRateLimitError(f"{self.name} 已达到远程限流。") from exc
+            raise ModelProviderError(f"{self.name} 请求失败。") from exc
+        except httpx.HTTPError as exc:
+            raise ModelProviderError(f"{self.name} 请求失败。") from exc
 
     def _check_rate_limit(self) -> None:
         now = time.monotonic()

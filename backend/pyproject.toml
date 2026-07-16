@@ -4,15 +4,18 @@ build-backend = "hatchling.build"
 
 [project]
 name = "prompt-optimizer"
-version = "2.0.0"
+version = "3.0.0"
 description = "离线优先的提示词分析、优化、模板管理与版本对比工具"
 readme = "../README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Prompt Optimizer Contributors" }]
 dependencies = [
+    "argon2-cffi>=23.1.0",
     "fastapi>=0.115.0",
     "httpx>=0.27.0",
+    "PyJWT>=2.10.0",
+    "redis>=5.0.0",
     "pydantic>=2.8.0",
     "pyyaml>=6.0.2",
     "rich>=13.7.0",

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from prompt_optimizer.auth.service import AuthError, AuthService
 from prompt_optimizer.core.analyzer import Analyzer
 from prompt_optimizer.core.models import (
@@ -13,20 +15,37 @@ from prompt_optimizer.core.models import (
 from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.export.service import ExportService
 from prompt_optimizer.providers import ModelProviderError, ModelRequest, ProviderRegistry
+from prompt_optimizer.providers.limiter import DistributedRateLimiter
+from prompt_optimizer.storage.service import StorageService
 from prompt_optimizer.storage.version_service import VersionService
 from prompt_optimizer.tasks import TaskService
 from prompt_optimizer.templates.manager import TemplateManager
 
 
 class AppServices:
-    def __init__(self) -> None:
+    def __init__(self, *, cli_mode: bool = False) -> None:
         self.analyzer = Analyzer()
         self.optimizer = Optimizer(self.analyzer)
         self.templates = TemplateManager()
-        self.versions = VersionService()
+        self.auth = AuthService()
+        storage = StorageService(
+            create_demo_user=os.getenv("PROMPT_OPTIMIZER_ENV") == "development"
+        )
+        self.cli_owner_id: int | None = None
+        if cli_mode:
+            username = "__local_cli__"
+            found = storage.get_user_by_username(username)
+            user = (
+                found[0]
+                if found
+                else storage.create_user(username, self.auth.hash_password(os.urandom(32).hex()))
+            )
+            self.cli_owner_id = user.id
+        self.versions = VersionService(storage)
         self.export = ExportService()
         self.providers = ProviderRegistry(self.optimizer)
-        self.auth = AuthService()
+        redis_url = os.getenv("PROMPT_OPTIMIZER_REDIS_URL")
+        self.remote_limiter = DistributedRateLimiter(redis_url) if redis_url else None
         self.tasks = TaskService(self.versions.storage)
 
     def register_user(self, username: str, password: str) -> AuthResponse:
@@ -40,6 +59,8 @@ class AppServices:
         user, password_hash = found
         if not self.auth.verify_password(password, password_hash):
             raise AuthError("用户名或密码错误。")
+        if self.auth.needs_password_rehash(password_hash):
+            self.versions.storage.update_password_hash(user.id, self.auth.hash_password(password))
         return AuthResponse(access_token=self.auth.create_token(user), user=user)
 
     def get_user_from_token(self, token: str | None) -> UserPublic:
@@ -58,6 +79,16 @@ class AppServices:
             return self.versions.storage.get_user(self.auth.read_token(token_value))
         except KeyError as exc:
             raise AuthError("用户不存在。") from exc
+
+    def consume_remote_quota(self, user_id: int, provider_name: str) -> None:
+        if os.getenv("PROMPT_OPTIMIZER_ENV") == "production" and self.remote_limiter is None:
+            raise ValueError("生产环境远程 Provider 必须配置 PROMPT_OPTIMIZER_REDIS_URL。")
+        if self.remote_limiter is not None:
+            limit = int(os.getenv("PROMPT_OPTIMIZER_REMOTE_RATE_PER_MINUTE", "30"))
+            key = f"prompt-optimizer:provider:{provider_name}:user:{user_id}"
+            if not self.remote_limiter.allow(key, limit):
+                raise ValueError("远程 Provider 请求过于频繁，请稍后重试。")
+        self.versions.storage.consume_provider_quota(user_id, provider_name)
 
     def optimize_and_save(
         self,

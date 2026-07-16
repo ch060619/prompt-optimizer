@@ -8,20 +8,32 @@ from prompt_optimizer.storage.service import StorageService
 from prompt_optimizer.storage.version_service import VersionService
 
 
+def test_demo_user_is_opt_in(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    production_storage = StorageService(tmp_path / "production.sqlite3")
+    demo_storage = StorageService(tmp_path / "development.sqlite3", create_demo_user=True)
+
+    assert production_storage.get_user_by_username("demo") is None
+    assert demo_storage.get_user_by_username("demo") is not None
+
+
 def test_version_storage_and_diff(tmp_path) -> None:  # type: ignore[no-untyped-def]
     storage = StorageService(tmp_path / "test.sqlite3")
     service = VersionService(storage)
+    owner_id = storage.create_user("owner", "hash-1").id
     analysis_one = Optimizer().optimize("写一个总结")
-    id_one = service.create("写一个总结", analysis_one.optimized_prompt or "", analysis_one)
+    id_one = service.create(
+        "写一个总结", analysis_one.optimized_prompt or "", analysis_one, owner_id
+    )
     analysis_two = Optimizer().optimize("写一个面向管理层的项目总结，包含风险和行动项")
     id_two = service.create(
         "写一个面向管理层的项目总结，包含风险和行动项",
         analysis_two.optimized_prompt or "",
         analysis_two,
+        owner_id,
     )
 
-    assert len(service.list()) == 2
-    diff = service.diff(id_one, id_two)
+    assert len(service.list(owner_id)) == 2
+    diff = service.diff(id_one, id_two, owner_id)
     assert diff.new_id == id_two
     assert diff.diff_lines
 
@@ -48,9 +60,12 @@ def test_version_storage_scopes_versions_by_owner(tmp_path) -> None:  # type: ig
 def test_export_formats(tmp_path) -> None:  # type: ignore[no-untyped-def]
     storage = StorageService(tmp_path / "export.sqlite3")
     service = VersionService(storage)
+    owner_id = storage.create_user("owner", "hash-1").id
     analysis = Optimizer().optimize("生成一个测试计划")
-    version_id = service.create("生成一个测试计划", analysis.optimized_prompt or "", analysis)
-    version = service.get(version_id)
+    version_id = service.create(
+        "生成一个测试计划", analysis.optimized_prompt or "", analysis, owner_id
+    )
+    version = service.get(version_id, owner_id)
     exporter = ExportService()
 
     assert "# 提示词优化结果" in exporter.render(version, "md")
@@ -62,10 +77,11 @@ def test_export_formats(tmp_path) -> None:  # type: ignore[no-untyped-def]
 def test_export_formats_preserve_special_characters(tmp_path) -> None:  # type: ignore[no-untyped-def]
     storage = StorageService(tmp_path / "special.sqlite3")
     service = VersionService(storage)
+    owner_id = storage.create_user("owner", "hash-1").id
     prompt = '生成 CSV 报告，包含逗号、"引号" 和\n换行'
     analysis = Optimizer().optimize(prompt)
-    version_id = service.create(prompt, analysis.optimized_prompt or "", analysis)
-    version = service.get(version_id)
+    version_id = service.create(prompt, analysis.optimized_prompt or "", analysis, owner_id)
+    version = service.get(version_id, owner_id)
     exporter = ExportService()
 
     json_output = json.loads(exporter.render(version, "json"))

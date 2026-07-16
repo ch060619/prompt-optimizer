@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Awaitable, Callable, Generator, Iterator
+import os
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator, Iterator
+from contextlib import asynccontextmanager
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from time import perf_counter
 from uuid import uuid4
@@ -11,6 +14,8 @@ from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request, Re
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import Scope
 
 from prompt_optimizer.core.models import (
     AnalyzeRequest,
@@ -27,13 +32,43 @@ from prompt_optimizer.paths import PROJECT_ROOT
 from prompt_optimizer.providers import ModelProviderError, ModelRequest
 from prompt_optimizer.services import AppServices
 
-services = AppServices()
 logger = logging.getLogger("prompt_optimizer.api")
 
+try:
+    APP_VERSION = version("prompt-optimizer")
+except PackageNotFoundError:
+    APP_VERSION = "3.0.0"
 
-def create_app(app_services: AppServices | None = None) -> FastAPI:
-    current_services = app_services or services
-    app = FastAPI(title="Prompt Optimizer", version="0.1.0")
+
+class SpaStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            normalized_path = scope["path"].lstrip("/")
+            if (
+                exc.status_code != 404
+                or normalized_path.startswith("api/")
+                or Path(normalized_path).suffix
+            ):
+                raise
+            return await super().get_response("index.html", scope)
+
+
+def create_app(
+    app_services: AppServices | None = None,
+    static_dir: Path | None = None,
+) -> FastAPI:
+    current_services = app_services or AppServices()
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        yield
+        current_services.providers.close()
+        if current_services.remote_limiter is not None:
+            current_services.remote_limiter.close()
+
+    app = FastAPI(title="Prompt Optimizer", version=APP_VERSION, lifespan=lifespan)
 
     @app.middleware("http")
     async def request_logging(
@@ -68,12 +103,21 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.get("/health/live")
+    def live() -> dict[str, str]:
+        return {"status": "ok"}
+
+    @app.get("/health/ready")
+    def ready() -> dict[str, str]:
+        current_services.versions.storage._connect().close()
+        return {"status": "ready"}
+
     @app.post("/api/analyze")
     def analyze(request: AnalyzeRequest) -> object:
         try:
             return current_services.analyzer.analyze(request.prompt)
         except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.post("/api/auth/register")
     def register(request: AuthRequest) -> object:
@@ -104,7 +148,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         authorization: str | None = Header(default=None),
     ) -> object:
         try:
-            user = _optional_user(current_services, authorization)
+            user = _user_for_provider(current_services, authorization, request.provider)
             prompt, template = _prepare_prompt(current_services, request)
             return current_services.optimize_and_save(
                 original_prompt=request.prompt,
@@ -116,7 +160,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @app.post("/api/optimize/stream")
     def optimize_stream(
@@ -125,7 +169,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
     ) -> StreamingResponse:
         def events() -> Iterator[str]:
             try:
-                user = _optional_user(current_services, authorization)
+                user = _user_for_provider(current_services, authorization, request.provider)
                 yield _sse("started", {"provider": request.provider})
                 prompt, template = _prepare_prompt(current_services, request)
                 preview = current_services.analyzer.analyze(prompt)
@@ -163,7 +207,10 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             kind="optimize",
             input_json=request.model_dump(mode="json"),
         )
-        background_tasks.add_task(_run_optimize_task, current_services, task.id, user.id, request)
+        if os.getenv("PROMPT_OPTIMIZER_TASK_MODE", "inline") == "inline":
+            background_tasks.add_task(
+                _run_optimize_task, current_services, task.id, user.id, request
+            )
         return TaskCreateResponse(task_id=task.id, status=task.status)
 
     @app.post("/api/tasks/export")
@@ -178,7 +225,8 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             kind="export",
             input_json=request.model_dump(mode="json"),
         )
-        background_tasks.add_task(_run_export_task, current_services, task.id, user.id, request)
+        if os.getenv("PROMPT_OPTIMIZER_TASK_MODE", "inline") == "inline":
+            background_tasks.add_task(_run_export_task, current_services, task.id, user.id, request)
         return TaskCreateResponse(task_id=task.id, status=task.status)
 
     @app.post("/api/tasks/evaluate")
@@ -193,7 +241,10 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             kind="evaluate",
             input_json=request.model_dump(mode="json"),
         )
-        background_tasks.add_task(_run_evaluate_task, current_services, task.id, user.id, request)
+        if os.getenv("PROMPT_OPTIMIZER_TASK_MODE", "inline") == "inline":
+            background_tasks.add_task(
+                _run_evaluate_task, current_services, task.id, user.id, request
+            )
         return TaskCreateResponse(task_id=task.id, status=task.status)
 
     @app.get("/api/tasks/{task_id}")
@@ -228,9 +279,13 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/api/history")
-    def history(authorization: str | None = Header(default=None)) -> object:
+    def history(
+        limit: int = 50,
+        before_id: int | None = None,
+        authorization: str | None = Header(default=None),
+    ) -> object:
         user = _current_user(current_services, authorization)
-        return current_services.versions.list(user.id)
+        return current_services.versions.list(user.id, limit=limit, before_id=before_id)
 
     @app.get("/api/history/{version_id}")
     def version(version_id: int, authorization: str | None = Header(default=None)) -> object:
@@ -264,7 +319,7 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
         media_types = {
             "md": "text/markdown; charset=utf-8",
             "txt": "text/plain; charset=utf-8",
@@ -273,9 +328,9 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         }
         return Response(content=content, media_type=media_types[request.format])
 
-    static_dir = PROJECT_ROOT / "frontend" / "dist"
-    if Path(static_dir).exists():
-        app.mount("/", StaticFiles(directory=static_dir, html=True), name="web")
+    current_static_dir = static_dir or PROJECT_ROOT / "frontend" / "dist"
+    if current_static_dir.exists():
+        app.mount("/", SpaStaticFiles(directory=current_static_dir, html=True), name="web")
 
     return app
 
@@ -304,6 +359,21 @@ def _optional_user(current_services: AppServices, authorization: str | None) -> 
         return current_services.get_optional_user_from_token(authorization)
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+
+def _user_for_provider(
+    current_services: AppServices,
+    authorization: str | None,
+    provider_name: str,
+) -> UserPublic | None:
+    if provider_name != "offline":
+        user = _current_user(current_services, authorization)
+        try:
+            current_services.consume_remote_quota(user.id, provider_name)
+        except ValueError as exc:
+            raise HTTPException(status_code=429, detail=str(exc)) from exc
+        return user
+    return _optional_user(current_services, authorization)
 
 
 def _run_optimize_task(

@@ -29,11 +29,30 @@ class TaskService:
     def get(self, task_id: str, owner_id: int) -> TaskRecord:
         return self.storage.get_task(task_id, owner_id)
 
-    def run(self, task_id: str, owner_id: int, work: Callable[[], dict[str, Any]]) -> None:
-        try:
-            self.storage.update_task(task_id, owner_id, status="running")
-            result = work()
-        except Exception as exc:
-            self.storage.update_task(task_id, owner_id, status="failed", error=str(exc))
+    def claim_next(self) -> TaskRecord | None:
+        return self.storage.claim_next_task()
+
+    def run(
+        self,
+        task_id: str,
+        owner_id: int,
+        work: Callable[[], dict[str, Any]],
+        *,
+        max_attempts: int = 3,
+    ) -> None:
+        last_error: Exception | None = None
+        for _ in range(max(1, max_attempts)):
+            try:
+                self.storage.update_task(task_id, owner_id, status="running")
+                result = work()
+            except Exception as exc:
+                last_error = exc
+                continue
+            self.storage.update_task(task_id, owner_id, status="succeeded", result_json=result)
             return
-        self.storage.update_task(task_id, owner_id, status="succeeded", result_json=result)
+        self.storage.update_task(
+            task_id,
+            owner_id,
+            status="failed",
+            error=str(last_error) if last_error else "任务失败。",
+        )

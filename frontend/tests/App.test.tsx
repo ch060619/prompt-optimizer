@@ -193,7 +193,7 @@ describe("App", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "CREATE ACCOUNT" }));
 
-    expect(await screen.findByText(/Signed in as demo-user/)).toBeInTheDocument();
+    expect(await screen.findByText("ACCOUNT ACTIVE")).toBeInTheDocument();
     expect(sawAuthHeader).toBe(true);
   });
 

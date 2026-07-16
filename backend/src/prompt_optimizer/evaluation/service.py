@@ -50,6 +50,7 @@ class EvaluationService:
                 prompt=case.prompt,
                 template=None,
                 provider_name=provider,
+                owner_id=None,
             )
             latency_ms = int((perf_counter() - started) * 1000)
             rows.append(
@@ -85,6 +86,9 @@ class EvaluationService:
             average_delta = 0.0
         lines = [
             "# Prompt Optimizer 评测报告",
+            "",
+            "> 本报告仅反映规则评分器的启发式变化，不等同于任务成功率或人工质量判断。",
+            "> 生产发布请使用独立盲测集、人工/独立模型裁判和语义保持率复核。",
             "",
             f"数据集：`{dataset.as_posix()}`",
             f"样本数：{len(rows)}",

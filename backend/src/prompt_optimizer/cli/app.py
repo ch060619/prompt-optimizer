@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from time import sleep
 from typing import Annotated
 
 import typer
@@ -20,7 +21,7 @@ app.add_typer(templates_app, name="templates")
 app.add_typer(history_app, name="history")
 
 console = Console()
-services = AppServices()
+services = AppServices(cli_mode=True)
 
 
 @app.command()
@@ -47,6 +48,7 @@ def optimize(
             prompt=prompt,
             template=template,
             provider_name=provider,
+            owner_id=services.cli_owner_id,
         )
     except (ValueError, KeyError) as exc:
         raise typer.BadParameter(str(exc)) from exc
@@ -99,7 +101,7 @@ def list_history() -> None:
     table.add_column("分数")
     table.add_column("原始提示词")
     table.add_column("创建时间")
-    for item in services.versions.list():
+    for item in services.versions.list(services.cli_owner_id or 0):
         table.add_row(
             str(item.id),
             str(item.score),
@@ -116,7 +118,7 @@ def diff_history(
 ) -> None:
     """对比两个版本。"""
     try:
-        result = services.versions.diff(old_id, new_id)
+        result = services.versions.diff(old_id, new_id, services.cli_owner_id or 0)
     except KeyError as exc:
         raise typer.BadParameter(str(exc)) from exc
     console.print(f"分数变化：{result.old_score} -> {result.new_score} ({result.score_delta:+})")
@@ -131,7 +133,7 @@ def export_version(
 ) -> None:
     """导出优化结果。"""
     try:
-        version = services.versions.get(version_id)
+        version = services.versions.get(version_id, services.cli_owner_id or 0)
         content = services.export.render(version, format)
     except (KeyError, ValueError) as exc:
         raise typer.BadParameter(str(exc)) from exc
@@ -165,6 +167,48 @@ def serve(
 ) -> None:
     """启动本地 Web 服务。"""
     uvicorn.run(create_app(), host=host, port=port)
+
+
+@app.command()
+def worker(
+    poll_seconds: Annotated[float, typer.Option("--poll-seconds")] = 1.0,
+    once: Annotated[bool, typer.Option("--once")] = False,
+) -> None:
+    """Run the persistent SQLite task worker."""
+    from prompt_optimizer.api.app import _run_evaluate_task, _run_export_task, _run_optimize_task
+    from prompt_optimizer.core.models import EvaluateTaskRequest, ExportRequest, OptimizeRequest
+    worker_services = AppServices()
+
+    while True:
+        task = worker_services.tasks.claim_next()
+        if task is None:
+            if once:
+                return
+            sleep(max(0.1, poll_seconds))
+            continue
+        if task.kind == "optimize":
+            _run_optimize_task(
+                worker_services,
+                task.id,
+                task.owner_id,
+                OptimizeRequest.model_validate(task.input_json),
+            )
+        elif task.kind == "export":
+            _run_export_task(
+                worker_services,
+                task.id,
+                task.owner_id,
+                ExportRequest.model_validate(task.input_json),
+            )
+        else:
+            _run_evaluate_task(
+                worker_services,
+                task.id,
+                task.owner_id,
+                EvaluateTaskRequest.model_validate(task.input_json),
+            )
+        if once:
+            return
 
 
 def _print_analysis(analysis: PromptAnalysis) -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
 
 from prompt_optimizer.paths import DATA_ROOT
@@ -61,7 +62,7 @@ def test_template_files_are_complete_unique_and_renderable() -> None:
                 assert "{" + variable + "}" in item["template"]
 
 
-def test_template_render_replaces_known_variables_and_keeps_missing_placeholders() -> None:
+def test_template_render_replaces_known_variables_and_rejects_missing_variables() -> None:
     manager = TemplateManager()
 
     rendered = manager.render(
@@ -72,9 +73,8 @@ def test_template_render_replaces_known_variables_and_keeps_missing_placeholders
     assert "版本导出" in rendered
     assert "保持离线运行" in rendered
 
-    rendered_with_missing = manager.render("tech-code-review", {"language": "TypeScript"})
-    assert "TypeScript" in rendered_with_missing
-    assert "{focus}" in rendered_with_missing
+    with pytest.raises(ValueError, match="focus"):
+        manager.render("tech-code-review", {"language": "TypeScript"})
 
 
 def test_evaluation_dataset_is_complete() -> None:

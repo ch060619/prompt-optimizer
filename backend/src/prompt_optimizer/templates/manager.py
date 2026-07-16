@@ -31,9 +31,20 @@ class TemplateManager:
 
     def render(self, template_id: str, variables: dict[str, str]) -> str:
         template = self.get(template_id)
+        expected = set(template.variables)
+        provided = set(variables)
+        missing = sorted(expected - provided)
+        extra = sorted(provided - expected)
+        if missing or extra:
+            details = []
+            if missing:
+                details.append(f"缺少变量：{', '.join(missing)}")
+            if extra:
+                details.append(f"未知变量：{', '.join(extra)}")
+            raise ValueError("；".join(details))
         content = template.template
         for name in template.variables:
-            content = content.replace("{" + name + "}", variables.get(name, f"{{{name}}}"))
+            content = content.replace("{" + name + "}", variables[name])
         return content
 
     def _load(self) -> list[PromptTemplate]:
@@ -46,4 +57,3 @@ class TemplateManager:
             templates.extend(PromptTemplate(**item) for item in payload["templates"])
         self._templates = templates
         return templates
-

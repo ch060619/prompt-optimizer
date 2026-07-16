@@ -26,7 +26,8 @@ Prompt Optimizer 使用前后端分离架构，但所有能力都面向本地运
 5. `VersionService` 将结果保存到 SQLite。
 6. 用户可查询历史、对比版本或导出结果。
 
-## 本地运行原则
+## 运行与安全边界
 
-首版不接入任何远程模型或云服务。所有规则、模板和历史数据都在本地处理，保证可离线使用。
+离线 Provider 始终可用；远程 Provider 通过环境变量配置，并要求已认证用户。生产环境必须设置 `PROMPT_OPTIMIZER_ENV=production` 和随机的 `PROMPT_OPTIMIZER_JWT_SECRET`（至少 32 字节）。
 
+Docker 将 SQLite 数据保存到 `/data/prompt_optimizer.sqlite3`，宿主机应挂载命名卷并定期备份。跨实例部署需要在网关或共享 Redis 中提供限流与配额计量；单个应用进程的内存计数不作为分布式限流。

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import base64
 from collections.abc import Iterator
 from datetime import UTC, datetime
+from hashlib import pbkdf2_hmac
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from pytest import fixture
+from pytest import fixture, raises
 
 from prompt_optimizer.api.app import create_app
+from prompt_optimizer.auth.service import AuthError, AuthService
 from prompt_optimizer.core.models import UserPublic
 from prompt_optimizer.export.service import ExportService
 from prompt_optimizer.providers import (
@@ -247,9 +250,14 @@ def test_api_optimize_falls_back_to_offline_provider(tmp_path: Path) -> None:
         },
     )
     with TestClient(create_app(services)) as test_client:
+        token = test_client.post(
+            "/api/auth/register",
+            json={"username": "fallback-user", "password": "secret123"},
+        ).json()["access_token"]
         response = test_client.post(
             "/api/optimize",
             json={"prompt": "帮我写销售话术", "provider": "openai"},
+            headers={"Authorization": f"Bearer {token}"},
         )
 
     assert response.status_code == 200
@@ -287,10 +295,15 @@ def test_api_optimize_stream_can_use_provider_chunks(tmp_path: Path) -> None:
         },
     )
     with TestClient(create_app(services)) as test_client:
+        token = test_client.post(
+            "/api/auth/register",
+            json={"username": "stream-user", "password": "secret123"},
+        ).json()["access_token"]
         with test_client.stream(
             "POST",
             "/api/optimize/stream",
             json={"prompt": "帮我写销售话术", "provider": "openai"},
+            headers={"Authorization": f"Bearer {token}"},
         ) as response:
             body = "".join(response.iter_text())
 
@@ -298,6 +311,66 @@ def test_api_optimize_stream_can_use_provider_chunks(tmp_path: Path) -> None:
     assert 'data: {"text": "流式"}' in body
     assert 'data: {"text": "优化"}' in body
     assert '"provider_used": "openai"' in body
+
+
+def test_api_rejects_remote_provider_without_login(client: TestClient) -> None:
+    response = client.post(
+        "/api/optimize",
+        json={"prompt": "帮我写销售话术", "provider": "openai"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_production_requires_a_strong_jwt_secret(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("PROMPT_OPTIMIZER_ENV", "production")
+    monkeypatch.delenv("PROMPT_OPTIMIZER_JWT_SECRET", raising=False)
+    with raises(AuthError, match="PROMPT_OPTIMIZER_JWT_SECRET"):
+        AuthService()
+
+    monkeypatch.setenv("PROMPT_OPTIMIZER_JWT_SECRET", "too-short")
+    with raises(AuthError, match="至少为 32 字节"):
+        AuthService()
+
+
+def test_login_rehashes_legacy_password(tmp_path: Path) -> None:
+    salt = "legacy-salt"
+    digest = pbkdf2_hmac("sha256", b"secret123", salt.encode("utf-8"), 120_000)
+    legacy_hash = f"{salt}${base64.urlsafe_b64encode(digest).decode('ascii')}"
+    services = AppServices()
+    storage = StorageService(tmp_path / "legacy.sqlite3")
+    services.versions = VersionService(storage)
+    storage.create_user("legacy", legacy_hash)
+
+    with TestClient(create_app(services)) as test_client:
+        response = test_client.post(
+            "/api/auth/login",
+            json={"username": "legacy", "password": "secret123"},
+        )
+
+    stored_user = storage.get_user_by_username("legacy")
+    assert response.status_code == 200
+    assert stored_user is not None
+    assert stored_user[1].startswith("$argon2id$")
+
+def test_spa_deep_links_return_index_html(tmp_path: Path) -> None:
+    static_dir = tmp_path / "dist"
+    static_dir.mkdir()
+    (static_dir / "index.html").write_text("<main>Prompt Optimizer</main>", encoding="utf-8")
+    services = AppServices()
+    services.versions = VersionService(StorageService(tmp_path / "spa.sqlite3"))
+
+    with TestClient(create_app(services, static_dir)) as test_client:
+        workspace_response = test_client.get("/workspace")
+        login_response = test_client.get("/login")
+        api_response = test_client.get("/api/not-found")
+        asset_response = test_client.get("/missing.js")
+
+    assert workspace_response.status_code == 200
+    assert login_response.status_code == 200
+    assert "Prompt Optimizer" in workspace_response.text
+    assert api_response.status_code == 404
+    assert asset_response.status_code == 404
 
 
 class FailingProvider:

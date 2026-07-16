@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
@@ -19,13 +20,13 @@ from prompt_optimizer.core.models import (
 from prompt_optimizer.paths import default_db_path
 
 DEMO_USERNAME = "demo"
-DEMO_PASSWORD_HASH = AuthService().hash_password("demo-password", "demo-salt")
 DEFAULT_PROJECT_NAME = "默认项目"
 
 
 class StorageService:
-    def __init__(self, db_path: Path | None = None) -> None:
+    def __init__(self, db_path: Path | None = None, *, create_demo_user: bool = False) -> None:
         self.db_path = db_path or default_db_path()
+        self.create_demo_user = create_demo_user
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
@@ -66,10 +67,17 @@ class StorageService:
                 raise RuntimeError("保存版本失败。")
             return int(version_id)
 
-    def list_versions(self, owner_id: int = 1) -> list[VersionSummary]:
+    def list_versions(
+        self, owner_id: int = 1, *, limit: int = 50, before_id: int | None = None
+    ) -> list[VersionSummary]:
+        limit = min(max(limit, 1), 100)
+        cursor_clause = "AND id < ?" if before_id is not None else ""
+        params: tuple[object, ...] = (
+            (owner_id, before_id, limit) if before_id is not None else (owner_id, limit)
+        )
         with self._connect() as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT
                     id,
                     owner_id,
@@ -79,10 +87,11 @@ class StorageService:
                     analysis_json,
                     created_at
                 FROM prompt_versions
-                WHERE owner_id = ?
+                WHERE owner_id = ? {cursor_clause}
                 ORDER BY id DESC
+                LIMIT ?
                 """,
-                (owner_id,),
+                params,
             ).fetchall()
         return [self._summary_from_row(row) for row in rows]
 
@@ -152,6 +161,38 @@ class StorageService:
             row["password_hash"],
         )
 
+    def update_password_hash(self, user_id: int, password_hash: str) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                "UPDATE users SET password_hash = ? WHERE id = ?",
+                (password_hash, user_id),
+            )
+
+    def consume_provider_quota(self, owner_id: int, provider: str) -> None:
+        daily_limit = int(os.getenv("PROMPT_OPTIMIZER_REMOTE_DAILY_QUOTA", "100"))
+        day = datetime.now(UTC).date().isoformat()
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT count FROM provider_usage WHERE owner_id = ? AND provider = ? AND day = ?",
+                (owner_id, provider, day),
+            ).fetchone()
+            count = int(row["count"]) if row else 0
+            if count >= daily_limit:
+                raise ValueError("已达到远程 Provider 今日配额。")
+            if row:
+                connection.execute(
+                    "UPDATE provider_usage SET count = count + 1 "
+                    "WHERE owner_id = ? AND provider = ? AND day = ?",
+                    (owner_id, provider, day),
+                )
+            else:
+                connection.execute(
+                    "INSERT INTO provider_usage(owner_id, provider, day, count) "
+                    "VALUES (?, ?, ?, 1)",
+                    (owner_id, provider, day),
+                )
+
     def get_user(self, user_id: int) -> UserPublic:
         with self._connect() as connection:
             row = connection.execute(
@@ -174,7 +215,7 @@ class StorageService:
         found = self.get_user_by_username(DEMO_USERNAME)
         if found:
             return found[0]
-        return self.create_user(DEMO_USERNAME, DEMO_PASSWORD_HASH)
+        return self.create_user(DEMO_USERNAME, AuthService().hash_password("demo-password"))
 
     def ensure_default_project(self, owner_id: int) -> ProjectSpace:
         with self._connect() as connection:
@@ -337,13 +378,35 @@ class StorageService:
             updated_at=datetime.fromisoformat(row["updated_at"]),
         )
 
+    def claim_next_task(self) -> TaskRecord | None:
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT id, owner_id FROM tasks WHERE status = 'queued' ORDER BY created_at LIMIT 1"
+            ).fetchone()
+            if row is None:
+                return None
+            connection.execute(
+                "UPDATE tasks SET status = 'running', updated_at = ? "
+                "WHERE id = ? AND status = 'queued'",
+                (datetime.now(UTC).isoformat(), row["id"]),
+            )
+        return self.get_task(row["id"], int(row["owner_id"]))
+
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.db_path)
+        connection = sqlite3.connect(self.db_path, timeout=10)
         connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA journal_mode = WAL")
+        connection.execute("PRAGMA busy_timeout = 10000")
         return connection
 
     def _init_db(self) -> None:
         with self._connect() as connection:
+            connection.execute(
+                "CREATE TABLE IF NOT EXISTS schema_migrations "
+                "(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)"
+            )
             connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS users (
@@ -425,17 +488,42 @@ class StorageService:
                 )
                 """
             )
-        demo = self.ensure_demo_user()
-        default_project = self.ensure_default_project(demo.id)
-        with self._connect() as connection:
             connection.execute(
                 """
-                UPDATE prompt_versions
-                SET owner_id = ?, project_id = COALESCE(project_id, ?)
-                WHERE owner_id IS NULL OR owner_id = 1
-                """,
-                (demo.id, default_project.id),
+                CREATE TABLE IF NOT EXISTS provider_usage (
+                    owner_id INTEGER NOT NULL,
+                    provider TEXT NOT NULL,
+                    day TEXT NOT NULL,
+                    count INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(owner_id, provider, day),
+                    FOREIGN KEY(owner_id) REFERENCES users(id)
+                )
+                """
             )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS idx_prompt_versions_owner_id_id "
+                "ON prompt_versions(owner_id, id DESC)"
+            )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS idx_tasks_owner_id_updated_at "
+                "ON tasks(owner_id, updated_at DESC)"
+            )
+            connection.execute(
+                "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (1, ?)",
+                (datetime.now(UTC).isoformat(),),
+            )
+        if self.create_demo_user:
+            demo = self.ensure_demo_user()
+            default_project = self.ensure_default_project(demo.id)
+            with self._connect() as connection:
+                connection.execute(
+                    """
+                    UPDATE prompt_versions
+                    SET owner_id = ?, project_id = COALESCE(project_id, ?)
+                    WHERE owner_id IS NULL OR owner_id = 1
+                    """,
+                    (demo.id, default_project.id),
+                )
 
     @staticmethod
     def _ensure_column(

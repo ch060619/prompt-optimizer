@@ -1,4 +1,6 @@
 .venv/
+.runtime/
+frontend/.openapi.json
 __pycache__/
 *.py[cod]
 .pytest_cache/

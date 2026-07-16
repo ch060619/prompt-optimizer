@@ -26,6 +26,12 @@ class ProviderRegistry:
         self._providers[name] = provider
         return provider
 
+    def close(self) -> None:
+        for provider in self._providers.values():
+            client = getattr(provider, "client", None)
+            if client is not None:
+                client.close()
+
     @staticmethod
     def _config_from_env(name: str) -> ProviderConfig:
         prefix = f"PROMPT_OPTIMIZER_{name.upper()}"

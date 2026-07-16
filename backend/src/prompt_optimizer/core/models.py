@@ -94,7 +94,7 @@ class AnalyzeRequest(BaseModel):
 class OptimizeRequest(BaseModel):
     prompt: str
     template_id: str | None = None
-    variables: dict[str, Any] = Field(default_factory=dict)
+    variables: dict[str, str] = Field(default_factory=dict)
     provider: ModelProviderName = "offline"
 
 

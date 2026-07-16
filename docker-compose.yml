@@ -1,0 +1,38 @@
+services:
+  api:
+    build: .
+    environment:
+      PROMPT_OPTIMIZER_ENV: production
+      PROMPT_OPTIMIZER_JWT_SECRET: ${PROMPT_OPTIMIZER_JWT_SECRET:?set a random 32-byte secret}
+      PROMPT_OPTIMIZER_TASK_MODE: worker
+      PROMPT_OPTIMIZER_DB: /data/prompt_optimizer.sqlite3
+      PROMPT_OPTIMIZER_REDIS_URL: redis://redis:6379/0
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - prompt-optimizer-data:/data
+    depends_on:
+      - redis
+  worker:
+    build: .
+    command: ["prompt-opt", "worker"]
+    environment:
+      PROMPT_OPTIMIZER_ENV: production
+      PROMPT_OPTIMIZER_JWT_SECRET: ${PROMPT_OPTIMIZER_JWT_SECRET:?set a random 32-byte secret}
+      PROMPT_OPTIMIZER_TASK_MODE: worker
+      PROMPT_OPTIMIZER_DB: /data/prompt_optimizer.sqlite3
+      PROMPT_OPTIMIZER_REDIS_URL: redis://redis:6379/0
+    volumes:
+      - prompt-optimizer-data:/data
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.2-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - prompt-optimizer-redis:/data
+
+volumes:
+  prompt-optimizer-data:
+  prompt-optimizer-redis:

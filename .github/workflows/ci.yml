@@ -2,11 +2,31 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
+    tags: ["v*.*.*"]
   pull_request:
-    branches: [main]
+    branches: [main, "release/**"]
 
 jobs:
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python dependency audit
+        run: |
+          python -m pip install pip-audit
+          pip-audit -r <(python -c "import tomllib; d=tomllib.load(open('backend/pyproject.toml','rb')); print('\\n'.join(d['project']['dependencies']))")
+      - name: Frontend dependency audit
+        working-directory: frontend
+        run: npm ci && npm audit --audit-level=high
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+
   backend:
     runs-on: ubuntu-latest
     steps:
@@ -21,9 +41,9 @@ jobs:
       - name: Ruff
         run: ruff check backend
       - name: Mypy
-        run: mypy backend/src
+        run: mypy --config-file backend/pyproject.toml backend/src
       - name: Pytest
-        run: pytest --cov=prompt_optimizer --cov-report=term-missing backend/tests
+        run: pytest --cov=prompt_optimizer --cov-report=term-missing --cov-fail-under=80 backend/tests
 
   frontend:
     runs-on: ubuntu-latest
@@ -36,7 +56,12 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install frontend
         working-directory: frontend
-        run: npm install
+        run: npm ci
+      - name: Generate OpenAPI client
+        working-directory: frontend
+        run: npm run generate:api
+      - name: Check generated OpenAPI client
+        run: git diff --exit-code -- frontend/src/generated/api.ts
       - name: Lint
         working-directory: frontend
         run: npm run lint
@@ -46,3 +71,16 @@ jobs:
       - name: Build
         working-directory: frontend
         run: npm run build
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build --tag prompt-optimizer:ci .
+      - name: Scan image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: prompt-optimizer:ci
+          severity: CRITICAL,HIGH
+          exit-code: "1"

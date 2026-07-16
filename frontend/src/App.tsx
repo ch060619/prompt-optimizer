@@ -12,6 +12,7 @@ import type {
   VersionSummary
 } from "./types";
 import { SiteShell } from "./components/SiteShell";
+import { pollTask } from "./hooks/useTaskPolling";
 import { AuthPage, SiteRoute } from "./marketing";
 
 const categories = ["all", "tech", "creative", "business", "education", "general"];
@@ -25,7 +26,12 @@ const categoryLabels: Record<string, string> = {
 };
 
 export function App() {
-  const pathname = window.location.pathname;
+  const [pathname, setPathname] = useState(window.location.pathname);
+  useEffect(() => {
+    const onPopState = () => setPathname(window.location.pathname);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
   const isWorkspaceRoute = pathname === "/workspace";
   const authMode = pathname === "/register" ? "register" : pathname === "/login" ? "login" : null;
   const showSharedRabbit = !isWorkspaceRoute && pathname !== "/" && !authMode;
@@ -45,6 +51,7 @@ export function App() {
   const [username, setUsername] = useState("demo-user");
   const [password, setPassword] = useState("demo-password");
   const [task, setTask] = useState<TaskRecord | null>(null);
+  const [welcome, setWelcome] = useState<string | null>(null);
 
   const visibleTemplates = useMemo(() => templates, [templates]);
 
@@ -54,7 +61,10 @@ export function App() {
     }
     void withLoading(async () => {
       if (api.getToken()) {
-        setUser(await api.me());
+        const currentUser = await api.me();
+        if (currentUser && typeof currentUser.username === "string") {
+          setUser(currentUser);
+        }
       }
       await loadTemplates(category);
       if (api.getToken()) {
@@ -73,9 +83,11 @@ export function App() {
           : await api.register(username, password);
       api.setToken(result.access_token);
       setUser(result.user);
+      setWelcome(result.user.username);
       await loadHistory();
       if (authMode) {
-        window.location.assign("/workspace");
+        window.history.pushState({}, "", "/workspace");
+        setPathname("/workspace");
       }
     });
   }
@@ -84,7 +96,8 @@ export function App() {
     api.setToken(null);
     setUser(null);
     setHistory([]);
-    window.location.assign("/");
+    window.history.pushState({}, "", "/");
+    setPathname("/");
   }
 
   async function loadTemplates(nextCategory: string) {
@@ -158,12 +171,9 @@ export function App() {
   async function runOptimizeTask() {
     await withLoading(async () => {
       const created = await api.createOptimizeTask(prompt, selectedTemplate);
-      let current = await api.task(created.task_id);
-      setTask(current);
-      for (let attempt = 0; attempt < 5 && ["queued", "running"].includes(current.status); attempt += 1) {
-        await new Promise((resolve) => window.setTimeout(resolve, 250));
-        current = await api.task(created.task_id);
-        setTask(current);
+      const current = await pollTask(api.task, created.task_id, setTask);
+      if (["queued", "running"].includes(current.status)) {
+        throw new Error("后台任务仍在运行，请稍后查看任务状态。");
       }
       if (current.status === "succeeded") {
         applyOptimizeResult(await api.taskResult(created.task_id));
@@ -257,6 +267,7 @@ export function App() {
         {user ? (
           <div className="workspace-account">
             <strong>{user.username}</strong>
+            <span>Signed in as {user.username}</span>
             <span>ACCOUNT ACTIVE</span>
           </div>
         ) : (
@@ -302,6 +313,7 @@ export function App() {
       </aside>
 
       <section className="workspace">
+        {welcome ? <p className="auth-success">Signed in as {welcome}</p> : null}
         <div className="toolbar">
           <button onClick={runAnalyze} disabled={loading}>分析</button>
           <button className="primary" onClick={runOptimize} disabled={loading}>{user ? "优化并保存" : "优化"}</button>

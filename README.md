@@ -1,10 +1,10 @@
 # Prompt Optimizer 提示词优化工具
 
-Prompt Optimizer 是一个离线优先的提示词分析、优化、模板管理、版本对比与导出工具。项目包含 Python 后端核心库、命令行界面、本地 FastAPI 服务和 React Web 工作台，不依赖外部 AI API，适合本地使用和开源二次开发。
+Prompt Optimizer 是一个离线优先的提示词分析、优化、模板管理、版本对比与导出工具。项目包含 Python 后端核心库、命令行界面、本地 FastAPI 服务和 React Web 工作台，并可选接入远程模型 Provider。
 
-## V2.0 版本状态
+## V3.0 版本状态
 
-V2.0 聚焦 AI 工程化能力补强：模型 Provider 抽象、SSE 流式优化、多用户归属、后台任务、评测集、结构化日志、Docker 构建和 CI 检查。
+V3.0 聚焦 AI 工程化能力补强：模型 Provider 抽象、SSE 流式优化、多用户归属、后台任务、评测集、结构化日志、Docker 构建和 CI 检查。
 
 本次发布保留旧版本在 `main` 分支，V2.0 使用 `release/v2.0` 分支保存发布线，并用 `v2.0` Git tag 标记可复现的版本快照。GitHub Release 基于 `v2.0` tag 创建，而不是只依赖分支。
 
@@ -50,7 +50,12 @@ start.bat local
 start.bat docker
 ```
 
-`start.bat docker` 会检查 Docker Desktop 是否运行，构建 `prompt-optimizer:v2.0` 和 `prompt-optimizer:local` 镜像，并以前台容器方式启动服务。
+`start.bat docker` 会检查 Docker Desktop 是否运行，构建 `prompt-optimizer:v2.0` 和 `prompt-optimizer:local` 镜像，并以前台容器方式启动服务。Docker 启动前必须设置随机的、至少 32 字节的 JWT 密钥；数据库保存在 Docker 命名卷 `prompt-optimizer-data` 中。
+
+```bat
+set PROMPT_OPTIMIZER_JWT_SECRET=<use-a-random-secret-of-at-least-32-bytes>
+start.bat docker
+```
 
 ## 安装步骤
 
@@ -156,7 +161,19 @@ Docker 验证：
 
 ```bash
 docker build -t prompt-optimizer:local .
-docker run --rm --name prompt-optimizer-smoke -p 8000:8000 prompt-optimizer:local
+docker run --name prompt-optimizer-smoke -p 127.0.0.1:8000:8000 -v prompt-optimizer-data:/data -e PROMPT_OPTIMIZER_JWT_SECRET prompt-optimizer:local
+```
+
+数据库备份与恢复：
+
+```powershell
+$env:PROMPT_OPTIMIZER_DB = "C:\data\prompt_optimizer.sqlite3"
+pwsh -File scripts/backup_db.ps1 -Output C:\backup\prompt-optimizer.sqlite3
+pwsh -File scripts/restore_db.ps1 -Backup C:\backup\prompt-optimizer.sqlite3
+
+# Online SQLite backup, safe while WAL is active:
+python scripts/backup_db.py --database C:\data\prompt_optimizer.sqlite3 --output C:\backup\prompt-optimizer.sqlite3
+python scripts/restore_db.py --backup C:\backup\prompt-optimizer.sqlite3 --database C:\data\prompt_optimizer.sqlite3
 ```
 
 ## 贡献指南

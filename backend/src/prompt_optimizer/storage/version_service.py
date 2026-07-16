@@ -30,8 +30,10 @@ class VersionService:
             project_id,
         )
 
-    def list(self, owner_id: int = 1) -> list[VersionSummary]:
-        return self.storage.list_versions(owner_id)
+    def list(
+        self, owner_id: int = 1, *, limit: int = 50, before_id: int | None = None
+    ) -> list[VersionSummary]:
+        return self.storage.list_versions(owner_id, limit=limit, before_id=before_id)
 
     def get(self, version_id: int, owner_id: int = 1) -> PromptVersion:
         return self.storage.get_version(version_id, owner_id)
