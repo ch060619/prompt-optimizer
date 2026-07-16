@@ -1,0 +1,61 @@
+schema_version: 1
+rc_id: RC-031
+captured_at: "2026-07-17"
+weights_downloaded: false
+default_packaging_policy: no-model-weights-in-installer
+runner_sources:
+  - id: ollama
+    repo: ollama/ollama
+    default_branch: main
+    head_sha: 03d61e19255158fc90552537aaec843b3867c2e1
+    license_spdx: MIT
+    license_url: https://github.com/ollama/ollama/blob/03d61e19255158fc90552537aaec843b3867c2e1/LICENSE
+    license_status: verified-200
+    use_decision: adapter-only-license-review-required
+  - id: llama-cpp
+    repo: ggml-org/llama.cpp
+    default_branch: master
+    head_sha: e8f19cc0ad70a243c8012bf17b4be601abfc8ea2
+    license_spdx: MIT
+    license_url: https://github.com/ggml-org/llama.cpp/blob/e8f19cc0ad70a243c8012bf17b4be601abfc8ea2/LICENSE
+    license_status: verified-200
+    use_decision: adapter-only-license-review-required
+model_sources:
+  - id: gemma-3-1b-it
+    model_id: google/gemma-3-1b-it
+    source_url: https://huggingface.co/google/gemma-3-1b-it
+    fixed_sha: dcc83ea841ab6100d6b47a070329e1ba4cf78752
+    model_license: gemma
+    license_url: https://ai.google.dev/gemma/terms
+    license_status: metadata-gated-manual-confirmation
+    model_card_status: verified-200-metadata-only
+    commit_page_status: pending-401
+    gated: manual
+    redistribution: user-confirmation-required
+    packaging: prohibited-by-default
+    file_metadata:
+      - path: model.safetensors
+        sha256: 3d4ef8d71c14db7e448a09ebe891cfb6bf32c57a9b44499ae0d1c098e48516b6
+        size_bytes: 1999811208
+      - path: tokenizer.json
+        sha256: 4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795
+        size_bytes: 33384568
+      - path: tokenizer.model
+        sha256: 1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c
+        size_bytes: 4689074
+  - id: qwen2.5-coder-1.5b-instruct
+    model_id: Qwen/Qwen2.5-Coder-1.5B-Instruct
+    source_url: https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct
+    fixed_sha: 2e1fd397ee46e1388853d2af2c993145b0f1098a
+    model_license: Apache-2.0
+    license_url: https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct/blob/2e1fd397ee46e1388853d2af2c993145b0f1098a/LICENSE
+    license_status: verified-200
+    model_card_status: verified-200
+    commit_page_status: verified-200
+    gated: false
+    redistribution: on-demand-after-license-display
+    packaging: prohibited-by-default
+    file_metadata:
+      - path: model.safetensors
+        sha256: c1b9b30e907950516ba3c646bdf570d8084c25a6410a0cdca80cf04b11bc13a8
+        size_bytes: 3087467144

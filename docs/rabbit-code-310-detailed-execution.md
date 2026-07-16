@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 26 |
-| 最后完成项 | RC-030 |
-| 下一待执行项 | RC-031 |
+| 已完成项数 | 27 |
+| 最后完成项 | RC-031 |
+| 下一待执行项 | RC-032 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-030 已提交 source-map clean-room 决策记录；M0 保持 blocked，技术/合规/法律签署待人工确认，准备执行 RC-031 |
-| 当前阻塞 | RC-030 M0 尚无技术负责人、合规负责人和合资格法律顾问签署；按会话规则记录待确认，不阻塞 RC-031 |
-| 最近一次完整验证 | 2026-07-17：进度计数 Done=26/Pending=284/Total=310/UniqueIds=310；M0 决策校验为 blocked；Anthropic 监控、source-map denylist 138 个输入零命中、专有内容与 RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 04:48:55 +08:00 |
+| 当前状态 | RC-031 已提交运行器/模型许可证 manifest、文件哈希和安装打包政策；Gemma gated 条款待确认，准备执行 RC-032 |
+| 当前阻塞 | RC-031 Gemma 模型卡/固定提交需要 gated 权限确认；权重未下载、不打包，不阻塞 RC-032 |
+| 最近一次完整验证 | 待完成 RC-031 状态记录后的进度计数与追踪检查 |
+| 最近更新时间 | 2026-07-17 04:52:51 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -60,6 +60,7 @@
 | RC-028 | 2026-07-17 04:41:07 +08:00 | `ed210b1` | PASS：两份 MIT 分析资料的固定 LICENSE/README 状态、代码围栏/外链计数和逆向/上游自述已审计；两份均标记 `restricted`；校验器与 Ruff 通过 | `docs/evidence/RC-028/README.md` | 未访问源码正文；MIT 元数据不批准还原/分析内容复用；只允许独立重新推导高层问题域 |
 | RC-029 | 2026-07-17 04:44:29 +08:00 | `0180f13` | PASS：季度监控登记、复核日志、GitHub Actions workflow 和 live API 检查已建立；Claude Code/SDK HEAD、分支、license、归档/禁用状态与基线一致；静态/Ruff 通过 | `docs/evidence/RC-029/README.md` | 条款/文档 URL 未作未经验证结论；任何变化要求新 ADR，复核前保持限制 |
 | RC-030 | 2026-07-17 04:47:16 +08:00 | `6483383` | SUBMITTED WITH PENDING CONFIRMATION：source-map clean-room 决策记录汇总事实、风险、临时允许/禁止范围、角色隔离、监控和 M0 触发条件；M0 校验为 blocked；未伪造签署 | `docs/evidence/RC-030/README.md` | 技术/合规/法律签署和决策编号待人工确认；在批准前默认禁止 source-map 正文访问、使用和分发 |
+| RC-031 | 2026-07-17 04:52:51 +08:00 | `8e5ab1f` | SUBMITTED WITH PENDING CONFIRMATION：Ollama/llama.cpp 固定 MIT 运行器版本；Gemma/Qwen 固定 HF commit、模型许可、gated 状态和文件哈希/大小；manifest 校验与 Ruff 通过；权重未下载 | `docs/evidence/RC-031/README.md` | Gemma manual-gated 条款/模型卡正文待确认；默认不打包模型权重，下载前必须 UI 确认并校验哈希 |
 
 ### 进度记录一致性检查
 
@@ -2398,7 +2399,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-029** 若 Anthropic 后续正式开源、明确授权或发布可复用规范，再通过 ADR 重新评估复用范围；在此之前默认结论为“可研究事实，不可直接复用代码”。
 - [x] **RC-030** 输出《Claude Code source map 事件调研与 Rabbit Code clean-room 决策记录》，作为 M0 和开源发布审计的必需材料。
 
-- [ ] **RC-031** 调研 Gemma、Qwen2.5-Coder、Ollama、llama.cpp、Hugging Face 模型文件的代码许可证、模型许可证、再分发限制、署名和用户确认要求。
+- [x] **RC-031** 调研 Gemma、Qwen2.5-Coder、Ollama、llama.cpp、Hugging Face 模型文件的代码许可证、模型许可证、再分发限制、署名和用户确认要求。
 - [ ] **RC-032** 为所有拟复用实现建立“来源、许可证、复用方式、修改内容、NOTICE 要求、替代方案”清单。
 - [ ] **RC-033** 对无许可、商业条款或来源不清晰的代码采用 clean-room 行为重实现，保留设计记录，不复制代码、提示词、隐藏协议或受保护资产。
 - [ ] **RC-034** 对 Rabbit Code、兔兔形象、包名、域名、GitHub 组织名和应用商店名称进行商标、命名冲突与可发布性检查。

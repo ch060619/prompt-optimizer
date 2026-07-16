@@ -44,6 +44,9 @@ jobs:
       # RC ID: RC-030
       - name: M0 clean-room decision record
         run: python scripts/check_m0_clean_room_decision.py
+      # RC ID: RC-031
+      - name: Local-model license manifest
+        run: python scripts/check_local_model_license_manifest.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy
