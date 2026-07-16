@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 from pytest import fixture
 
 from prompt_optimizer.api.app import create_app
+from prompt_optimizer.core.models import UserPublic
 from prompt_optimizer.export.service import ExportService
 from prompt_optimizer.providers import (
     ModelProviderError,
@@ -141,6 +143,26 @@ def test_api_rejects_invalid_auth_header(client: TestClient) -> None:
     response = client.get("/api/auth/me", headers={"Authorization": "bad-token"})
 
     assert response.status_code == 401
+
+
+def test_api_rejects_token_for_missing_user(tmp_path: Path) -> None:
+    services = AppServices()
+    services.versions = VersionService(StorageService(tmp_path / "missing-user.sqlite3"))
+    token = services.auth.create_token(
+        UserPublic(id=999, username="missing-user", created_at=datetime.now(UTC))
+    )
+    headers = {"Authorization": f"Bearer {token}"}
+
+    with TestClient(create_app(services)) as test_client:
+        me_response = test_client.get("/api/auth/me", headers=headers)
+        optimize_response = test_client.post(
+            "/api/optimize",
+            json={"prompt": "帮我写销售话术"},
+            headers=headers,
+        )
+
+    assert me_response.status_code == 401
+    assert optimize_response.status_code == 401
 
 
 def test_api_optimize_task_succeeds(client: TestClient) -> None:

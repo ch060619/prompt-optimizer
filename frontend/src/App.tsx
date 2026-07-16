@@ -304,7 +304,7 @@ export function App() {
       <section className="workspace">
         <div className="toolbar">
           <button onClick={runAnalyze} disabled={loading}>分析</button>
-          <button className="primary" onClick={runOptimize} disabled={loading}>优化并保存</button>
+          <button className="primary" onClick={runOptimize} disabled={loading}>{user ? "优化并保存" : "优化"}</button>
           <button onClick={() => void runStreamOptimize()} disabled={loading}>流式优化</button>
           <button onClick={() => void runOptimizeTask()} disabled={loading || !user}>后台优化</button>
           {["md", "json", "txt", "csv"].map((format) => (

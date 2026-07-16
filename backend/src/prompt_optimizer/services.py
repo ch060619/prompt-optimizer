@@ -54,7 +54,10 @@ class AppServices:
         if not token.startswith("Bearer "):
             raise AuthError("无效 token。")
         token_value = token.removeprefix("Bearer ").strip()
-        return self.versions.storage.get_user(self.auth.read_token(token_value))
+        try:
+            return self.versions.storage.get_user(self.auth.read_token(token_value))
+        except KeyError as exc:
+            raise AuthError("用户不存在。") from exc
 
     def optimize_and_save(
         self,
@@ -63,7 +66,7 @@ class AppServices:
         prompt: str,
         template: PromptTemplate | None,
         provider_name: str = "offline",
-        owner_id: int = 1,
+        owner_id: int | None = 1,
         project_id: int | None = None,
     ) -> OptimizeResponse:
         request = ModelRequest(prompt=prompt, template=template)
@@ -107,7 +110,7 @@ class AppServices:
         fallback_used: bool,
         latency_ms: int,
         error_summary: str | None,
-        owner_id: int = 1,
+        owner_id: int | None = 1,
         project_id: int | None = None,
     ) -> OptimizeResponse:
         analysis: PromptAnalysis = self.analyzer.analyze(optimized_prompt)

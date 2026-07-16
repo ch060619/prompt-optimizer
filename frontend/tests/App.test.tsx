@@ -60,7 +60,7 @@ describe("App", () => {
     stubFetch();
     render(<App />);
     expect(await screen.findByRole("link", { name: "Prompt Optimizer home" })).toBeInTheDocument();
-    expect(screen.getByText("优化并保存")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "优化" })).toBeInTheDocument();
   });
 
   it("renders a dedicated login page", () => {
@@ -130,9 +130,8 @@ describe("App", () => {
           `event: started\ndata: {"provider":"offline"}`,
           `event: analysis\ndata: ${JSON.stringify(analysis)}`,
           `event: chunk\ndata: {"text":"优化后的提示词"}`,
-          `event: saved\ndata: {"version_id":1}`,
           `event: completed\ndata: ${JSON.stringify({
-            version_id: 1,
+            version_id: null,
             analysis: { ...analysis, optimized_prompt: "优化后的提示词" },
             metadata: {
               provider_requested: "offline",
