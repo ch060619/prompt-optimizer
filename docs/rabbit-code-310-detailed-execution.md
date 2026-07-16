@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 3 |
-| 最后完成项 | RC-047 |
-| 下一待执行项 | RC-048 |
+| 已完成项数 | 4 |
+| 最后完成项 | RC-048 |
+| 下一待执行项 | RC-050 |
 | 当前里程碑 | W0：保护现有项目基线，为 M0 准备 |
-| 当前状态 | RC-047 V2 核心黄金回归基线已完成，准备执行 RC-048 |
+| 当前状态 | RC-048 FastAPI 兼容接口与版本化 OpenAPI 契约已完成，准备执行 RC-050 |
 | 当前阻塞 | 无 |
-| 最近一次完整验证 | 2026-07-17：V2 回归 4 passed；后端 43 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 01:39:57 +08:00 |
+| 最近一次完整验证 | 2026-07-17：OpenAPI 36 paths/22 schemas 且 SHA-256 可复现；后端 49 passed；Ruff/Mypy 通过；前端 9 passed、Lint/Build 通过；RC 追踪检查通过 |
+| 最近更新时间 | 2026-07-17 02:04:39 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -37,6 +37,7 @@
 | RC-043 | 2026-07-17 00:59:26 +08:00 | `ed0e098` | PASS：追踪契约 4 passed；后端 36 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-043/README.md` | 309 项待实施；48 个现有代码文件待随对应 RC 建立关联，不阻塞本项 |
 | RC-046 | 2026-07-17 01:20:40 +08:00 | `4429c82` | PASS：sidecar 3 passed；后端 39 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-046/README.md` | Windows 强制终止退出码 1；Docker Engine 未运行；跨平台/生产生命周期留给 RC-057/067 |
 | RC-047 | 2026-07-17 01:39:57 +08:00 | `f009f66` | PASS：V2 回归 4 passed；后端 43 passed；Ruff/Mypy；前端 9 passed、Lint/Build；黄金 SHA-256 可复现 | `docs/evidence/RC-047/README.md` | 基线审批尚未加签名/CODEOWNERS 门禁；既有前端 jsdom 警告保留 |
+| RC-048 | 2026-07-17 02:04:39 +08:00 | `424b135` | PASS：版本化 OpenAPI 36 paths/22 schemas 且 SHA-256 可复现；契约与既有 API 共 49 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-048/README.md` | 旧 `/api/*` 入口仍按兼容期保留；生成客户端与 CI 差异门禁留给 RC-062；既有前端 jsdom 警告保留 |
 
 ### 进度记录一致性检查
 
@@ -2398,7 +2399,7 @@ git diff --exit-code -- frontend\src\generated
 
 - [x] **RC-046** 保留现有 Python 3.12、FastAPI、React、Vite、TypeScript、SQLite、Typer、测试和 Docker 基础，先通过 ADR 决定升级或替换范围。
 - [x] **RC-047** 复用并回归验证现有评分、建议、规则、模板、优化、版本 diff、历史、导出和评测模块。
-- [ ] **RC-048** 复用现有 `/api/analyze`、`/api/optimize`、`/api/optimize/stream`、任务、认证、项目和版本接口的有效能力。
+- [x] **RC-048** 复用现有 `/api/analyze`、`/api/optimize`、`/api/optimize/stream`、任务、认证、项目和版本接口的有效能力。
 - [ ] **RC-049** 将现有仅能基本处理 OpenAI Chat Completions 的通用 HTTP Provider 拆分为协议明确、能力可探测的 Provider Adapter。
 - [ ] **RC-050** 保留 `OfflineRuleProvider` 作为无网络、模型未安装、模型加载失败时的最终可用降级，而不是把它误称为大模型。
 - [ ] **RC-051** 将现有 `prompt-opt` CLI 与 Rabbit Code Agent CLI 的命令空间、配置和存储进行兼容迁移。
