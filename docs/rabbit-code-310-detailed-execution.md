@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 27 |
-| 最后完成项 | RC-031 |
-| 下一待执行项 | RC-032 |
+| 已完成项数 | 28 |
+| 最后完成项 | RC-032 |
+| 下一待执行项 | RC-033 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-031 已提交运行器/模型许可证 manifest、文件哈希和安装打包政策；Gemma gated 条款待确认，准备执行 RC-032 |
-| 当前阻塞 | RC-031 Gemma 模型卡/固定提交需要 gated 权限确认；权重未下载、不打包，不阻塞 RC-032 |
-| 最近一次完整验证 | 2026-07-17：进度计数 Done=27/Pending=283/Total=310/UniqueIds=310；RC-031 manifest 校验通过、权重未下载；M0、source-map denylist 139 个输入零命中、专有内容与 RC 追踪检查通过 |
-| 最近更新时间 | 2026-07-17 04:54:58 +08:00 |
+| 当前状态 | RC-032 已建立第三方登记册、生成 THIRD_PARTY_NOTICES 并完成 manifest 对账；10 个许可证条目待确认，准备执行 RC-033 |
+| 当前阻塞 | RC-032 部分 PyPI license 字段为空、GSAP 为自定义 license；已标记 review-required，不阻塞 RC-033 |
+| 最近一次完整验证 | 待完成 RC-032 状态记录后的进度计数与追踪检查 |
+| 最近更新时间 | 2026-07-17 05:00:51 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -61,6 +61,7 @@
 | RC-029 | 2026-07-17 04:44:29 +08:00 | `0180f13` | PASS：季度监控登记、复核日志、GitHub Actions workflow 和 live API 检查已建立；Claude Code/SDK HEAD、分支、license、归档/禁用状态与基线一致；静态/Ruff 通过 | `docs/evidence/RC-029/README.md` | 条款/文档 URL 未作未经验证结论；任何变化要求新 ADR，复核前保持限制 |
 | RC-030 | 2026-07-17 04:47:16 +08:00 | `6483383` | SUBMITTED WITH PENDING CONFIRMATION：source-map clean-room 决策记录汇总事实、风险、临时允许/禁止范围、角色隔离、监控和 M0 触发条件；M0 校验为 blocked；未伪造签署 | `docs/evidence/RC-030/README.md` | 技术/合规/法律签署和决策编号待人工确认；在批准前默认禁止 source-map 正文访问、使用和分发 |
 | RC-031 | 2026-07-17 04:52:51 +08:00 | `8e5ab1f` | SUBMITTED WITH PENDING CONFIRMATION：Ollama/llama.cpp 固定 MIT 运行器版本；Gemma/Qwen 固定 HF commit、模型许可、gated 状态和文件哈希/大小；manifest 校验与 Ruff 通过；权重未下载 | `docs/evidence/RC-031/README.md` | Gemma manual-gated 条款/模型卡正文待确认；默认不打包模型权重，下载前必须 UI 确认并校验哈希 |
+| RC-032 | 2026-07-17 05:00:51 +08:00 | `bb1f6b4` | SUBMITTED WITH PENDING CONFIRMATION：32 个直接/构建依赖全部登记；PyPI/npm 官方 metadata 已记录；THIRD_PARTY_NOTICES 可生成且对账通过；10 个条目仍 review-required | `docs/evidence/RC-032/README.md` | 未确认 license 和自定义 GSAP 条目不得发布；传递依赖/SBOM 逐层审计留给后续发布门禁 |
 
 ### 进度记录一致性检查
 
@@ -2400,7 +2401,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-030** 输出《Claude Code source map 事件调研与 Rabbit Code clean-room 决策记录》，作为 M0 和开源发布审计的必需材料。
 
 - [x] **RC-031** 调研 Gemma、Qwen2.5-Coder、Ollama、llama.cpp、Hugging Face 模型文件的代码许可证、模型许可证、再分发限制、署名和用户确认要求。
-- [ ] **RC-032** 为所有拟复用实现建立“来源、许可证、复用方式、修改内容、NOTICE 要求、替代方案”清单。
+- [x] **RC-032** 为所有拟复用实现建立“来源、许可证、复用方式、修改内容、NOTICE 要求、替代方案”清单。
 - [ ] **RC-033** 对无许可、商业条款或来源不清晰的代码采用 clean-room 行为重实现，保留设计记录，不复制代码、提示词、隐藏协议或受保护资产。
 - [ ] **RC-034** 对 Rabbit Code、兔兔形象、包名、域名、GitHub 组织名和应用商店名称进行商标、命名冲突与可发布性检查。
 - [ ] **RC-035** 确认用户提供的 `兔兔素材.png` 拥有开源项目使用、修改、派生和再分发权，并记录素材许可证与署名要求。

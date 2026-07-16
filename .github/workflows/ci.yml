@@ -47,6 +47,9 @@ jobs:
       # RC ID: RC-031
       - name: Local-model license manifest
         run: python scripts/check_local_model_license_manifest.py
+      # RC ID: RC-032
+      - name: Third-party register
+        run: python scripts/check_third_party_register.py --check
       - name: Ruff
         run: ruff check backend
       - name: Mypy
