@@ -1,0 +1,26 @@
+name: Rabbit Code work item
+description: Track implementation or verification for one or more RC requirements.
+title: "[RC-xxx] "
+body:
+  - type: input
+    id: rc_ids
+    attributes:
+      label: RC ID
+      description: "RC ID: RC-043 established this field. Use RC-xxx format."
+      placeholder: RC-xxx
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Measurable outcome
+      description: State the observable completion criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Link code, tests, documents, and release evidence.
+    validations:
+      required: true

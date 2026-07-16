@@ -18,6 +18,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e backend[dev]
+      # RC ID: RC-043
+      - name: RC traceability
+        run: python scripts/check_rc_traceability.py --check
       - name: Ruff
         run: ruff check backend
       - name: Mypy
