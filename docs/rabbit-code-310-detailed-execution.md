@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 41 |
-| 最后完成项 | RC-049 |
-| 下一待执行项 | RC-056 |
+| 已完成项数 | 42 |
+| 最后完成项 | RC-056 |
+| 下一待执行项 | RC-057 |
 | 当前里程碑 | W2：共享协议、数据模型和 Agent Core |
-| 当前状态 | RC-049 已定义 Provider Protocol、能力声明、统一事件和 OpenAI-compatible HTTP Adapter；RC-050 至 RC-055 保留为已完成前置，下一未完成项为 RC-056 Monorepo |
-| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；Gemini、Anthropic 原生协议和本地模型运行器不在 RC-049 猜测实现，留给后续 Provider/本地模型 RC |
-| 最近一次完整验证 | 2026-07-17：RC-049 Provider 契约 9 passed、目标 API/离线回归 17 passed、后端 69 passed、Ruff、Mypy、前端 9 passed、Lint、Build、RC-045 工作包覆盖和交付计划校验通过；实际速度按周证据更新 |
-| 最近更新时间 | 2026-07-17 15:11:51 +08:00 |
+| 当前状态 | RC-056 已建立 Monorepo 工作区清单、成员边界和根级 install/check/test/build/verify 任务；RC-050 至 RC-055 保留为已完成前置，下一未完成项为 RC-057 候选架构基线 |
+| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 的 Windows/Linux 原型实测、Tauri 打包和跨方案性能比较尚未执行 |
+| 最近一次完整验证 | 2026-07-17：RC-056 根级 workspace verify 通过，包含成员/版本/边界检查、RC-045 工作包和交付计划校验、Ruff、Mypy、后端 70 passed、前端 9 passed、Lint、Build；实际速度按周证据更新 |
+| 最近更新时间 | 2026-07-17 15:23:05 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -45,6 +45,7 @@
 | RC-054 | 2026-07-17 02:49:55 +08:00 | `107df2c` | PASS：身份/路径/OpenAPI/sidecar 契约通过；后端 62 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI Rabbit Code 标题与 SHA-256 可复现；索引检查通过 | `docs/evidence/RC-054/README.md` | 兼容截止 3.0.0；安装包升级/卸载和兼容期结束后的删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 | RC-051 | 2026-07-17 02:56:28 +08:00 | `bfe7e47` | PASS：CLI 兼容契约 3 passed；后端 65 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 可复现；索引检查通过 | `docs/evidence/RC-051/README.md` | 安装包升级/卸载、CLI 独立二进制和兼容期结束后的旧入口删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 | RC-055 | 2026-07-17 03:32:37 +08:00 | `c04a528` | PASS：v2.0/v2.0-baseline 均剥离到 `8306d117`；V2 后端 31 passed；两次 Python wheel、前端 dist 和 Git archive 哈希一致；`release/v2.0` 分支保护与两个 V2 标签 Ruleset 已启用 | `docs/evidence/RC-055/README.md` | 制品哈希/来源证明留给 RC-277；安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次 |
+| RC-056 | 2026-07-17 15:23:05 +08:00 | `04de5ae` | PASS：根级 workspace verify 通过；成员边界、统一版本和任务入口校验通过；后端 70 passed；前端 9 passed、Lint/Build；本地安装入口通过 | `docs/evidence/RC-056/README.md` | 现有实现路径按兼容策略保留；Agent Core、协议包、UI 包和 Tauri/CLI 真正迁移留给后续 RC；既有前端 jsdom 警告和路径迁移 DeprecationWarning 保留 |
 | RC-015 | 2026-07-17 03:38:00 +08:00 | `5fc9361` | PASS：9 个 GitHub 来源的 URL、默认分支、HEAD SHA、commit URL、许可证元数据和状态已固定；YAML 校验器与 Ruff 通过；CI 已接入 source baseline 门禁 | `docs/evidence/RC-015/README.md` | 4 个来源无 SPDX 许可证，1 个来源已归档；仅保留研究元数据，法律和 clean-room 结论留给 RC-021 至 RC-030 |
 | RC-016 | 2026-07-17 03:50:47 +08:00 | `f88d8c2` | CLOSED BY USER：按用户指示将 RC-016 视为已完成；官方 Codex manual 获取 HTTP 403，未写入未经验证结论 | `docs/evidence/RC-016/README.md` | 未验证的 manual 结论不纳入本项目；本限制已记录，不阻塞 RC-017 |
 | RC-017 | 2026-07-17 03:56:37 +08:00 | `583848a` | PASS：来源登记包含 `open-source`、`public-doc`、`behavior-only`；固定 Codex SHA、README 与 manual 均已核对；manual HEAD/GET 均 HTTP 200；来源校验器与 Ruff 通过；无新增 Codex GUI 源码/资产 | `docs/evidence/RC-017/README.md` | 公开文档只按事实使用；桌面 GUI 继续按 behavior-only 处理，不复制专有源码或资产 |
@@ -2448,7 +2449,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### 5. 总体技术架构
 
-- [ ] **RC-056** 采用 Monorepo 管理桌面端、CLI、Agent Core、FastAPI App Server、Provider、协议、UI、安装脚本、测试和文档。
+- [x] **RC-056** 采用 Monorepo 管理桌面端、CLI、Agent Core、FastAPI App Server、Provider、协议、UI、安装脚本、测试和文档。
 - [ ] **RC-057** 形成“共享 Agent Core + 本地 App Server + CLI/TUI + Tauri 桌面壳 + React GUI”的候选基线，并通过跨平台原型验证后锁定。
 - [ ] **RC-058** FastAPI App Server 作为 GUI、CLI、提示词优化、本地模型和后台任务的统一本地服务入口。
 - [ ] **RC-059** CLI 可选择进程内调用共享核心或连接本地 App Server，但二者必须使用同一事件和数据模型。
