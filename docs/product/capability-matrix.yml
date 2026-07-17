@@ -1,0 +1,260 @@
+schema_version: 1
+rc_id: RC-040
+status: defined-not-implementation-validated
+scope: "CLI、GUI 和无头模式共享同一 Agent/Provider/会话/权限/优化核心；GUI 专属能力只保留窗口、拖放和系统通知。"
+surfaces:
+  - id: cli
+    label: CLI/TUI
+    role: "交互终端、管道和 JSON/JSONL 机器输出。"
+  - id: gui
+    label: GUI
+    role: "桌面窗口、可视化渲染、拖放和系统集成。"
+  - id: headless
+    label: 无头模式
+    role: "无 TTY 的 CI/脚本调用；不得等待交互提示。"
+
+contract_rules:
+  - id: one-core
+    rule: "三种表面只能调用同一个 Agent、Provider、Permission、Session 和 PromptOptimizationService 边界。"
+  - id: one-event-schema
+    rule: "Agent、工具、审批、任务、诊断和优化流只能使用本登记的事件 Schema；表面只能渲染或序列化。"
+  - id: one-storage-schema
+    rule: "会话、消息、工具、检查点、Prompt 版本、Provider 元数据和设置只使用本登记的存储 Schema。"
+  - id: surface-difference
+    rule: "GUI 专属差异只能是窗口/拖放/系统通知；CLI/无头差异只能是输入输出传输和渲染，不得改变业务语义。"
+  - id: no-silent-capability-loss
+    rule: "表面不支持交互时必须返回机器可读拒绝/等待/取消状态，不能静默跳过权限或工具结果。"
+
+shared_contracts:
+  event_schemas:
+    - id: agent-event-v1
+      fields: "event_id, session_id, task_id, sequence, type, timestamp, payload, visibility"
+      purpose: "Agent 状态、文本增量、工具、审批、进度、诊断和终止事件。"
+    - id: content-block-v1
+      fields: "block_id, kind, source, text_or_reference, sensitivity, truncation"
+      purpose: "文本、文件、目录、diff、诊断、进度、错误和附件内容块。"
+    - id: optimization-event-v1
+      fields: "request_id, revision, sequence, type, provider, model, fallback, payload"
+      purpose: "星星优化开始、增量、保存、完成、取消和错误事件。"
+  storage_schemas:
+    - id: workspace-v1
+      records: "workspace, project_instruction, permission_scope"
+      purpose: "工作区、项目指令、权限和作用域。"
+    - id: session-v1
+      records: "session, message, task, tool_call, approval, checkpoint, diagnostic"
+      purpose: "会话、任务、工具、审批、检查点和诊断。"
+    - id: provider-v1
+      records: "provider_reference, model, capability, health, credential_reference"
+      purpose: "Provider/模型能力、健康状态和密钥引用；不保存密钥明文。"
+    - id: prompt-optimization-v1
+      records: "prompt_revision, optimization_request, optimization_result, optimization_metadata"
+      purpose: "原文、revision、结果、采用状态和必要 Provider/fallback 元数据。"
+    - id: settings-v1
+      records: "setting, source, scope, audit_event"
+      purpose: "分层设置、来源和最小审计事件。"
+
+capabilities:
+  - id: workspace-discovery
+    label: 工作区发现与项目指令
+    requirement_ids: [R1, R5]
+    shared_contract: workspace-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: workspace-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "打印根目录、分支、脏状态和指令来源。"}
+      gui: {status: shared-core, behavior: "渲染工作区首页、状态和指令来源。"}
+      headless: {status: shared-core, behavior: "输出 JSON 状态，不等待目录选择。"}
+    difference_reason: "同一发现服务和数据；只改变终端文本、GUI 组件和 JSON 序列化。"
+    dependencies: [RC-080, RC-081, RC-083]
+  - id: context-assembly
+    label: 上下文搜索与内容块
+    requirement_ids: [R1, R5]
+    shared_contract: context-runtime-v1
+    event_schema: content-block-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "使用文件提及、搜索和 stdin 组装上下文。"}
+      gui: {status: shared-core, behavior: "使用文件选择、选区、拖放引用和预览。"}
+      headless: {status: shared-core, behavior: "使用 JSON/参数引用并返回拒绝或截断字段。"}
+    difference_reason: "内容块和安全边界相同；拖放预览是 GUI 传输方式，不是新上下文类型。"
+    dependencies: [RC-082, RC-083, RC-084]
+  - id: agent-loop
+    label: Agent 状态与模型循环
+    requirement_ids: [R1, R5]
+    shared_contract: agent-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "渲染进度、工具卡和最终答复；支持交互/单次。"}
+      gui: {status: shared-core, behavior: "渲染时间线、任务卡和最终答复。"}
+      headless: {status: shared-core, behavior: "输出有序 JSONL 事件和稳定退出码。"}
+    difference_reason: "状态转换、预算和终态唯一；表面只改变事件呈现和输出编码。"
+    dependencies: [RC-068, RC-069, RC-071, RC-072, RC-073]
+  - id: plan-edit-permission
+    label: Plan/Edit/高权限模式
+    requirement_ids: [R1, R5]
+    shared_contract: permission-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: workspace-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "命令行显示模式和权限请求。"}
+      gui: {status: shared-core, behavior: "对话框和审批面板显示模式和权限请求。"}
+      headless: {status: shared-core, behavior: "使用显式策略参数；缺少批准时返回拒绝退出码。"}
+    difference_reason: "能力集合和拒绝语义唯一；按钮、提示和参数是不同交互载体。"
+    dependencies: [RC-070, RC-201, RC-202, RC-203]
+  - id: tool-and-approval
+    label: 工具调用与审批
+    requirement_ids: [R1, R5]
+    shared_contract: tool-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "显示工具调用并读取明确终端批准。"}
+      gui: {status: shared-core, behavior: "显示工具卡和审批弹窗。"}
+      headless: {status: shared-core, behavior: "按策略文件/参数决策，不弹出交互提示。"}
+    difference_reason: "工具 Schema、权限和审计唯一；批准输入和展示方式不同。"
+    dependencies: [RC-075, RC-076, RC-097, RC-099, RC-202]
+  - id: terminal-process
+    label: 终端命令与后台进程
+    requirement_ids: [R1, R5]
+    shared_contract: process-runtime-v1
+    event_schema: content-block-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "复用当前终端或受控子进程，显示 stdout/stderr。"}
+      gui: {status: shared-core, behavior: "渲染终端面板、输出游标和停止操作。"}
+      headless: {status: shared-core, behavior: "捕获输出并返回退出码，不要求 TTY。"}
+    difference_reason: "命令参数、工作目录、超时和取消唯一；PTY/面板/JSON 是传输差异。"
+    dependencies: [RC-091, RC-094, RC-096]
+  - id: git-diff-checkpoint
+    label: Git、diff、检查点和回滚
+    requirement_ids: [R1, R2, R5]
+    shared_contract: change-review-v1
+    event_schema: content-block-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "打印结构化 diff、检查点和接受/拒绝命令。"}
+      gui: {status: shared-core, behavior: "渲染文件树、行内 diff 和回滚控件。"}
+      headless: {status: shared-core, behavior: "输出机器可读 diff 和检查结果，拒绝隐式接受。"}
+    difference_reason: "变更归属、基线哈希和回滚范围唯一；视觉 diff 与文本/JSON 为渲染差异。"
+    dependencies: [RC-087, RC-092, RC-095, RC-098]
+  - id: session-history-recovery
+    label: 会话、历史和恢复
+    requirement_ids: [R1, R3, R5]
+    shared_contract: session-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "列出、恢复、分叉、归档和导出会话。"}
+      gui: {status: shared-core, behavior: "渲染会话列表、时间线和恢复向导。"}
+      headless: {status: shared-core, behavior: "按 session_id 恢复并输出恢复状态。"}
+    difference_reason: "会话归属、检查点和重试规则唯一；列表、时间线和 JSON 是展示差异。"
+    dependencies: [RC-073, RC-085, RC-086, RC-087, RC-089]
+  - id: task-progress-cancel
+    label: 任务、进度和取消
+    requirement_ids: [R1, R3, R5]
+    shared_contract: task-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "显示进度并支持 Ctrl+C/取消命令。"}
+      gui: {status: shared-core, behavior: "渲染进度条、部分失败和取消按钮。"}
+      headless: {status: shared-core, behavior: "输出进度事件，收到信号后返回稳定退出码。"}
+    difference_reason: "取消令牌、终态和重试规则唯一；快捷键、按钮和信号是交互差异。"
+    dependencies: [RC-071, RC-073, RC-094, RC-226]
+  - id: provider-model
+    label: Provider、模型和能力协商
+    requirement_ids: [R3, R4, R6]
+    shared_contract: provider-runtime-v1
+    event_schema: agent-event-v1
+    storage_schema: provider-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "通过参数/配置选择 Provider 和模型并显示来源。"}
+      gui: {status: shared-core, behavior: "渲染模型选择器、健康和数据边界。"}
+      headless: {status: shared-core, behavior: "从配置/环境变量读取引用并返回能力错误。"}
+    difference_reason: "Provider Adapter、能力和错误分类唯一；选择器、参数和 JSON 只改变输入载体。"
+    dependencies: [RC-078, RC-159, RC-160, RC-169, RC-170, RC-172]
+  - id: prompt-optimization
+    label: 菱形星星提示词优化
+    requirement_ids: [R2, R3, R5, R6]
+    shared_contract: prompt-optimization-v1
+    event_schema: optimization-event-v1
+    storage_schema: prompt-optimization-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "使用子命令/参数触发，输出原文、结果、元数据和 diff。"}
+      gui: {status: shared-core, behavior: "使用星星按钮触发，渲染比较、采用、撤销和发送。"}
+      headless: {status: shared-core, behavior: "使用 JSON 请求/事件，完成后不自动发送后续消息。"}
+    difference_reason: "revision、取消、fallback、验证和采用规则唯一；按钮、命令和 JSON 是输入/渲染差异。"
+    dependencies: [RC-135, RC-137, RC-138, RC-139, RC-140, RC-147, RC-152]
+  - id: offline-local-model
+    label: 本地模型与离线规则
+    requirement_ids: [R3, R4, R5]
+    shared_contract: local-model-runtime-v1
+    event_schema: optimization-event-v1
+    storage_schema: provider-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "选择本地模型或 offline，显示资源/许可/降级原因。"}
+      gui: {status: shared-core, behavior: "渲染安装、就绪、忙碌、OOM 和修复状态。"}
+      headless: {status: shared-core, behavior: "在离线模式返回稳定结果或机器可读未就绪错误。"}
+    difference_reason: "运行器 Adapter、许可证和 fallback 语义唯一；安装向导和命令/JSON 为表面差异。"
+    dependencies: [RC-149, RC-150, RC-187, RC-193, RC-194, RC-198]
+  - id: diagnostics
+    label: 测试、Lint、类型和诊断
+    requirement_ids: [R1, R5]
+    shared_contract: diagnostics-v1
+    event_schema: content-block-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "打印稳定诊断行和退出码。"}
+      gui: {status: shared-core, behavior: "渲染文件/行号/级别和原始输出。"}
+      headless: {status: shared-core, behavior: "输出诊断 JSON，不输出 ANSI 或交互提示。"}
+    difference_reason: "诊断字段和命令结果唯一；文本、组件和 JSON 的布局不同。"
+    dependencies: [RC-093, RC-096, RC-230, RC-232, RC-233]
+  - id: export-audit
+    label: 导出、隐私和审计
+    requirement_ids: [R1, R3, R5]
+    shared_contract: export-runtime-v1
+    event_schema: content-block-v1
+    storage_schema: settings-v1
+    surfaces:
+      cli: {status: shared-core, behavior: "执行显式导出并显示脱敏/敏感字段提示。"}
+      gui: {status: shared-core, behavior: "渲染导出设置、预览和删除确认。"}
+      headless: {status: shared-core, behavior: "使用明确格式参数并返回文件/内容元数据。"}
+    difference_reason: "导出格式、脱敏和审计规则唯一；预览、命令和 JSON 是表面交互差异。"
+    dependencies: [RC-064, RC-180, RC-210, RC-212, RC-221]
+  - id: window-management
+    label: 桌面窗口管理
+    requirement_ids: [R2]
+    shared_contract: null
+    event_schema: null
+    storage_schema: null
+    surfaces:
+      cli: {status: not-applicable, behavior: "不创建桌面窗口。"}
+      gui: {status: gui-only, behavior: "窗口大小、焦点、最大化、关闭和系统菜单。"}
+      headless: {status: not-applicable, behavior: "不创建桌面窗口。"}
+    difference_reason: "窗口是 GUI 壳的系统集成，不改变 Agent、事件或存储语义。"
+    dependencies: [RC-109, RC-121, RC-254, RC-255]
+  - id: drag-drop
+    label: 文件拖放与桌面附件选择
+    requirement_ids: [R2, R3]
+    shared_contract: content-block-v1
+    event_schema: content-block-v1
+    storage_schema: session-v1
+    surfaces:
+      cli: {status: not-applicable, behavior: "使用文件路径/标准输入替代拖放。"}
+      gui: {status: gui-only, behavior: "将拖入文件转换为统一内容块并显示预览。"}
+      headless: {status: not-applicable, behavior: "使用 JSON 内容块引用替代拖放。"}
+    difference_reason: "拖放手势只属于 GUI；落盘后的内容块、大小/权限检查和会话 Schema 仍唯一。"
+    dependencies: [RC-082, RC-110, RC-137]
+  - id: system-notifications
+    label: 系统通知与桌面集成
+    requirement_ids: [R2, R5]
+    shared_contract: agent-event-v1
+    event_schema: agent-event-v1
+    storage_schema: settings-v1
+    surfaces:
+      cli: {status: not-applicable, behavior: "使用终端进度和退出码替代系统通知。"}
+      gui: {status: gui-only, behavior: "在用户允许时发送完成、失败或需要批准通知。"}
+      headless: {status: not-applicable, behavior: "使用 JSON 事件、日志和退出码替代通知。"}
+    difference_reason: "系统通知是 GUI 显示层；通知内容只能由共享事件派生，不能产生独立任务状态。"
+    dependencies: [RC-071, RC-110, RC-215]

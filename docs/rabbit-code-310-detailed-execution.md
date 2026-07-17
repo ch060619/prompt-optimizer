@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 35 |
-| 最后完成项 | RC-039 |
-| 下一待执行项 | RC-040 |
+| 已完成项数 | 36 |
+| 最后完成项 | RC-040 |
+| 下一待执行项 | RC-041 |
 | 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-039 已定义十二个 Windows/Linux 核心旅程、R1-R6 映射、失败/恢复分支、功能依赖和人工测试卡；实现/E2E 待后续 RC，准备执行 RC-040 |
-| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台组合实测和 RC-039 Agent/GUI/Provider/模型 E2E 待后续 RC，不阻塞 RC-040 |
-| 最近一次完整验证 | 2026-07-17：RC-039 场景校验、R1-R6 覆盖审查、RC-038 矩阵/追踪、RC-037 Persona 校验、RC-036 汇总、RC-035 授权/发布阻断、RC-034 名称渠道、Ruff、第三方登记、source-map denylist 与专有内容政策检查通过；实现/E2E 按证据记录保持待确认 |
-| 最近更新时间 | 2026-07-17 13:46:04 +08:00 |
+| 当前状态 | RC-040 已冻结 CLI、GUI、无头三表面共享核心、唯一事件/存储 Schema 和 GUI 专属差异；实现对账待后续 RC，准备执行 RC-041 |
+| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E 和 RC-040 三表面实现对账待后续 RC，不阻塞 RC-041 |
+| 最近一次完整验证 | 2026-07-17：RC-040 能力矩阵校验、唯一契约/GUI-only 审查、RC-039 场景校验、RC-038 矩阵/追踪、RC-037 Persona、RC-036 汇总、RC-035 授权/发布阻断、RC-034 名称渠道、Ruff、第三方登记、source-map denylist 与专有内容政策检查通过；实现对账按证据记录保持待确认 |
+| 最近更新时间 | 2026-07-17 13:58:40 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -69,6 +69,7 @@
 | RC-037 | 2026-07-17 12:25:00 +08:00 | `4d75ca9` | SUBMITTED WITH PENDING CONFIRMATION：五类 Persona、可测高频任务、优先级、冲突与核心能力覆盖已提交；校验器与 Ruff 通过，访谈未执行 | `docs/evidence/RC-037/README.md` | 真实用户访谈/问卷、P0 优先级和产品范围签收待确认 |
 | RC-038 | 2026-07-17 13:12:09 +08:00 | `bc9764d` | SUBMITTED WITH PENDING CONFIRMATION：Windows/Linux 首发平台矩阵、x86_64 正式基线、终端/Shell、CPU/GPU、未签名制品、SHA-256、验证环境和责任角色已冻结；组合实测待后续 RC | `docs/evidence/RC-038/README.md` | Linux 实机、未签名安装包、ARM/GPU 和 Fedora rpm 实测待后续平台/安装包/测试 RC；macOS 不在首发范围 |
 | RC-039 | 2026-07-17 13:46:04 +08:00 | `e6b71e8` | SUBMITTED WITH PENDING CONFIRMATION：十二个核心旅程、R1-R6 映射、失败/恢复分支、功能依赖和人工测试卡已提交；实现/E2E 待后续 RC | `docs/evidence/RC-039/README.md` | Agent、GUI、Provider、模型和跨平台 E2E 待后续 RC；RC-037 产品范围评审仍待确认 |
+| RC-040 | 2026-07-17 13:58:40 +08:00 | 待本项记录提交后固定 | SUBMITTED WITH PENDING CONFIRMATION：CLI、GUI、无头三表面共享核心、唯一事件/存储 Schema 和 GUI 专属差异已冻结；实现对账待后续 RC | `docs/evidence/RC-040/README.md` | Agent/Provider/会话/权限/优化共享实现、事件重放、存储对账和跨表面 E2E 待后续 RC；现有 V2 API 仅为迁移依赖 |
 
 ### 进度记录一致性检查
 
