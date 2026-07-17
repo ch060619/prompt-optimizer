@@ -1,0 +1,25 @@
+# RC ID: RC-056. Root workspace manifest for the Rabbit Code monorepo.
+
+[workspace]
+name = "rabbit-code"
+version = "3.0.0"
+members = [
+    "apps/desktop",
+    "apps/cli",
+    "backend",
+    "backend/rabbit_code",
+    "frontend",
+    "packages/protocol",
+    "packages/ui",
+    "scripts",
+    "tests",
+    "docs",
+    "data",
+]
+
+[workspace.tasks]
+install = "python scripts/workspace.py install"
+check = "python scripts/workspace.py check"
+test = "python scripts/workspace.py test"
+build = "python scripts/workspace.py build"
+verify = "python scripts/workspace.py verify"
