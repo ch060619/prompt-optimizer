@@ -4,7 +4,7 @@
 - 状态：已提交（RC-001..RC-310 的工作量、依赖、责任、里程碑、缓冲和周证据规则已登记；实际开发计划按周更新）
 - 负责人：Codex
 - 基线 Commit：`c321d53`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`6fc3f39`
 - 前置 RC：RC-044（已完成；版本和迁移策略已冻结）
 - 修改文件：`docs/planning/rc-045-delivery-plan.yml`、`docs/planning/rc-045-delivery-plan.md`、`scripts/check_delivery_plan.py`、本证据和主计划/追踪记录
 - 用户可见行为：执行清单的每项 RC 都归入唯一工作包，拥有工作量、依赖、负责人、评审者、目标里程碑和缓冲；完成状态只由提交和验证证据推进。
