@@ -36,17 +36,27 @@ def main() -> int:
         errors.append("status must remain pending-human-confirmation until authorization is verified")
 
     source = payload.get("source", {})
-    if source.get("present_at_capture") is not False or source.get("observed_status") != "missing":
-        errors.append("missing source file must remain explicitly recorded")
+    if source.get("present_at_capture") is not True or source.get("observed_status") != "user-confirmed-identity":
+        errors.append("the repository candidate must remain identified by the user")
 
     candidate = payload.get("repository_candidate", {})
     candidate_path = REPOSITORY_ROOT / str(candidate.get("path", ""))
+    if candidate.get("path") != source.get("requested_path"):
+        errors.append("source and repository candidate paths must identify the same asset")
     if not candidate_path.is_file():
         errors.append(f"repository candidate is missing: {candidate.get('path')}")
     else:
         observed_hash = file_sha256(candidate_path)
         if candidate.get("sha256") != EXPECTED_HASH or observed_hash != EXPECTED_HASH:
             errors.append("repository candidate hash does not match the fixed evidence")
+
+    generation = payload.get("generation", {})
+    if generation.get("creator_statement") != "user-stated-ai-generated":
+        errors.append("the user's AI-generation statement must be recorded as a statement only")
+    if generation.get("provider") != "unknown" or generation.get("terms_url") is not None:
+        errors.append("generation provider and terms must remain unverified")
+    if generation.get("terms_review") != "pending" or generation.get("human_contribution_review") != "pending":
+        errors.append("generation terms and human contribution review must remain pending")
 
     authorization = payload.get("authorization", {})
     permissions = authorization.get("permissions", {})
