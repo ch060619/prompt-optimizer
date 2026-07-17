@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -10,6 +11,7 @@ from rich.console import Console
 from rich.table import Table
 
 from prompt_optimizer.api.app import create_app, create_app_server
+from prompt_optimizer.config import ConfigService
 from prompt_optimizer.core.models import ExportFormat, ModelProviderName, PromptAnalysis
 from prompt_optimizer.evaluation import EvaluationService
 from prompt_optimizer.identity import (
@@ -27,8 +29,10 @@ app = typer.Typer(
 prompt_app = typer.Typer(help="Rabbit Code 提示词工作流兼容命令组。")
 templates_app = typer.Typer(help="模板库管理。")
 history_app = typer.Typer(help="版本历史与对比。")
+config_app = typer.Typer(help="分层配置查看。")
 app.add_typer(templates_app, name="templates")
 app.add_typer(history_app, name="history")
+app.add_typer(config_app, name="config")
 app.add_typer(prompt_app, name="prompt")
 prompt_app.add_typer(templates_app, name="templates")
 prompt_app.add_typer(history_app, name="history")
@@ -188,6 +192,35 @@ def evaluate(
     console.print(f"[green]评测报告已生成：{output}[/green]")
 
 
+@config_app.command("show")
+# RC ID: RC-065. Show non-sensitive merged configuration sources in the CLI.
+def show_config(
+    user_config: Annotated[Path | None, typer.Option("--user-config")] = None,
+    workspace: Annotated[Path | None, typer.Option("--workspace")] = None,
+    session: Annotated[list[str] | None, typer.Option("--session")] = None,
+    override: Annotated[list[str] | None, typer.Option("--override")] = None,
+) -> None:
+    """显示合并后的配置和来源，不显示敏感值。"""
+    try:
+        snapshot = ConfigService(
+            user_path=user_config,
+            workspace_root=workspace,
+        ).resolve(
+            session=_parse_overrides(session or [], "--session"),
+            cli=_parse_overrides(override or [], "--override"),
+        )
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    table = Table(title="Rabbit Code 配置")
+    table.add_column("配置项")
+    table.add_column("值")
+    table.add_column("来源")
+    table.add_column("作用域")
+    for name, entry in snapshot.display().items():
+        table.add_row(name, str(entry["value"]), str(entry["source"]), str(entry["scope"]))
+    console.print(table)
+
+
 @app.command()
 @prompt_app.command()
 def serve(
@@ -216,3 +249,16 @@ def _print_analysis(analysis: PromptAnalysis) -> None:
     console.print("\n[bold]优化建议[/bold]")
     for suggestion in analysis.suggestions:
         console.print(f"- [{suggestion.priority}] {suggestion.title}: {suggestion.detail}")
+
+
+def _parse_overrides(values: list[str], option_name: str) -> dict[str, object]:
+    parsed: dict[str, object] = {}
+    for raw_value in values:
+        name, separator, raw = raw_value.partition("=")
+        if not separator or not name:
+            raise ValueError(f"{option_name} 必须使用 key=value 格式。")
+        try:
+            parsed[name] = json.loads(raw)
+        except json.JSONDecodeError:
+            parsed[name] = raw
+    return parsed
