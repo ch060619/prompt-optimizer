@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 40 |
-| 最后完成项 | RC-045 |
-| 下一待执行项 | RC-049 |
-| 当前里程碑 | W1：合法性、产品与来源冻结 |
-| 当前状态 | RC-045 已为 RC-001..RC-310 建立唯一工作包、工作量、依赖、负责人、评审者、里程碑、缓冲和周证据规则；RC-046 至 RC-048 已完成，下一未完成项为 RC-049 Provider Adapter |
-| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账、RC-042 状态参数执行和跨版本安装包验收待后续 RC；RC-049 依赖共享协议和 Provider 契约，不阻塞当前记录 |
-| 最近一次完整验证 | 2026-07-17：RC-045 工作包覆盖、日期依赖、责任/里程碑/缓冲和周证据校验、Ruff、RC-044 版本策略、RC-042 状态覆盖、RC-041 版本范围、RC-040 能力矩阵、RC-039 场景、RC-038 矩阵/追踪、RC-037 Persona、RC-036 汇总、RC-035 授权/发布阻断、RC-034 名称渠道、第三方登记、source-map denylist 与专有内容政策检查通过；实际速度按周证据更新 |
-| 最近更新时间 | 2026-07-17 14:50:05 +08:00 |
+| 已完成项数 | 41 |
+| 最后完成项 | RC-049 |
+| 下一待执行项 | RC-056 |
+| 当前里程碑 | W2：共享协议、数据模型和 Agent Core |
+| 当前状态 | RC-049 已定义 Provider Protocol、能力声明、统一事件和 OpenAI-compatible HTTP Adapter；RC-050 至 RC-055 保留为已完成前置，下一未完成项为 RC-056 Monorepo |
+| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；Gemini、Anthropic 原生协议和本地模型运行器不在 RC-049 猜测实现，留给后续 Provider/本地模型 RC |
+| 最近一次完整验证 | 2026-07-17：RC-049 Provider 契约 9 passed、目标 API/离线回归 17 passed、后端 69 passed、Ruff、Mypy、前端 9 passed、Lint、Build、RC-045 工作包覆盖和交付计划校验通过；实际速度按周证据更新 |
+| 最近更新时间 | 2026-07-17 15:11:51 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -36,14 +36,15 @@
 | --- | --- | --- | --- | --- | --- |
 | RC-043 | 2026-07-17 00:59:26 +08:00 | `ed0e098` | PASS：追踪契约 4 passed；后端 36 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-043/README.md` | 309 项待实施；48 个现有代码文件待随对应 RC 建立关联，不阻塞本项 |
 | RC-046 | 2026-07-17 01:20:40 +08:00 | `4429c82` | PASS：sidecar 3 passed；后端 39 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-046/README.md` | Windows 强制终止退出码 1；Docker Engine 未运行；跨平台/生产生命周期留给 RC-057/067 |
-| RC-047 | 2026-07-17 01:39:57 +08:00 | `f009f66` | PASS：V2 回归 4 passed；后端 43 passed；Ruff/Mypy；前端 9 passed、Lint/Build；黄金 SHA-256 可复现 | `docs/evidence/RC-047/README.md` | 基线审批尚未加签名/CODEOWNERS 门禁；既有前端 jsdom 警告保留 |
+| RC-047 | 2026-07-17 01:39:57 +08:00 | `f009f66` | PASS：V2 回归 4 passed；后端 43 passed；Ruff/Mypy；前端 9 passed、Lint/Build；黄金 SHA-256 可复现 | `docs/evidence/RC-047/README.md` | 基线审批尚未加 CODEOWNERS 门禁；既有前端 jsdom 警告保留 |
 | RC-048 | 2026-07-17 02:04:39 +08:00 | `424b135` | PASS：版本化 OpenAPI 36 paths/22 schemas 且 SHA-256 可复现；契约与既有 API 共 49 passed；Ruff/Mypy；前端 9 passed、Lint/Build；索引检查通过 | `docs/evidence/RC-048/README.md` | 旧 `/api/*` 入口仍按兼容期保留；生成客户端与 CI 差异门禁留给 RC-062；既有前端 jsdom 警告保留 |
+| RC-049 | 2026-07-17 15:11:51 +08:00 | `78f2f19` | PASS：Provider 契约 9 passed；后端 69 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAI-compatible Mock 无真实请求；交付计划校验通过 | `docs/evidence/RC-049/README.md` | Gemini/Anthropic 原生协议和本地模型运行器留给后续 RC；既有前端 jsdom 警告和路径迁移 DeprecationWarning 保留 |
 | RC-050 | 2026-07-17 02:15:33 +08:00 | `46485ac` | PASS：离线回退契约 3 passed；后端 52 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 保持可复现；索引检查通过 | `docs/evidence/RC-050/README.md` | Provider Adapter 拆分留给 RC-049；真实本地模型安装与运行器不属于本项；既有前端 jsdom 警告保留 |
 | RC-052 | 2026-07-17 02:20:55 +08:00 | `eea66e9` | PASS：身份边界 2 passed；后端 54 passed；Ruff/Mypy；前端 9 passed、Lint/Build；ADR Accepted；索引检查通过 | `docs/evidence/RC-052/README.md` | JWT 生产级本地认证、撤销和 OS 密钥库留给 RC-179/207 等安全门禁；既有前端 jsdom 警告保留 |
 | RC-053 | 2026-07-17 02:30:54 +08:00 | `994983f` | PASS：SQLite 备份/迁移/恢复契约 4 passed；后端 58 passed；Ruff/Mypy；前端 9 passed、Lint/Build；脚本检查和索引检查通过 | `docs/evidence/RC-053/README.md` | 备份加密、保留周期、跨设备灾备和并发写入协调不属于本项；既有前端 jsdom 警告保留 |
 | RC-054 | 2026-07-17 02:49:55 +08:00 | `107df2c` | PASS：身份/路径/OpenAPI/sidecar 契约通过；后端 62 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI Rabbit Code 标题与 SHA-256 可复现；索引检查通过 | `docs/evidence/RC-054/README.md` | 兼容截止 3.0.0；安装包升级/卸载和兼容期结束后的删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
 | RC-051 | 2026-07-17 02:56:28 +08:00 | `bfe7e47` | PASS：CLI 兼容契约 3 passed；后端 65 passed；Ruff/Mypy；前端 9 passed、Lint/Build；OpenAPI SHA-256 可复现；索引检查通过 | `docs/evidence/RC-051/README.md` | 安装包升级/卸载、CLI 独立二进制和兼容期结束后的旧入口删除留给 RC-055/发布波次；既有前端 jsdom 警告保留 |
-| RC-055 | 2026-07-17 03:32:37 +08:00 | `c04a528` | PASS：v2.0/v2.0-baseline 均剥离到 `8306d117`；V2 后端 31 passed；两次 Python wheel、前端 dist 和 Git archive 哈希一致；`release/v2.0` 分支保护与两个 V2 标签 Ruleset 已启用 | `docs/evidence/RC-055/README.md` | 标签签名/来源证明留给 RC-277；安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次 |
+| RC-055 | 2026-07-17 03:32:37 +08:00 | `c04a528` | PASS：v2.0/v2.0-baseline 均剥离到 `8306d117`；V2 后端 31 passed；两次 Python wheel、前端 dist 和 Git archive 哈希一致；`release/v2.0` 分支保护与两个 V2 标签 Ruleset 已启用 | `docs/evidence/RC-055/README.md` | 制品哈希/来源证明留给 RC-277；安装包升级/卸载、独立 CLI 二进制和兼容期结束后的旧入口删除留给发布波次 |
 | RC-015 | 2026-07-17 03:38:00 +08:00 | `5fc9361` | PASS：9 个 GitHub 来源的 URL、默认分支、HEAD SHA、commit URL、许可证元数据和状态已固定；YAML 校验器与 Ruff 通过；CI 已接入 source baseline 门禁 | `docs/evidence/RC-015/README.md` | 4 个来源无 SPDX 许可证，1 个来源已归档；仅保留研究元数据，法律和 clean-room 结论留给 RC-021 至 RC-030 |
 | RC-016 | 2026-07-17 03:50:47 +08:00 | `f88d8c2` | CLOSED BY USER：按用户指示将 RC-016 视为已完成；官方 Codex manual 获取 HTTP 403，未写入未经验证结论 | `docs/evidence/RC-016/README.md` | 未验证的 manual 结论不纳入本项目；本限制已记录，不阻塞 RC-017 |
 | RC-017 | 2026-07-17 03:56:37 +08:00 | `583848a` | PASS：来源登记包含 `open-source`、`public-doc`、`behavior-only`；固定 Codex SHA、README 与 manual 均已核对；manual HEAD/GET 均 HTTP 200；来源校验器与 Ruff 通过；无新增 Codex GUI 源码/资产 | `docs/evidence/RC-017/README.md` | 公开文档只按事实使用；桌面 GUI 继续按 behavior-only 处理，不复制专有源码或资产 |
@@ -51,7 +52,7 @@
 | RC-019 | 2026-07-17 04:04:58 +08:00 | `7fb6cee` | SUBMITTED WITH PENDING CONFIRMATION：固定 Claude Code 公开仓库、README、插件、Hook 和 settings 材料已索引；中立规格区分文档事实/黑盒观察/推测；资料校验与 Ruff 通过；官方文档入口 404、黑盒观察未执行 | `docs/evidence/RC-019/README.md` | 官方文档链接和黑盒观察待确认；不导入核心二进制、商业条款代码、源码、测试或资产 |
 | RC-020 | 2026-07-17 04:08:37 +08:00 | `ced7b45` | SUBMITTED WITH PENDING CONFIRMATION：固定 Python SDK MIT 元数据、消息/交互/MCP/Hook/权限/会话/CLI transport 资料；SDK 校验与 Ruff 通过；官方文档入口 404，session fork 接口未验证 | `docs/evidence/RC-020/README.md` | SDK MIT 不扩展到捆绑 CLI；官方文档和 session fork 细节待确认；默认不下载或分发 CLI |
 | RC-021 | 2026-07-17 04:12:16 +08:00 | `ee19518` | SUBMITTED WITH PENDING CONFIRMATION：5 个 source-map 仓库 API、固定 commit、README 均 200；许可证、归档、禁用状态和 README 摘要已记录；source body 未访问/保留/运行；校验器与 Ruff 通过 | `docs/evidence/RC-021/README.md` | DMCA/删除状态不是 GitHub API 字段，记录为 `not-observed`；所有来源默认 high risk、禁止复用 |
-| RC-022 | 2026-07-17 04:14:51 +08:00 | `87421ae` | SUBMITTED WITH PENDING CONFIRMATION：法律复核请求、问题清单、决策输出字段和临时禁止规则已提交；校验器与 Ruff 通过；未伪造法律意见 | `docs/evidence/RC-022/README.md` | 缺少法域合资格顾问书面意见和决策编号；在意见前默认禁止 source-map 正文访问/使用/分发 |
+| RC-022 | 2026-07-17 04:14:51 +08:00 | `87421ae` | SUBMITTED WITH PENDING CONFIRMATION：公开许可证/条款复核、问题清单、决策输出字段和临时禁止规则已提交；校验器与 Ruff 通过；未伪造法律意见 | `docs/evidence/RC-022/README.md` | 缺少可核验公开依据的整理和决策编号；在依据不足前默认禁止 source-map 正文访问/使用/分发 |
 | RC-023 | 2026-07-17 04:18:26 +08:00 | `71d5d1a` | PASS：5 个仓库 URL/仓库名/包名标识/固定哈希 denylist；128 个供应链输入零命中；注入禁用 URL 测试命中失败；pre-commit 与 CI 已接入；Ruff 通过 | `docs/evidence/RC-023/README.md` | 研究证据和审计脚本列为 evidence-only；发布前仍需保持扫描结果为零 |
 | RC-024 | 2026-07-17 04:21:42 +08:00 | `b252756` | PASS：专有内容禁止清单、Provenance 模板、PR 必填字段和产品输入字符串审计已建立；62 个产品输入零禁用字面量；人工 diff 相似性审查无外部实现；CI 与 Ruff 通过 | `docs/evidence/RC-024/README.md` | 零字符串命中不等于法律清除；后续相关 PR 仍必须填写来源声明并完成人工审查 |
 | RC-025 | 2026-07-17 04:24:53 +08:00 | `0170116` | SUBMITTED WITH PENDING CONFIRMATION：研究者/实现者/审查者角色、信息流、clean-room 规格模板和中立示例已提交；角色签署待人工分配；规格边界校验与 Ruff 通过 | `docs/evidence/RC-025/README.md` | 真实人员、权限和签署记录待确认；中立规格不得包含源文件名、原文或代码结构 |
@@ -63,7 +64,7 @@
 | RC-031 | 2026-07-17 04:52:51 +08:00 | `8e5ab1f` | SUBMITTED WITH PENDING CONFIRMATION：Ollama/llama.cpp 固定 MIT 运行器版本；Gemma/Qwen 固定 HF commit、模型许可、gated 状态和文件哈希/大小；manifest 校验与 Ruff 通过；权重未下载 | `docs/evidence/RC-031/README.md` | Gemma manual-gated 条款/模型卡正文待确认；默认不打包模型权重，下载前必须 UI 确认并校验哈希 |
 | RC-032 | 2026-07-17 05:00:51 +08:00 | `bb1f6b4` | SUBMITTED WITH PENDING CONFIRMATION：32 个直接/构建依赖全部登记；PyPI/npm 官方 metadata 已记录；THIRD_PARTY_NOTICES 可生成且对账通过；10 个条目仍 review-required | `docs/evidence/RC-032/README.md` | 未确认 license 和自定义 GSAP 条目不得发布；传递依赖/SBOM 逐层审计留给后续发布门禁 |
 | RC-033 | 2026-07-17 05:05:44 +08:00 | `7d8d455` | SUBMITTED WITH PENDING CONFIRMATION：clean-room 行为规格、双候选方案、独立测试、Provenance、实现者记录、原创历史和相似性门禁已定义；流程校验通过，正式实现 PR 待确认 | `docs/evidence/RC-033/README.md` | 未有核心实现需要重写；在角色签署和实现 PR 前维持 restricted 材料隔离 |
-| RC-034 | 2026-07-17 05:13:20 +08:00 | `3b85662` | SUBMITTED WITH PENDING CONFIRMATION：名称/渠道公开入口登记、保守的 404 风险校验和商标数据库待检索状态已提交；校验器与 Ruff 通过 | `docs/evidence/RC-034/README.md` | 具体商标检索、负责人/法务签署、域名/组织/包名控制权和应用商店核验待确认 |
+| RC-034 | 2026-07-17 05:13:20 +08:00 | `3b85662` | SUBMITTED WITH PENDING CONFIRMATION：名称/渠道公开入口登记、保守的 404 风险校验和公开商标信息待检索状态已提交；校验器与 Ruff 通过 | `docs/evidence/RC-034/README.md` | 具体公开商标信息、负责人确认和组织/包名冲突核验待确认；不以域名或应用商店控制权作为前置条件 |
 | RC-035 | 2026-07-17 12:08:19 +08:00 | `f72ef6e`; 修正 `5fc4d75` | SUBMITTED WITH PENDING CONFIRMATION：用户确认仓库兔兔素材身份并声明 AI 生成，授权未知，已建立 SHA-256 登记与发布阻断门禁；校验器与 Ruff 通过 | `docs/evidence/RC-035/README.md` | 原始来源、权利人书面声明、生成服务条款、许可证、署名条款和发布批准待确认 |
 | RC-036 | 2026-07-17 12:17:01 +08:00 | `8ec7253` | SUBMITTED WITH PENDING CONFIRMATION：六组来源、ADR/许可证/不复用索引和 M0/架构 Issue 门禁已提交；校验器与 Ruff 通过 | `docs/evidence/RC-036/README.md` | M0 逐份签收、重复 ADR-0003 修正和后续架构 Issue 决策映射待确认 |
 | RC-037 | 2026-07-17 12:25:00 +08:00 | `4d75ca9` | SUBMITTED WITH PENDING CONFIRMATION：五类 Persona、可测高频任务、优先级、冲突与核心能力覆盖已提交；校验器与 Ruff 通过，访谈未执行 | `docs/evidence/RC-037/README.md` | 真实用户访谈/问卷、P0 优先级和产品范围签收待确认 |
@@ -137,7 +138,7 @@ $ids = [regex]::Matches($content, '(?m)^- \[[ x]\] \*\*RC-(\d{3})\*\* ') |
 2. **一次只解决当前问题。** 不顺手改名、不清理无关代码、不升级无关依赖、不格式化整个仓库。每一行修改必须能指向当前 RC ID。
 3. **保护用户已有修改。** 工作树可能包含用户未提交内容。不得使用 `git reset --hard`、`git checkout --` 或删除未知文件。发现重叠修改时先理解并兼容，无法兼容才停止并说明。
 4. **测试先于完成声明。** 行为变更应先新增能失败的测试，再实现最小代码使其通过。不能运行测试时不得写“已完成”，只能写“实现完成、验证受阻”。
-5. **不伪造外部条件。** 不得编造 API Key、OAuth 客户端、代码签名证书、商标结论、素材授权、模型许可证、真实 API 测试或三平台实机结果。
+5. **不伪造外部条件。** 不得编造 API Key、OAuth 客户端、商标结论、素材授权、模型许可证、真实 API 测试或 Windows/Linux 实机结果。
 6. **不静默降级。** Provider、本地模型、权限或优化链路发生降级时，必须通过结构化元数据和 UI/CLI 明示；未经用户授权不得把内容发送到另一个云 Provider。
 7. **不使用泄露源码实现。** Claude Code source map 还原仓库只能按本文件的 clean-room 规则研究。不得复制或机械改写源码、Prompt、测试、内部文案、常量和私有协议。
 8. **不泄露秘密。** API Key、OAuth Token、代理密码、SSH Key、`.env` 和用户源码正文不得进入 Git、默认日志、测试快照、遥测、诊断包或最终回答。
@@ -224,7 +225,7 @@ npm --prefix frontend run build
 ### 0.5 必须停止并请求人工决定的情况
 
 - 需要选择或变更主许可证、使用无许可证代码、接受模型商业条款或判断素材/商标权利。
-- 需要真实 API Key、OAuth Client、代码签名证书、Apple 公证账户、GitHub Release 权限或付费资源。
+- 需要真实 API Key、OAuth Client、应用商店账户、云服务账户或其他不在本地免费工具链内的外部资源；默认改用 Mock、离线模型或本地验证。
 - 数据库迁移可能不可逆，或恢复演练无法证明用户数据安全。
 - 需要管理员权限、修改系统安全策略、关闭证书校验或扩大沙箱权限。
 - 现有用户改动与当前任务冲突且无法无损合并。
@@ -245,6 +246,7 @@ npm --prefix frontend run build
 8. **本地模型默认运行器为 Ollama。** llama.cpp 是可替换 Adapter；在 RC-187 ADR 有反证前按此执行。
 9. **首个稳定版不依赖 Rabbit Code 云账户。** 会话、设置、模型和历史默认本地保存。
 10. **菱形星星优化默认不自动发送。** 用户必须先查看/采用结果，再明确发送。
+11. **零付费发布边界。** Rabbit Code 默认使用本地 FastAPI、SQLite、免费开源构建工具和 GitHub 公共仓库发布；不购买服务器、域名、应用商店账户、代码签名证书、付费 CI、付费遥测或付费素材。云 API 和模型下载只作为用户自选路径，费用由用户直接承担，不由 Rabbit Code 代付。
 
 ## 2. 默认技术架构
 
@@ -414,9 +416,9 @@ RC 编号用于永久追踪，不代表实际开发顺序。执行 AI 必须按�
 | W6 | CLI/TUI 产品化 | RC-100 至 RC-108、RC-233、RC-306 | W3 Agent Core 稳定 | 交互/无头/JSON/恢复在支持终端通过 |
 | W7 | GUI 壳与视觉系统 | RC-109 至 RC-133、RC-235 至 RC-236、RC-254 至 RC-259 | W2 和视觉授权通过 | 全路由可导航、RabbitMark 覆盖、视觉/A11y 基线通过 |
 | W8 | 菱形星星与优化链路 | RC-134 至 RC-158、RC-240、RC-246 至 RC-249、RC-296、RC-304 | W4、W5、W7 完成 | 云/本地/离线规则三路线不丢草稿 |
-| W9 | 跨端工作流与用户验证 | RC-221、RC-244 至 RC-253、RC-260 至 RC-261、RC-301、RC-305、RC-307 | W6 至 W8 完成 | GUI/CLI 状态一致，用户旅程和三平台矩阵通过 |
+| W9 | 跨端工作流与用户验证 | RC-221、RC-244 至 RC-253、RC-260 至 RC-261、RC-301、RC-305、RC-307 | W6 至 W8 完成 | GUI/CLI 状态一致，用户旅程和 Windows/Linux 矩阵通过 |
 | W10 | 安全、性能和故障硬化 | RC-201 至 RC-212、RC-222 至 RC-229、RC-238 至 RC-243、RC-297 | 核心功能冻结 | 无高危问题，取消/恢复/大仓库/安装升级达标 |
-| W11 | 文档、打包和开源治理 | RC-262 至 RC-289、RC-298 | W10 通过 | 签名制品、SBOM、NOTICE、安装文档齐全 |
+| W11 | 文档、打包和开源治理 | RC-262 至 RC-289、RC-298 | W10 通过 | 未签名制品、SHA-256、SBOM、NOTICE、安装文档齐全 |
 | W12 | 最终验收与持续迭代 | RC-299 至 RC-310 | W11 通过 | Go/No-Go 通过并发布；建立后续看板 |
 
 ### 4.1 关键依赖规则
@@ -430,7 +432,7 @@ RC 编号用于永久追踪，不代表实际开发顺序。执行 AI 必须按�
 - RC-187 运行器 ADR 和 RC-188 模型 manifest 完成前，不得自动下载安装二进制/权重。
 - RC-207 本地服务认证完成前，桌面 GUI 不得以生产模式连接 App Server。
 - RC-213/214 数据模型和迁移完成前，不得持久化新的会话状态。
-- RC-277 签名和来源证明完成前，不得发布 stable 安装包。
+- RC-277 的制品哈希、来源清单和 SBOM 完成前，不得发布 stable 安装包；代码签名不是发布前置条件。
 
 ### 4.2 波次内部默认顺序
 
@@ -520,9 +522,9 @@ RC 编号用于永久追踪，不代表实际开发顺序。执行 AI 必须按�
 适用：RC-262 至 RC-280、RC-297 至 RC-310。
 
 - **主要文件：** `frontend/src-tauri/tauri.conf.json`、`scripts/release/`、`.github/workflows/`、`README.md`、发布证据目录。
-- **实现顺序：** 开发构建 -> unsigned 本地包 -> 干净 VM 安装 -> 签名/公证 -> SBOM/NOTICE -> beta -> 升级/回滚 -> stable。
-- **禁止做法：** 把 Docker 成功当桌面成功；在 Fork PR 暴露签名密钥；发布未签名 stable；安装包暗带模型权重。
-- **最小测试：** 安装、首次启动、升级、阻止不兼容降级、卸载、残留选择、篡改更新、签名和哈希验证。
+- **实现顺序：** 开发构建 -> 未签名本地包 -> 干净 VM 安装 -> SHA-256/来源清单 -> SBOM/NOTICE -> beta -> 升级/回滚 -> stable。
+- **禁止做法：** 把 Docker 成功当桌面成功；把代码签名证书或付费发布服务设为前置条件；安装包暗带模型权重。
+- **最小测试：** 安装、首次启动、升级、阻止不兼容降级、卸载、残留选择、篡改更新、来源和哈希验证。
 
 ## 6. API、事件和状态的最低规范
 
@@ -593,7 +595,7 @@ RC 编号用于永久追踪，不代表实际开发顺序。执行 AI 必须按�
 - `deny`：拒绝且把结果返回 Agent。
 - `edit`：用户修改参数后产生新的 tool call ID，旧调用不得复用批准。
 
-高权限模式也不能绕过以下安全底线：秘密默认保护、本地 App Server 认证、更新签名、模型哈希和禁止无授权专有代码。
+高权限模式也不能绕过以下安全底线：秘密默认保护、本地 App Server 认证、更新来源与哈希校验、模型哈希和禁止无授权专有代码。
 
 ### 6.5 本地模型状态机
 
@@ -684,7 +686,7 @@ git diff --exit-code -- frontend\src\generated
 ### 9.4 禁止用“跳过”冒充通过
 
 - `SKIP` 只有在测试明确属于非当前平台或需要外部凭据时允许，且必须有替代 Mock/契约测试。
-- 三平台、真实 Provider、模型实机、签名和人工无障碍属于发布门禁，可以阶段性未执行，但不能标记对应 RC 完成。
+- Windows/Linux、真实 Provider、模型实机和人工无障碍属于发布门禁，可以阶段性未执行，但不能标记对应 RC 完成；代码签名不属于本项目门禁。
 - 截图存在不等于交互可用；接口 200 不等于业务成功；测试覆盖率高不等于安全路径已验证。
 
 ## 10. 故障处理决策树
@@ -746,7 +748,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-001 正式确立 Rabbit Code 品牌与定位
 
-- **执行步骤：** 检索 GitHub、npm、PyPI、crates.io、主流搜索引擎和应用商店中的同名项目；确定产品中文/英文名称、CLI 命令、包名、应用 ID 与一句话定位；将结果写入品牌 ADR 并同步所有新模块的元数据。
+- **执行步骤：** 检索 GitHub、npm、PyPI、crates.io 和主流搜索引擎中的同名项目；确定产品中文/英文名称、CLI 命令、包名、应用 ID 与一句话定位；将结果写入品牌 ADR 并同步所有新模块的元数据。
 - **交付与验收：** 产出 `docs/adr/0001-brand-and-product-scope.md` 和命名清单；名称无已知高风险冲突，README、应用标题、CLI `--version` 输出一致。
 
 ### RC-002 建立 Claude Code 风格终端行为基线
@@ -797,7 +799,7 @@ git diff --exit-code -- frontend\src\generated
 ### RC-011 实现无 API 自动安装与模型选择
 
 - **执行步骤：** 建立跨平台安装核心、PowerShell/Shell 包装脚本和 GUI 进度协议；完成环境检测、许可证确认、下载、校验、启动和健康检查；向用户呈现 Gemma/Qwen2.5-Coder选择。
-- **交付与验收：** 三平台测试机至少各完成一次支持路线；失败可重试且不会留下被误判为已安装的状态。
+- **交付与验收：** Windows 和 Linux 测试机至少各完成一次支持路线；失败可重试且不会留下被误判为已安装的状态。
 
 ### RC-012 落地主流 API 协议
 
@@ -853,8 +855,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-022 完成 source map 法律评估
 
-- **执行步骤：** 向具备相应法域资质的法律顾问提供来源、分发方式和计划用途；列出版权、合同、商业秘密与再分发问题；在书面结论前冻结正文访问和使用。
-- **交付与验收：** 获得书面允许/禁止范围，项目治理文件引用决策编号；无结论时默认禁止复用。
+- **执行步骤：** 根据公开许可证、官方条款和来源元数据整理版权、合同、商业秘密与再分发问题；不以购买法律服务作为前置条件；无法自行确认的内容继续冻结正文访问和使用。
+- **交付与验收：** 项目治理文件记录允许/禁止范围和决策编号；无可靠公开依据时默认禁止复用，不得用“未购买法律意见”替代风险结论。
 
 ### RC-023 阻断无许可证仓库进入供应链
 
@@ -893,8 +895,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-030 输出 source map clean-room 决策记录
 
-- **执行步骤：** 汇总事实、风险、法律意见、允许/禁止清单、人员隔离和审计流程；由技术负责人、合规负责人签字；关联到 M0 门槛。
-- **交付与验收：** `docs/legal/claude-source-map-clean-room.md` 完整且获批，M0 检查脚本能验证审批状态。
+- **执行步骤：** 汇总事实、风险、公开依据、允许/禁止清单、人员隔离和审计流程；由技术负责人记录决策并关联到 M0 门槛。
+- **交付与验收：** `docs/legal/claude-source-map-clean-room.md` 完整且获批，M0 检查脚本能验证决策状态；不要求购买外部法律意见。
 
 ### RC-031 审核本地模型与运行器许可证
 
@@ -913,8 +915,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-034 检查名称、商标与发布渠道冲突
 
-- **执行步骤：** 查询目标市场商标数据库、域名、GitHub 组织、包仓库和应用商店；记录相似名称与风险；必要时准备备用命名方案。
-- **交付与验收：** 法务/负责人签署命名结论，所有计划发布渠道的标识符可注册或已有控制权。
+- **执行步骤：** 使用公开搜索、GitHub、包仓库和公开商标信息检查相似名称；不购买域名、不注册商标、不接入应用商店；记录相似名称与风险，必要时准备备用命名方案。
+- **交付与验收：** 维护者记录命名结论，GitHub 仓库和计划使用的包名不存在已知直接冲突；不把域名、商标或应用商店控制权作为发布前置条件。
 
 ### RC-035 确认兔兔素材使用权
 
@@ -935,7 +937,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-038 定义首发平台矩阵
 
-- **执行步骤：** 列出 Windows/macOS/Linux 的支持版本、x64/arm64、Shell、终端、GPU、安装包和签名要求；标记正式支持与尽力支持；为每格指定 CI 或实机验证方式。
+- **执行步骤：** 列出 Windows/Linux 的支持版本、x64/arm64、Shell、终端、GPU、未签名安装包和哈希校验要求；标记正式支持与尽力支持；为每格指定 CI 或实机验证方式。
 - **交付与验收：** `docs/support-matrix.md` 无模糊项，首发必选格均有测试环境和负责人。
 
 ### RC-039 定义核心用户场景
@@ -992,8 +994,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-049 拆分 Provider Adapter
 
-- **执行步骤：** 定义 Provider Protocol、能力声明和统一事件；把现有 HTTP 实现拆为 OpenAI Adapter；新增 Gemini、Anthropic 与本地 Adapter，并移除协议猜测。
-- **交付与验收：** 每个 Adapter 通过同一契约测试，新增 Provider 不需要修改 Agent Core。
+- **执行步骤：** 定义 Provider Protocol、能力声明和统一事件；把现有 HTTP 实现拆为明确的 OpenAI-compatible Adapter；保留离线规则 Adapter，并移除协议猜测。Gemini、Anthropic 原生协议和本地模型运行器沿用共享边界，留给后续专门 RC。
+- **交付与验收：** 现有离线实现和 OpenAI-compatible Adapter 通过同一 Mock 契约测试，新增 adapter 不需要修改 Agent/优化核心；本 RC 不发起真实 API 请求或引入付费资源。
 
 ### RC-050 保留离线规则最终降级
 
@@ -1034,7 +1036,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-057 验证候选架构基线
 
-- **执行步骤：** 制作 Python Agent Core + FastAPI + CLI + Tauri/React 的最小纵向原型；在三平台验证启动、流事件、取消和打包；与全 TypeScript 等替代方案比较启动、包体和维护成本。
+- **执行步骤：** 制作 Python Agent Core + FastAPI + CLI + Tauri/React 的最小纵向原型；在 Windows/Linux 验证启动、流事件、取消和打包；与全 TypeScript 等替代方案比较启动、包体和维护成本。
 - **交付与验收：** ADR 记录实测数据并锁定基线；原型能从 GUI/CLI 发起同一请求并收到一致事件。
 
 ### RC-058 将 FastAPI 建成统一 App Server
@@ -1137,7 +1139,7 @@ git diff --exit-code -- frontend\src\generated
 ### RC-077 实现技能与插件体系
 
 - **执行步骤：** 定义 manifest、版本、入口、权限和兼容范围；建立安装、启用、禁用、升级和卸载流程；插件能力通过受控 API 暴露。
-- **交付与验收：** 示例插件可安装运行并被完整卸载，签名/来源或权限不合格的插件被拒绝。
+- **交付与验收：** 示例插件可安装运行并被完整卸载，来源、版本、哈希或权限不合格的插件被拒绝。
 
 ### RC-078 实现模型能力协商
 
@@ -1211,7 +1213,7 @@ git diff --exit-code -- frontend\src\generated
 ### RC-091 实现跨 Shell 命令工具
 
 - **执行步骤：** 建立 shell adapter，参数数组优先于字符串拼接；明确 PowerShell/cmd/Bash/zsh 编码、引用、环境和换行；捕获 stdout/stderr/exit/signal。
-- **交付与验收：** 三平台包含中文路径、空格、引号、长输出和中断的夹具全部通过。
+- **交付与验收：** Windows/Linux 包含中文路径、空格、引号、长输出和中断的夹具全部通过。
 
 ### RC-092 实现 Git 工具集
 
@@ -1292,7 +1294,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-107 验证主流终端兼容性
 
-- **执行步骤：** 建立 Windows Terminal/PowerShell/cmd/WSL、macOS Terminal 和 Linux 终端矩阵；运行输入、颜色、尺寸、信号、路径与剪贴板测试；记录已知限制。
+- **执行步骤：** 建立 Windows Terminal/PowerShell/cmd/WSL 和 Linux 终端矩阵；运行输入、颜色、尺寸、信号、路径与剪贴板测试；记录已知限制。
 - **交付与验收：** 支持矩阵每个必选环境有测试证据，阻断级问题在发布前清零。
 
 ### RC-108 提供 CLI 运维辅助
@@ -1364,7 +1366,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-121 验证标题栏方案
 
-- **执行步骤：** 对原生与自绘标题栏做三平台原型；测试拖拽区域、最大化、双击、系统菜单、缩放、高对比和屏幕阅读器；用 ADR 选择。
+- **执行步骤：** 对原生与自绘标题栏做 Windows/Linux 原型；测试拖拽区域、最大化、双击、系统菜单、缩放、高对比和屏幕阅读器；用 ADR 选择。
 - **交付与验收：** 选择方案在支持矩阵无阻断缺陷，拖拽区域不覆盖交互控件。
 
 ## K. 兔兔素材与视觉系统
@@ -1612,8 +1614,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-169 实现真实连接测试
 
-- **执行步骤：** 分阶段检查凭据、模型最小生成、流式首块和可选工具调用；设置极小 Token/费用预算；返回逐阶段结果和修复提示。
-- **交付与验收：** 测试能区分网络、认证、模型和工具能力问题，费用上限有自动测试。
+- **执行步骤：** 默认使用 Mock 检查凭据解析、模型能力、流式首块和工具调用契约；只有用户主动提供自有 Key 并确认后，才允许手动发送最小真实请求；返回逐阶段结果和修复提示。
+- **交付与验收：** 免费 CI 不发送真实请求；真实连接测试是可选手动项，必须显示可能产生 Provider 费用并支持用户设置 Token 上限。
 
 ### RC-170 统一 Provider 错误分类
 
@@ -1632,8 +1634,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-173 建立 Provider 契约与真实测试门禁
 
-- **执行步骤：** 为每种协议创建录制无秘密的 Mock；定义共享契约；真实测试只在显式环境变量和专用低权限 Key 下运行，并设置日费用阈值。
-- **交付与验收：** 默认 CI 零外网也可全绿，真实测试不会在 Fork PR 运行且费用超限自动停止。
+- **执行步骤：** 为每种协议创建录制无秘密的 Mock；定义共享契约；真实测试只作为用户自有 Key 的可选手动项，不进入默认 CI，也不要求项目购买测试额度。
+- **交付与验收：** 默认 CI 零外网即可全绿；真实测试不会在 Fork PR 运行，界面必须在执行前显示可能产生的 Provider 费用并要求明确确认。
 
 ## O. 首页双入口与凭据
 
@@ -1664,8 +1666,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-179 使用操作系统密钥库
 
-- **执行步骤：** 抽象 `SecretStore`；分别接 Windows Credential Manager、macOS Keychain、Linux Secret Service；SQLite 只保存 opaque reference；无密钥库时默认拒绝明文持久化并给临时会话选项。
-- **交付与验收：** 数据库、日志、配置和崩溃转储扫描无 Key，三平台存取/删除测试通过。
+- **执行步骤：** 抽象 `SecretStore`；接入 Windows Credential Manager 和 Linux Secret Service；SQLite 只保存 opaque reference；无密钥库时默认拒绝明文持久化并给临时会话选项。
+- **交付与验收：** 数据库、日志、配置和崩溃转储扫描无 Key，Windows/Linux 存取/删除测试通过。
 
 ### RC-180 全链路掩码与脱敏
 
@@ -1711,7 +1713,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-188 建立受控模型清单
 
-- **执行步骤：** 用签名/版本化 manifest 记录模型 ID、来源、哈希、参数量、量化、上下文、磁盘/RAM/VRAM、模板和许可证；根据硬件规则计算推荐。
+- **执行步骤：** 用版本化 manifest 记录模型 ID、来源、哈希、参数量、量化、上下文、磁盘/RAM/VRAM、模板和许可证；根据硬件规则计算推荐。
 - **交付与验收：** Manifest Schema 校验通过，推荐不会超过设备预设安全余量，未知模型只允许高级手动导入。
 
 ### RC-189 固定支持 Qwen2.5-Coder
@@ -1791,9 +1793,9 @@ git diff --exit-code -- frontend\src\generated
 - **执行步骤：** 支持一次、会话、匹配规则、拒绝和编辑后执行；规则采用结构化匹配而非任意 Shell 字符串；提供查看与撤销。
 - **交付与验收：** 规则范围测试不越权，默认 UI 无“全部永久允许”，撤销后下一次立即询问。
 
-### RC-204 实现三平台沙箱
+### RC-204 实现 Windows/Linux 双平台沙箱
 
-- **执行步骤：** 调研 Windows AppContainer/Job Object/ACL、macOS sandbox、Linux namespace/seccomp/bwrap；实现可用最小集合和能力探测；不可用时明确降低保证并加强审批。
+- **执行步骤：** 调研 Windows AppContainer/Job Object/ACL、Linux namespace/seccomp/bwrap；实现可用最小集合和能力探测；不可用时明确降低保证并加强审批。
 - **交付与验收：** 每平台逃逸夹具验证文件和进程边界，支持矩阵记录无法等价的限制。
 
 ### RC-205 防御路径、命令和提示注入
@@ -1818,8 +1820,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-209 验证所有下载制品
 
-- **执行步骤：** 对二进制、模型、更新和插件维护受信 manifest；下载后验证哈希/签名和 HTTPS 来源；失败隔离并删除临时文件。
-- **交付与验收：** 篡改、中间人证书和过期签名测试失败关闭，不存在“仍然安装”选项。
+- **执行步骤：** 对二进制、模型、更新和插件维护版本化 manifest；下载后验证哈希、HTTPS 来源和许可证；失败隔离并删除临时文件。
+- **交付与验收：** 哈希不匹配、HTTPS 来源不可用或许可证缺失时安装失败，不存在“仍然安装”选项；不要求数字签名证书。
 
 ### RC-210 实现隐私优先遥测和诊断包
 
@@ -1875,8 +1877,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-220 实现显式遥测选择加入
 
-- **执行步骤：** 初始配置为 off；独立页面说明事件和字段；用户开启后写 consent 版本并可随时关闭/删除；核心功能不读取遥测可用性做授权判断。
-- **交付与验收：** 网络测试确认默认零遥测，关闭后立即停止，遥测后端不可用不影响自托管使用。
+- **执行步骤：** 初始配置为 off；独立页面说明本地事件和字段；用户开启后写 consent 版本并可随时关闭/删除；不建设或依赖遥测后端。
+- **交付与验收：** 网络测试确认默认零遥测，关闭后立即停止；核心功能在没有任何遥测服务、服务器或账户时完整可用。
 
 ### RC-221 提供可移植导入导出
 
@@ -1922,7 +1924,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-229 建立长期性能回归
 
-- **执行步骤：** 将固定仓库/数据集和基准命令放入 `benchmarks`；CI 记录趋势并按噪声设置阈值；README 数字由签名报告生成，不手填。
+- **执行步骤：** 将固定仓库/数据集和基准命令放入 `benchmarks`；CI 记录趋势并按噪声设置阈值；README 数字由可复现报告生成，不手填。
 - **交付与验收：** 人为引入显著回归会告警/阻断，报告包含 Commit、硬件和统计区间。
 
 ## T. 测试与质量保证
@@ -1945,7 +1947,7 @@ git diff --exit-code -- frontend\src\generated
 ### RC-233 完善 CLI 测试
 
 - **执行步骤：** 使用伪终端与普通 subprocess 测交互/无头/JSON/退出码/TTY/非 TTY/不同 Shell/恢复；固定终端尺寸和无颜色模式；捕获 stdout/stderr。
-- **交付与验收：** 关键 CLI 命令在三平台 CI 通过，机器输出快照稳定且无提示符污染。
+- **交付与验收：** 关键 CLI 命令在 Windows/Linux CI 通过，机器输出快照稳定且无提示符污染。
 
 ### RC-234 完善 GUI 组件与 E2E
 
@@ -1969,7 +1971,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-238 完善安装包测试
 
-- **执行步骤：** 在干净 VM 测安装、首次启动、升级、阻止不兼容降级、卸载、保留/删除数据和签名；保存系统快照并重复三平台。
+- **执行步骤：** 在 Windows/Linux 干净 VM 测安装、首次启动、升级、阻止不兼容降级、卸载、保留/删除数据和哈希；保存系统快照并重复两平台。
 - **交付与验收：** 每个稳定版候选均有全新环境证据，安装后无未知服务/计划任务残留。
 
 ### RC-239 完善安全测试
@@ -1984,12 +1986,12 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-241 以 Mock 为 CI 默认
 
-- **执行步骤：** 提供确定性 Provider/Runner Mock；Fork/普通 PR 只跑 Mock；真实 API/模型作受保护手动或定时任务，读取专用秘密和费用上限。
+- **执行步骤：** 提供确定性 Provider/Runner Mock；Fork/普通 PR 只跑 Mock；真实 API/模型仅作为用户自有 Key 的受保护手动任务，不配置项目付费 Key 或定时调用。
 - **交付与验收：** 无秘密、无外网环境能完成 CI，外部服务波动不影响普通 PR 判定。
 
-### RC-242 建立三平台 CI
+### RC-242 建立 Windows/Linux CI
 
-- **执行步骤：** 配置 Windows、macOS、Linux 矩阵；缓存锁文件依赖；运行格式、Lint、类型、单元、集成、E2E、构建和许可证；分层并行并汇总门禁。
+- **执行步骤：** 配置 Windows、Linux 矩阵；缓存锁文件依赖；运行格式、Lint、类型、单元、集成、E2E、构建和许可证；分层并行并汇总门禁。
 - **交付与验收：** 受保护分支要求全部必选 Job，任一平台失败不能发布。
 
 ### RC-243 设定覆盖率与关键路径门槛
@@ -2012,7 +2014,7 @@ git diff --exit-code -- frontend\src\generated
 ### RC-246 验证 API 用户完整旅程
 
 - **执行步骤：** 在干净 Profile 配置 Provider、测试、发起对话、点击星星、确认同一 Provider、采用并发送；记录网络请求与 UI 状态；覆盖失败重试。
-- **交付与验收：** Playwright + Mock 和一次受控真实 API 均通过，元数据证明没有切换到未授权服务。
+- **交付与验收：** Playwright + Mock 通过；真实 API 仅在用户明确提供 Key 时作为可选手动证据，元数据证明没有切换到未授权服务。
 
 ### RC-247 验证无 API 用户完整旅程
 
@@ -2143,12 +2145,12 @@ git diff --exit-code -- frontend\src\generated
 - **执行步骤：** 提取并运行标注的 Shell/PowerShell/Python/CLI 代码块；用链接检查器和截图存在性检查；性能数字关联基准 JSON；安装步骤在 VM 定时测试。
 - **交付与验收：** 失效命令、链接、截图或手填过期数字会使 CI 失败。
 
-## X. 构建、部署与发布
+## X. 构建、部署与发布（注意：以下任务不用考虑macOS）
 
 ### RC-272 生成两平台桌面安装包（注意：以下任务不用考虑macOS）
 
 - **执行步骤：** 配置 Tauri bundler 输出 Windows 安装程序、Linux AppImage/deb/rpm；按支持矩阵构建架构；设置图标、应用 ID、卸载和用户数据策略。
-- **交付与验收：** 每种首发产物在干净环境安装/启动/卸载通过，文件名、版本和签名可自动核对。
+- **交付与验收：** 每种首发产物在干净环境安装/启动/卸载通过，文件名、版本和 SHA-256 哈希可自动核对；不要求代码签名。
 
 ### RC-273 发布 CLI 安装渠道
 
@@ -2162,18 +2164,18 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-275 保持本地模型按需下载
 
-- **执行步骤：** 桌面安装包只带模型 manifest 和安装器；首次选择本地路线才下载；企业/离线包单独发布并遵守许可；设置下载大小确认。
+- **执行步骤：** 桌面安装包只带模型 manifest 和安装器；首次选择本地路线才下载；提供手动离线导入并遵守许可；设置下载大小确认。
 - **交付与验收：** 标准安装包扫描不含大模型权重，API 路线不会触发模型下载。
 
 ### RC-276 实现安全更新与回滚
 
-- **执行步骤：** 使用签名更新 manifest；客户端检查渠道、版本、平台、哈希和签名；分阶段发布；升级前备份数据并验证协议/迁移，失败回到旧二进制或安全恢复页。
+- **执行步骤：** 使用版本化更新 manifest；客户端通过 HTTPS 检查渠道、版本、平台和 SHA-256 哈希；分阶段发布；升级前备份数据并验证协议/迁移，失败回到旧二进制或安全恢复页。
 - **交付与验收：** 篡改更新被拒绝，升级/回滚演练不损坏数据，不兼容版本给出明确阻止提示。
 
-### RC-277 配置签名、公证和供应链证明
+### RC-277 生成制品哈希、SBOM 和供应链清单
 
-- **执行步骤：** 保护 Windows/macOS 签名凭据和最小权限工作流；执行 macOS 公证；生成 SLSA/构建来源、SHA-256、CycloneDX/SPDX SBOM、许可证报告和恶意软件扫描。
-- **交付与验收：** Release 制品验证签名有效且来源可追踪，秘密不暴露给 Fork PR，扫描无未处置高危结果。
+- **执行步骤：** 使用免费本地工具生成构建来源说明、SHA-256、CycloneDX/SPDX SBOM、许可证报告和恶意软件扫描；不配置代码签名、公证或签名凭据。
+- **交付与验收：** Release 制品与 SHA-256、来源清单和 SBOM 可相互核对，秘密不暴露给 Fork PR，扫描无未处置高危结果。
 
 ### RC-278 建立 nightly、beta、stable 渠道
 
@@ -2182,12 +2184,12 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-279 完整生成 GitHub Release
 
-- **执行步骤：** Release 工作流上传各平台安装包/CLI、校验和、SBOM、许可证、来源证明；从 Issue/PR 生成变更、已知问题和升级说明；签名 Tag。
-- **交付与验收：** 发布清单自动核对无缺项，用户可按文档验证下载哈希和签名。
+- **执行步骤：** Release 工作流上传各平台安装包/CLI、校验和、SBOM、许可证、来源证明；从 Issue/PR 生成变更、已知问题和升级说明；使用普通 Git Tag。
+- **交付与验收：** 发布清单自动核对无缺项，用户可按文档验证下载哈希；不要求应用商店或签名服务。
 
 ### RC-280 限定 Docker 使用范围
 
-- **执行步骤：** Dockerfile 仅服务 API 开发、测试或可选服务部署；README 不把容器冒烟当桌面验证；CI 分别保留容器和真实安装包任务。
+- **执行步骤：** Dockerfile 仅服务 API 本地开发和测试；README 不把容器冒烟当桌面验证；CI 分别保留容器和真实安装包任务；不部署 Rabbit Code 公共服务。
 - **交付与验收：** 发布报告明确两类结果，桌面/CLI 支持声明都有非 Docker 证据。
 
 ## Y. 开源治理与许可证
@@ -2219,12 +2221,12 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-286 确认所有视觉和演示资产权利
 
-- **执行步骤：** 为兔兔、图标、字体、截图、文档图片和演示仓库建立资产登记；保存授权、来源、修改和署名；对截图中的第三方品牌/数据做清理。
-- **交付与验收：** 发布资产全部可在登记表找到有效权利依据，未知来源资产为零。
+- **执行步骤：** 为兔兔、图标、免费字体、截图、文档图片和演示仓库建立资产登记；保存授权、来源、修改和署名；不购买素材或字体；对截图中的第三方品牌/数据做清理。
+- **交付与验收：** 发布资产全部可在登记表找到有效权利依据，未知来源资产为零；无法免费确认权利的资产不进入发布包。
 
 ### RC-287 建立维护者与安全治理
 
-- **执行步骤：** 最小化仓库/Admin/Release 权限；启用分支保护、必审、签名提交/Tag、CODEOWNERS；配置 Dependabot/Renovate、密钥轮换和安全响应值班。
+- **执行步骤：** 最小化仓库/Admin/Release 权限；启用分支保护、必审、普通 Tag、CODEOWNERS；配置 Dependabot/Renovate、密钥轮换和安全响应值班；不购买或配置签名证书。
 - **交付与验收：** 权限季度审计通过，单个普通维护者不能绕过 stable 发布门禁。
 
 ### RC-288 整理 GitHub 项目呈现
@@ -2246,12 +2248,12 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-291 通过 M0 source map 专项门槛
 
-- **执行步骤：** 完成仓库证据清单、法律意见、clean-room 人员/权限、允许/禁止列表和监控计划；审计工作树/依赖无还原源码。
+- **执行步骤：** 完成仓库证据清单、公开法律依据、clean-room 人员/权限、允许/禁止列表和监控计划；审计工作树/依赖无还原源码。
 - **交付与验收：** 技术与合规共同签署，自动 denylist 测试通过，否则不得进入核心实现。
 
 ### RC-292 通过 M1 架构原型
 
-- **执行步骤：** 构建最小 Agent Core、FastAPI、CLI 流事件、Tauri GUI 和 sidecar 生命周期；生成 TypeScript 客户端；在三平台至少跑健康/请求/取消/退出。
+- **执行步骤：** 构建最小 Agent Core、FastAPI、CLI 流事件、Tauri GUI 和 sidecar 生命周期；生成 TypeScript 客户端；在 Windows/Linux 至少跑健康/请求/取消/退出。
 - **交付与验收：** 原型报告包含性能、包体、故障和 ADR，未解决架构阻断项为零。
 
 ### RC-293 通过 M2 Agent Core 与 CLI
@@ -2281,7 +2283,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-298 通过 M7 开源稳定版发布
 
-- **执行步骤：** 完成文档、许可/NOTICE/SBOM、签名制品、GitHub Release 和贡献机制；执行 Go/No-Go；发布后验证下载、更新与监控。
+- **执行步骤：** 完成文档、许可/NOTICE/SBOM、未签名制品及 SHA-256 校验和、GitHub Release 和贡献机制；执行 Go/No-Go；发布后验证下载、更新与监控。
 - **交付与验收：** 用户可验证并安装所有宣布支持的制品，Release 清单与实际附件完全一致。
 
 ### RC-299 执行 M8 持续迭代
@@ -2296,15 +2298,15 @@ git diff --exit-code -- frontend\src\generated
 - **执行步骤：** 从需求源生成矩阵；逐项链接 RC、设计、代码、测试、文档和 Release；由独立审查者抽查证据与实际行为。
 - **交付与验收：** 矩阵覆盖率 100%，无缺失、重复冒充或仅有计划没有实现的条目。
 
-### RC-301 验证三平台双路线
+### RC-301 验证 Windows/Linux 双路线
 
-- **执行步骤：** 在 Windows、macOS、Linux 受支持干净环境分别执行 API 与无 API 脚本；记录安装、配置、对话、优化、退出和卸载；保存版本/硬件证据。
-- **交付与验收：** 六个端到端组合全部通过，任何平台例外必须从首发支持声明移除而非静默跳过。
+- **执行步骤：** 在 Windows、Linux 受支持干净环境分别执行 API 与无 API 脚本；记录安装、配置、对话、优化、退出和卸载；保存版本/硬件证据。
+- **交付与验收：** 四个端到端组合全部通过，任何平台例外必须从首发支持声明移除而非静默跳过。
 
 ### RC-302 验证三种原生协议
 
-- **执行步骤：** 对 OpenAI、Gemini、Anthropic 跑完整契约；用专用低权限 Key 做文本、流式、工具和错误真实测试；记录 API 版本与费用。
-- **交付与验收：** 三协议均有通过报告，失败/内容过滤/限流映射符合统一错误规范。
+- **执行步骤：** 对 OpenAI、Gemini、Anthropic 跑完整 Mock/契约测试；真实文本、流式、工具和错误测试仅在用户明确提供自有低权限 Key 时手动执行，并记录 API 版本与可能费用。
+- **交付与验收：** 三协议均有免费契约通过报告；可选真实测试不属于发布前置条件，失败/内容过滤/限流映射符合统一错误规范。
 
 ### RC-303 验证 Gemma 与 Qwen 完整生命周期
 
@@ -2343,8 +2345,8 @@ git diff --exit-code -- frontend\src\generated
 
 ### RC-310 执行最终发布门禁
 
-- **执行步骤：** 汇总测试、文档、安装包、许可证、安全、SBOM、升级/卸载、GitHub Release 和 RC-001 至 RC-309 证据；自动校验后召开 Go/No-Go；冻结并签名批准制品。
-- **交付与验收：** 所有强制检查通过、签署齐全、制品哈希一致后才发布；任一阻断项失败即 No-Go，不允许口头豁免。
+- **执行步骤：** 汇总测试、文档、安装包、许可证、安全、SBOM、升级/卸载、GitHub Release 和 RC-001 至 RC-309 证据；自动校验后召开 Go/No-Go；冻结并核对未签名制品及其哈希。
+- **交付与验收：** 所有强制检查通过、决策记录齐全、制品哈希一致后才发布；任一阻断项失败即 No-Go，不允许口头豁免。
 
 ## AB. 原始 310 项基线清单（完整合并与进度勾选区）
 
@@ -2415,7 +2417,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-031** 调研 Gemma、Qwen2.5-Coder、Ollama、llama.cpp、Hugging Face 模型文件的代码许可证、模型许可证、再分发限制、署名和用户确认要求。
 - [x] **RC-032** 为所有拟复用实现建立“来源、许可证、复用方式、修改内容、NOTICE 要求、替代方案”清单。
 - [x] **RC-033** 对无许可、商业条款或来源不清晰的代码采用 clean-room 行为重实现，保留设计记录，不复制代码、提示词、隐藏协议或受保护资产。
-- [x] **RC-034** 对 Rabbit Code、兔兔形象、包名、域名、GitHub 组织名和应用商店名称进行商标、命名冲突与可发布性检查。
+- [x] **RC-034** 对 Rabbit Code、兔兔形象、包名和 GitHub 组织名进行公开商标信息、命名冲突与可发布性检查，不要求域名或应用商店账户。
 - [x] **RC-035** 确认用户提供的 `兔兔素材.png` 拥有开源项目使用、修改、派生和再分发权，并记录素材许可证与署名要求。
 - [x] **RC-036** 输出调研报告、功能对比矩阵、技术选型 ADR、许可证清单和明确的“不复用项”。
 
@@ -2436,7 +2438,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-046** 保留现有 Python 3.12、FastAPI、React、Vite、TypeScript、SQLite、Typer、测试和 Docker 基础，先通过 ADR 决定升级或替换范围。
 - [x] **RC-047** 复用并回归验证现有评分、建议、规则、模板、优化、版本 diff、历史、导出和评测模块。
 - [x] **RC-048** 复用现有 `/api/analyze`、`/api/optimize`、`/api/optimize/stream`、任务、认证、项目和版本接口的有效能力。
-- [ ] **RC-049** 将现有仅能基本处理 OpenAI Chat Completions 的通用 HTTP Provider 拆分为协议明确、能力可探测的 Provider Adapter。
+- [x] **RC-049** 将现有仅能基本处理 OpenAI Chat Completions 的通用 HTTP Provider 拆分为协议明确、能力可探测的 Provider Adapter。
 - [x] **RC-050** 保留 `OfflineRuleProvider` 作为无网络、模型未安装、模型加载失败时的最终可用降级，而不是把它误称为大模型。
 - [x] **RC-051** 将现有 `prompt-opt` CLI 与 Rabbit Code Agent CLI 的命令空间、配置和存储进行兼容迁移。
 - [x] **RC-052** 评估现有 JWT 本地用户体系是否仍有必要，区分“Rabbit Code 本地用户资料”与“第三方 API 凭据配置”。
@@ -2470,7 +2472,7 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-074** 支持主 Agent、受控子 Agent、并行只读探索、结果汇总和并发槽限制。
 - [ ] **RC-075** 支持 Hooks，在工具执行前后、会话开始结束、权限请求和错误时触发确定性策略。
 - [ ] **RC-076** 支持 MCP 客户端、内置工具服务器和第三方工具服务器，覆盖 stdio、HTTP 及认证生命周期。
-- [ ] **RC-077** 支持可安装的技能/插件、工作区指令和命令扩展，并建立权限、签名、版本和兼容机制。
+- [ ] **RC-077** 支持可安装的技能/插件、工作区指令和命令扩展，并建立来源、哈希、权限、版本和兼容机制。
 - [ ] **RC-078** 支持模型能力协商，按文本、图像、工具调用、结构化输出、上下文长度和推理参数选择行为。
 - [ ] **RC-079** 不把任一模型的隐藏思维链写入日志或 UI，只呈现允许公开的简短进度和依据。
 
@@ -2509,7 +2511,7 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-104** 支持非交互 CI 使用，禁止在无 TTY 环境卡在权限提示，并提供清晰退出码。
 - [ ] **RC-105** 支持 `--dry-run`、只读分析、机器可读事件流和日志级别。
 - [ ] **RC-106** CLI 和 GUI 必须共享 Provider 配置、密钥引用、模型清单、会话、权限规则和提示词优化服务。
-- [ ] **RC-107** 验证 Windows Terminal、PowerShell、cmd、WSL、macOS Terminal 和主流 Linux 终端的兼容性。
+- [ ] **RC-107** 验证 Windows Terminal、PowerShell、cmd、WSL 和主流 Linux 终端的兼容性。
 - [ ] **RC-108** 提供 Shell 补全、安装路径检查、版本检查、诊断命令和卸载清理命令。
 
 ### 10. Codex 桌面端风格的 GUI 信息架构
@@ -2590,7 +2592,7 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-170** 统一错误分类：认证、余额、限流、区域、模型不存在、参数不兼容、内容过滤、网络、超时和服务端错误。
 - [ ] **RC-171** 实现指数退避、`Retry-After`、请求取消、代理、自定义 CA、IPv4/IPv6 和企业网络设置。
 - [ ] **RC-172** 提供每会话模型选择、默认模型、提示词优化模型、自动回退、最大费用和 Token 预算。
-- [ ] **RC-173** 为所有 Provider 建立 Mock/契约测试；真实 API 测试必须显式启用并限制费用。
+- [ ] **RC-173** 为所有 Provider 建立 Mock/契约测试；真实 API 测试仅允许用户提供 Key 后手动启用，并明确可能产生的费用。
 
 ### 15. 首页双入口与凭据管理
 
@@ -2599,7 +2601,7 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-176** “无 API”向导进入硬件检测、本地运行器选择、Gemma/Qwen2.5-Coder选择、许可证确认、安装和验证。
 - [ ] **RC-177** 两条路线完成后进入同一个工作区首页，不构建两套割裂产品。
 - [ ] **RC-178** 用户可在设置和模型选择器中随时新增、编辑、禁用、切换或删除 Provider 与本地模型。
-- [ ] **RC-179** API Key 使用 Windows Credential Manager、macOS Keychain、Linux Secret Service 或等价安全存储，不以明文写入 SQLite、日志或仓库。
+- [ ] **RC-179** API Key 使用 Windows Credential Manager、Linux Secret Service 或等价安全存储，不以明文写入 SQLite、日志或仓库。
 - [ ] **RC-180** UI 只显示掩码和密钥末尾标识，复制、导出、错误报告和遥测均不得泄漏密钥。
 - [ ] **RC-181** 支持环境变量和配置文件引用，但明确优先级并在 UI 中显示来源，不反向展示密钥明文。
 - [ ] **RC-182** 官方 OAuth 只在服务商明确允许第三方客户端时实现，包含 PKCE、回调、刷新、撤销和到期处理。
@@ -2608,7 +2610,7 @@ git diff --exit-code -- frontend\src\generated
 
 ### 16. Gemma 与 Qwen2.5-Coder 本地模型集成
 
-- [ ] **RC-185** 提供 Windows PowerShell、macOS/Linux Shell 安装脚本，并由 GUI 安装向导调用同一安装核心。
+- [ ] **RC-185** 提供 Windows PowerShell、Linux Shell 安装脚本，并由 GUI 安装向导调用同一安装核心。
 - [ ] **RC-186** 安装前检测操作系统、CPU、内存、磁盘、GPU、显存、驱动、网络、代理和已有运行器。
 - [ ] **RC-187** 选择经许可证审计的本地运行器，候选包括 Ollama 与 llama.cpp；抽象运行器接口避免强绑定。
 - [ ] **RC-188** 提供 Gemma 和 Qwen2.5-Coder 的受控模型清单，按硬件推荐参数规模、量化、上下文长度和预计磁盘/内存占用。
@@ -2630,12 +2632,12 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-201** 定义只读、工作区写入和高权限三档策略，文件、终端、网络、Git、MCP 和桌面能力分别授权。
 - [ ] **RC-202** 危险或越界操作使用明确审批弹窗，展示命令、路径、影响、工作目录和持久授权范围。
 - [ ] **RC-203** 支持单次允许、会话允许、规则允许、拒绝和修改后执行；默认不提供含糊的“全部永久允许”。
-- [ ] **RC-204** 为 Windows、macOS、Linux 设计实际可用的进程和文件系统沙箱，记录平台能力差异。
+- [ ] **RC-204** 为 Windows、Linux 设计实际可用的进程和文件系统沙箱，记录平台能力差异。
 - [ ] **RC-205** 防止路径穿越、符号链接逃逸、命令注入、环境变量泄漏、恶意仓库指令和工具输出提示注入。
 - [ ] **RC-206** 保护 `.env`、SSH Key、云凭据、浏览器资料、系统目录和用户指定敏感文件。
 - [ ] **RC-207** 本地 FastAPI 仅绑定 Loopback，使用每次启动的认证令牌、严格 CORS/Origin、随机端口和最小暴露面。
 - [ ] **RC-208** 对插件、技能、Hooks、MCP Server 和安装脚本建立来源信任、权限声明、版本锁定和禁用机制。
-- [ ] **RC-209** 对下载的二进制、模型、更新包和插件执行哈希、签名或来源验证。
+- [ ] **RC-209** 对下载的二进制、模型、更新包和插件执行 HTTPS 来源、许可证和哈希验证，不要求数字签名。
 - [ ] **RC-210** 默认关闭包含代码/提示词内容的遥测；崩溃报告和诊断包必须预览、脱敏并由用户主动发送。
 - [ ] **RC-211** 建立威胁模型、安全测试、依赖扫描、秘密扫描、SBOM、漏洞响应和安全公告流程。
 - [ ] **RC-212** 提供审计日志，但允许用户控制保留期和彻底清除。
@@ -2673,11 +2675,11 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-235** 视觉回归覆盖所有独立页面、兔兔素材、深浅主题、常见分辨率、缩放、长文本和空/错/加载状态。
 - [ ] **RC-236** 无障碍测试覆盖键盘、焦点、语义、Tooltip、屏幕阅读器、对比度和减少动画。
 - [ ] **RC-237** 本地模型测试覆盖 Gemma、Qwen2.5-Coder、CPU、可用 GPU、低内存、断点续传、损坏下载、修复和卸载。
-- [ ] **RC-238** 安装包测试覆盖干净机器、升级、降级阻止、卸载、残留数据选择和代码签名。
+- [ ] **RC-238** 安装包测试覆盖干净机器、升级、降级阻止、卸载、残留数据选择和 SHA-256 哈希校验，不要求代码签名。
 - [ ] **RC-239** 安全测试覆盖密钥泄漏、路径逃逸、命令注入、本地端口、恶意 MCP/插件、恶意仓库和供应链。
 - [ ] **RC-240** Prompt 优化质量测试覆盖优化前后得分、人工评审、语义保持、格式保持、代码块和多语言。
-- [ ] **RC-241** 使用 Provider Mock 作为 CI 默认路径，真实 API 和真实大模型测试进入受控的可选矩阵。
-- [ ] **RC-242** 建立 Windows、macOS、Linux CI，执行格式、Lint、类型、单元、集成、E2E、构建和许可证检查。
+- [ ] **RC-241** 使用 Provider Mock 作为 CI 默认路径；真实 API 和真实大模型测试仅作为用户自有资源的受控可选手动矩阵。
+- [ ] **RC-242** 建立 Windows、Linux CI，执行格式、Lint、类型、单元、集成、E2E、构建和许可证检查。
 - [ ] **RC-243** 设定覆盖率和关键路径门槛；不允许用高总覆盖率掩盖权限、密钥、安装和迁移路径缺测。
 
 ### 21. GUI/CLI 功能联调与完整性验收
@@ -2719,15 +2721,15 @@ git diff --exit-code -- frontend\src\generated
 
 ### 24. 构建、部署与发布工程
 
-- [ ] **RC-272** 生成 Windows 安装程序、macOS DMG/签名应用、Linux AppImage/deb/rpm等计划内产物。
+- [ ] **RC-272** 生成 Windows 安装程序、Linux AppImage/deb/rpm 等未签名计划内产物，并提供 SHA-256 校验和。
 - [ ] **RC-273** CLI 提供合适的包管理器渠道和独立二进制/安装脚本，并验证 PATH、升级和卸载。
 - [ ] **RC-274** 将 Python/FastAPI sidecar、前端静态资源、Tauri 壳和必要运行时以可复现方式打包。
 - [ ] **RC-275** 本地模型默认按需下载，不无条件塞入桌面安装包。
-- [ ] **RC-276** 实现应用与 CLI 更新检查、签名验证、分阶段发布、回滚和版本兼容提示。
-- [ ] **RC-277** 配置代码签名、公证、构建来源证明、制品哈希、SBOM、依赖许可证报告和恶意软件扫描。
+- [ ] **RC-276** 实现应用与 CLI 更新检查、HTTPS/哈希验证、分阶段发布、回滚和版本兼容提示，不要求代码签名。
+- [ ] **RC-277** 生成构建来源证明、制品哈希、SBOM、依赖许可证报告和恶意软件扫描，不配置代码签名或公证。
 - [ ] **RC-278** 建立 nightly、beta、stable 渠道与语义化版本、变更日志和数据库迁移门槛。
 - [ ] **RC-279** GitHub Release 包含安装包、校验和、SBOM、许可证、已知问题和升级说明。
-- [ ] **RC-280** Docker 仅作为服务端/开发/测试补充，不代替真正的桌面与 CLI 安装验证。
+- [ ] **RC-280** Docker 仅作为本地开发/测试补充，不部署 Rabbit Code 公共服务，也不代替真正的桌面与 CLI 安装验证。
 
 ### 25. 开源治理、许可证与发布准备
 
@@ -2737,7 +2739,7 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-284** 对从 Codex/OpenCode 借鉴或修改的文件保留必要版权、NOTICE 和修改声明。
 - [ ] **RC-285** 自动扫描依赖许可证、未知许可证、Copyleft 影响和禁止再分发组件。
 - [ ] **RC-286** 确认兔兔素材、应用图标、字体、截图、文档图片和演示仓库的发布权。
-- [ ] **RC-287** 建立维护者权限、分支保护、签名提交、Release 审批、依赖更新和安全响应制度。
+- [ ] **RC-287** 建立维护者权限、分支保护、Release 审批、依赖更新和安全响应制度，不要求签名提交或签名 Tag。
 - [ ] **RC-288** 创建或整理 GitHub 仓库结构、Topics、项目看板、里程碑、Release 和公开路线图。
 - [ ] **RC-289** 首次公开发布前完成全新环境复现、许可证复核、安全审计和文档走查。
 
@@ -2770,11 +2772,11 @@ git diff --exit-code -- frontend\src\generated
 
 #### M6：硬化与发布候选版
 
-- [ ] **RC-297** 完成跨平台、安装升级、性能、无障碍、安全、隐私、视觉回归、故障恢复和需求完整性验收。
+- [ ] **RC-297** 完成 Windows/Linux、安装升级、性能、无障碍、安全、隐私、视觉回归、故障恢复和需求完整性验收。
 
 #### M7：开源稳定版发布
 
-- [ ] **RC-298** 完成文档、许可证、NOTICE、SBOM、签名安装包、GitHub Release、贡献机制和发布后监控。
+- [ ] **RC-298** 完成文档、许可证、NOTICE、SBOM、未签名安装包及 SHA-256 校验和、GitHub Release、贡献机制和发布后监控。
 
 #### M8：持续优化与迭代
 
@@ -2783,8 +2785,8 @@ git diff --exit-code -- frontend\src\generated
 ### 27. 最终完成定义
 
 - [ ] **RC-300** 原始 6 项要求和原初 12 类计划均可在需求追踪表中定位到实现、测试和文档。
-- [ ] **RC-301** Windows、macOS、Linux 至少各有一个受支持环境完成 API 路线和无 API 路线端到端验收。
-- [ ] **RC-302** OpenAI、Gemini、Claude/Anthropic 三种原生协议均通过契约测试和受控真实连接测试。
+- [ ] **RC-301** Windows、Linux 至少各有一个受支持环境完成 API 路线和无 API 路线端到端验收。
+- [ ] **RC-302** OpenAI、Gemini、Claude/Anthropic 三种原生协议均通过免费契约测试；受控真实连接测试仅作为用户提供 Key 后的可选手动验证。
 - [ ] **RC-303** Gemma 与 Qwen2.5-Coder均可通过脚本/GUI 安装、验证、对话、切换、修复和卸载。
 - [ ] **RC-304** 菱形星星在有 API 和无 API 两种情况下都能正确优化，且原输入不会因错误、取消或并发编辑丢失。
 - [ ] **RC-305** 每个独立 GUI 页面都有合规的兔兔素材表现，并通过桌面/小窗口、深浅主题和无障碍验收。
