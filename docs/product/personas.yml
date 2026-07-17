@@ -1,0 +1,142 @@
+schema_version: 1
+rc_id: RC-037
+captured_at: "2026-07-17"
+research_status: evidence-calibrated-not-interview-validated
+scope_review_status: pending-product-review
+evidence:
+  - docs/development-plan.md
+  - docs/rabbit-code-310-detailed-execution.md
+  - docs/adr/0002-technology-stack-retention.md
+  - docs/adr/0003-local-identity-and-provider-credentials.md
+  - docs/research/local-model-license-policy.md
+  - docs/research/rc036-research-delivery-summary.md
+personas:
+  - id: individual-developer
+    label: 个人开发者
+    goals:
+      - open-a-repository-and-understand-the-change-surface
+      - complete-small-to-medium-coding-tasks-with-reviewable-diffs
+      - reduce-prompt-iteration-time
+    constraints:
+      - limited-time-and-attention
+      - prefers-local-first-workflow
+      - needs-clear-cost-and-provider-state
+    high_frequency_tasks:
+      - id: repo-to-plan
+        priority: P0
+        measure: opens-a-repository-and-creates-a-testable-plan-without-external-tutorials
+      - id: plan-to-diff
+        priority: P0
+        measure: produces-a-reviewable-diff-and-test-result-without-losing-input
+      - id: prompt-optimize
+        priority: P1
+        measure: compares-and-adopts-an-optimization-with-undo-and-history
+  - id: offline-user
+    label: 无 API 用户
+    goals:
+      - analyze-and-optimize-prompts-without-cloud-credentials
+      - use-local-rules-or-user-installed-models
+      - keep-source-and-prompt-data-on-device
+    constraints:
+      - no-api-key-or-no-cloud-consent
+      - hardware-and-disk-budget-may-be-limited
+      - model-terms-and-downloads-must-be-explicit
+    high_frequency_tasks:
+      - id: offline-optimize
+        priority: P0
+        measure: completes-a-rule-based-optimization-without-login-or-api-key
+      - id: model-consent
+        priority: P0
+        measure: sees-license-source-size-and-data-boundary-before-download
+      - id: offline-recovery
+        priority: P1
+        measure: resumes-or-repairs-a-local-model-session-after-a-failed-download
+  - id: multi-provider-developer
+    label: 多 Provider 用户
+    goals:
+      - switch-between-compatible-provider-endpoints
+      - compare-output-quality-and-cost
+      - keep-provider-secrets-out-of-project-history
+    constraints:
+      - provider-capabilities-and-error-shapes-differ
+      - api-keys-must-not-enter-jwt-or-persistent-content
+      - changing-provider-must-not-destroy-current-input
+    high_frequency_tasks:
+      - id: configure-provider
+        priority: P0
+        measure: configures-a-provider-and-sees-a-specific-health-or-error-state
+      - id: switch-provider
+        priority: P0
+        measure: switches-provider-without-losing-prompt-session-or-diff-context
+      - id: compare-results
+        priority: P1
+        measure: compares-provider-results-with-recorded-model-and-settings
+  - id: open-source-contributor
+    label: 开源贡献者
+    goals:
+      - implement-changes-with-tests-and-reproducible-evidence
+      - understand-source-and-license-boundaries
+      - submit-reviewable-provenance
+    constraints:
+      - cannot-import-unapproved-source-or-assets
+      - ci-and-notice-gates-must-be-repeatable
+      - limited-time-for-context-switching
+    high_frequency_tasks:
+      - id: trace-requirement
+        priority: P0
+        measure: links-a-change-to-an-rc-id-test-and-evidence-record
+      - id: review-provenance
+        priority: P0
+        measure: completes-source-license-originality-and-similarity-fields-before-pr
+      - id: run-gates
+        priority: P1
+        measure: reproduces-local-and-ci-check-results-from-a-clean-worktree
+  - id: team-maintainer
+    label: 团队维护者
+    goals:
+      - standardize-agent-workflows-and-review-policy
+      - resume-work-across-sessions-and-people
+      - control-provider-data-and-release-risk
+    constraints:
+      - must-preserve-resource-ownership-and-audit-history
+      - policies-cannot-block-safe-local-development-without-an-explanation
+      - release-approvals-and-signoffs-are-limited
+    high_frequency_tasks:
+      - id: review-session
+        priority: P0
+        measure: reviews-plan-terminal-output-and-diff-before-accepting-a-change
+      - id: resume-task
+        priority: P1
+        measure: restores-session-context-and-pending-actions-without-guessing
+      - id: approve-release
+        priority: P0
+        measure: sees-blocking-license-provenance-security-and-test-gates-in-one-view
+conflicts:
+  - id: privacy-vs-provider-breadth
+    tension: offline-local-first-control-versus-remote-model-and-provider-capability
+    resolution_direction: make-data-boundary-and-provider-state-visible; keep-offline-route-usable
+  - id: speed-vs-governance
+    tension: individual-fast-editing-versus-provenance-license-and-human-review-gates
+    resolution_direction: keep-gates-automated-and-reviewable; do-not-silently-bypass-blockers
+  - id: freedom-vs-team-policy
+    tension: contributor-local-experimentation-versus-maintainer-release-controls
+    resolution_direction: separate-local-draft-from-approved-release-state-and-show-reason
+  - id: breadth-vs-validation
+    tension: cross-platform-provider-and-model-scope-versus-limited-validation-capacity
+    resolution_direction: publish-support-matrix-and-label-unvalidated-combinations
+  - id: richness-vs-scanning
+    tension: expressive-rabbit-brand-and-rich-ui-versus-dense-code-diff-and-terminal-review
+    resolution_direction: keep-brand-elements-subordinate-to-work-content-and-accessible
+core_capability_coverage:
+  - capability: repository-and-workspace
+    primary_personas: [individual-developer, open-source-contributor, team-maintainer]
+  - capability: agent-plan-edit-test-diff
+    primary_personas: [individual-developer, open-source-contributor, team-maintainer]
+  - capability: offline-prompt-optimization
+    primary_personas: [offline-user, individual-developer]
+  - capability: providers-and-models
+    primary_personas: [multi-provider-developer, offline-user]
+  - capability: sessions-history-and-ownership
+    primary_personas: [team-maintainer, individual-developer]
+  - capability: provenance-license-and-release-gates
+    primary_personas: [open-source-contributor, team-maintainer]

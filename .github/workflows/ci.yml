@@ -62,6 +62,9 @@ jobs:
       # RC ID: RC-036
       - name: Research delivery summary
         run: python scripts/check_rc036_research_summary.py
+      # RC ID: RC-037
+      - name: Persona contract
+        run: python scripts/check_personas.py
       - name: Ruff
         run: ruff check backend
       - name: Mypy
