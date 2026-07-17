@@ -20,6 +20,7 @@ def _run(*args: str) -> None:
 
 def install() -> None:
     _run(sys.executable, "-m", "pip", "install", "-e", "backend[dev]")
+    _run(sys.executable, "-m", "pip", "install", "-e", "packages/protocol")
     _run(NPM, "--prefix", "frontend", "install")
 
 
@@ -46,7 +47,14 @@ def lint() -> None:
 
 
 def typecheck() -> None:
-    _run(sys.executable, "-m", "mypy", "backend/src", "backend/rabbit_code")
+    _run(
+        sys.executable,
+        "-m",
+        "mypy",
+        "backend/src",
+        "backend/rabbit_code",
+        "packages/protocol/rabbit_code_protocol",
+    )
 
 
 def verify() -> None:

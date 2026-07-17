@@ -12,6 +12,7 @@ WORKSPACE_FILE = Path("workspace.toml")
 BACKEND_PROJECT_FILE = Path("backend/pyproject.toml")
 FRONTEND_PACKAGE_FILE = Path("frontend/package.json")
 FRONTEND_LOCK_FILE = Path("frontend/package-lock.json")
+PROTOCOL_PROJECT_FILE = Path("packages/protocol/pyproject.toml")
 
 
 def _read_toml(path: Path) -> dict[str, object]:
@@ -73,11 +74,17 @@ def validate_workspace(repository_root: Path) -> list[str]:
     backend_project = repository_root / BACKEND_PROJECT_FILE
     frontend_package = repository_root / FRONTEND_PACKAGE_FILE
     frontend_lock = repository_root / FRONTEND_LOCK_FILE
+    protocol_project = repository_root / PROTOCOL_PROJECT_FILE
     try:
         project = _read_toml(backend_project).get("project")
         package = _read_json(frontend_package)
         lock_packages = _read_json(frontend_lock).get("packages")
-        if not isinstance(project, dict) or not isinstance(lock_packages, dict):
+        protocol = _read_toml(protocol_project).get("project")
+        if (
+            not isinstance(project, dict)
+            or not isinstance(lock_packages, dict)
+            or not isinstance(protocol, dict)
+        ):
             raise TypeError("member metadata has an invalid object shape")
         lock_root = lock_packages.get("")
         if not isinstance(lock_root, dict):
@@ -85,12 +92,19 @@ def validate_workspace(repository_root: Path) -> list[str]:
         backend_version = project["version"]
         frontend_version = package["version"]
         lock_version = lock_root["version"]
+        protocol_version = protocol["version"]
     except (KeyError, OSError, TypeError, json.JSONDecodeError, tomllib.TOMLDecodeError) as exc:
         errors.append(f"unable to read member metadata: {exc}")
     else:
-        if not (version == backend_version == frontend_version == lock_version):
+        if not (
+            version
+            == backend_version
+            == frontend_version
+            == lock_version
+            == protocol_version
+        ):
             errors.append(
-                "workspace, backend, frontend, and frontend lockfile versions must match"
+                "workspace, backend, frontend, protocol, and lockfile versions must match"
             )
 
     errors.extend(_check_forbidden_imports(repository_root))
