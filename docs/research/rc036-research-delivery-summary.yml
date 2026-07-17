@@ -1,0 +1,196 @@
+schema_version: 1
+rc_id: RC-036
+captured_at: "2026-07-17"
+status: submitted-pending-m0-review
+scope:
+  sources:
+    - codex
+    - opencode
+    - claude-code
+    - claude-agent-sdk
+    - local-models-and-runners
+    - rabbit-artwork
+  conclusion_boundary: research-facts-and-reuse-boundaries-only
+feature_comparison:
+  - id: codex
+    evidence:
+      - docs/research/codex-source-register.yml
+      - docs/research/codex-source-boundaries.md
+    decision: adopt-licensed-cli-app-server-facts-and-independent-boundaries
+    reuse_boundary: fixed-sha-source-requires-file-level-license-and-notice-review; desktop-gui-is-behavior-only
+  - id: opencode
+    evidence:
+      - docs/research/opencode-research-register.yml
+      - docs/research/opencode-module-map.md
+      - docs/adr/0003-opencode-research-boundary.md
+    decision: adopt-independent-architecture-concepts
+    reuse_boundary: no-upstream-code-tests-copy; no-ui-or-desktop-assets
+  - id: claude-code
+    evidence:
+      - docs/research/claude-code-public-materials.yml
+      - docs/research/claude-code-neutral-spec.md
+    decision: facts-and-neutral-behavior-categories-only
+    reuse_boundary: no-core-code-commercial-materials-brand-assets-prompts-or-tests
+  - id: claude-agent-sdk
+    evidence:
+      - docs/research/claude-agent-sdk-research.yml
+      - docs/research/claude-agent-sdk-neutral-spec.md
+      - docs/adr/0004-claude-agent-sdk-rights-boundary.md
+    decision: reference-interface-facts-only
+    reuse_boundary: sdk-license-does-not-cover-bundled-cli; no-cli-download-bundle-or-distribution
+  - id: local-models-and-runners
+    evidence:
+      - docs/research/local-model-license-manifest.yml
+      - docs/research/local-model-license-policy.md
+      - docs/research/third-party-register.yml
+    decision: adapter-only-and-on-demand-model-policy
+    reuse_boundary: no-model-weights-in-installer; gemma-remains-gated; qwen-requires-license-display-and-user-confirmation
+  - id: rabbit-artwork
+    evidence:
+      - docs/legal/rabbit-art-license.yml
+      - docs/legal/rabbit-art-license.md
+    decision: identity-recorded-but-release-blocked
+    reuse_boundary: no-new-release-distribution-until-rights-and-license-evidence
+adr_index:
+  - key: technology-stack-retention
+    path: docs/adr/0002-technology-stack-retention.md
+    status: accepted
+    approval_scope: engineering
+    m0_status: pending
+  - key: opencode-research-boundary
+    path: docs/adr/0003-opencode-research-boundary.md
+    status: accepted-for-research
+    approval_scope: research-boundary
+    m0_status: pending
+  - key: local-identity-provider-separation
+    path: docs/adr/0003-local-identity-and-provider-credentials.md
+    status: accepted
+    approval_scope: engineering
+    m0_status: pending
+  - key: claude-agent-sdk-rights-boundary
+    path: docs/adr/0004-claude-agent-sdk-rights-boundary.md
+    status: accepted-for-research
+    approval_scope: rights-boundary
+    m0_status: pending
+  - key: independent-agent-event-design
+    path: docs/adr/0005-independent-agent-event-design.md
+    status: submitted
+    approval_scope: clean-room-design
+    m0_status: blocked-by-role-signoff
+  - key: claude-source-map-clean-room
+    path: docs/legal/claude-source-map-clean-room.md
+    status: pending-human-approval
+    approval_scope: legal-and-clean-room
+    m0_status: blocked
+  - key: product-name-channel-audit
+    path: docs/legal/product-name-channel-audit.md
+    status: pending-human-legal-review
+    approval_scope: product-and-legal
+    m0_status: pending
+  - key: rabbit-art-license
+    path: docs/legal/rabbit-art-license.md
+    status: pending-human-confirmation
+    approval_scope: asset-rights
+    m0_status: blocked
+id_collision:
+  status: found
+  value: ADR-0003 is used by two files; normalize numbering before publishing a canonical ADR index
+license_matrix:
+  - source: openai/codex
+    license: Apache-2.0
+    status: verified
+    use: file-level-review-required
+    evidence: docs/research/source-baselines.yml
+  - source: anomalyco/opencode
+    license: MIT
+    status: verified
+    use: concepts-only-no-upstream-code
+    evidence: docs/research/opencode-research-register.yml
+  - source: anthropics/claude-code
+    license: unknown
+    status: behavior-only
+    use: no-core-code-or-commercial-materials
+    evidence: docs/research/claude-code-public-materials.yml
+  - source: anthropics/claude-agent-sdk-python
+    license: MIT-declared-sdk
+    status: verified-for-sdk-surface
+    use: sdk-surface-review-only; bundled-cli-not-approved
+    evidence: docs/research/claude-agent-sdk-research.yml
+  - source: ollama-and-llama.cpp
+    license: MIT
+    status: verified-metadata
+    use: adapter-only-license-review-required
+    evidence: docs/research/local-model-license-manifest.yml
+  - source: google/gemma-3-1b-it
+    license: Gemma-specific
+    status: gated-manual-confirmation
+    use: no-download-or-packaging-before-user-confirmation
+    evidence: docs/research/local-model-license-manifest.yml
+  - source: Qwen/Qwen2.5-Coder-1.5B-Instruct
+    license: Apache-2.0
+    status: verified-metadata
+    use: on-demand-after-license-display; no-installer-weights
+    evidence: docs/research/local-model-license-manifest.yml
+  - source: current-direct-and-build-dependencies
+    license: mixed-and-review-required
+    status: 32-registered; 10-review-required
+    use: third-party-register-and-notice-gate
+    evidence: docs/research/third-party-register.yml
+  - source: frontend/public/rabbit-artwork.png
+    license: unknown
+    status: pending-human-confirmation
+    use: release-blocked
+    evidence: docs/legal/rabbit-art-license.yml
+non_reuse_rules:
+  - id: codex-desktop
+    rule: do-not-copy-desktop-source-assets-or-brand
+    evidence: docs/research/codex-source-boundaries.md
+  - id: opencode-implementation
+    rule: do-not-copy-upstream-code-tests-prompts-resources-or-ui
+    evidence: docs/adr/0003-opencode-research-boundary.md
+  - id: claude-code-materials
+    rule: do-not-copy-core-binary-commercial-materials-brand-prompts-tests-or-assets
+    evidence: docs/research/claude-code-neutral-spec.md
+  - id: claude-cli
+    rule: do-not-download-bundle-distribute-or-recreate-bundled-claude-code-cli
+    evidence: docs/adr/0004-claude-agent-sdk-rights-boundary.md
+  - id: source-map-content
+    rule: do-not-access-run-copy-mechanically-rewrite-or-distribute-source-map-content
+    evidence: docs/legal/claude-source-map-clean-room.md
+  - id: model-weights
+    rule: do-not-package-model-weights; enforce-gated-and-user-confirmed-downloads
+    evidence: docs/research/local-model-license-policy.md
+  - id: rabbit-artwork
+    rule: do-not-release-unlicensed-artwork
+    evidence: docs/legal/rabbit-art-license.md
+cross_module_review:
+  status: pending-human-m0-review
+  m0_approved: false
+  signoff:
+    - module: research-and-sources
+      owner: pending
+      status: prepared-not-signed
+    - module: engineering-architecture
+      owner: pending
+      status: prepared-not-signed
+    - module: compliance-and-provenance
+      owner: pending
+      status: prepared-not-signed
+    - module: legal-and-asset-rights
+      owner: pending
+      status: blocked-pending-qualified-review
+  blockers:
+    - RC-025-role-signoff
+    - RC-030-m0-clean-room-approval
+    - RC-034-name-and-channel-legal-review
+    - RC-035-artwork-authorization
+    - RC-031-gemma-terms-confirmation
+  architecture_issue_gate:
+    required: true
+    approval_status: blocked
+    required_fields:
+      - approved_decision_id
+      - evidence_path
+      - provenance_and_license_scope
+      - reviewer_and_date
+    current_mapping: []
