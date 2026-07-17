@@ -1,0 +1,74 @@
+schema_version: 1
+rc_id: RC-044
+status: accepted
+current_release_line: 3.0.x
+semver:
+  major: "允许删除完成弃用窗口的 API、配置和数据兼容。"
+  minor: "只增加向后兼容能力；新增迁移必须可前向执行。"
+  patch: "只修复错误或安全问题，不改变已登记契约。"
+compatibility_windows:
+  api:
+    legacy_prefix: /api
+    versioned_prefix: /api/v1
+    window: "同一 MAJOR 保留旧入口，删除必须在下一 MAJOR 前完成公告、替代入口和测试。"
+    deprecation: "响应/CLI 诊断显示替代入口和截止版本；不静默改变旧请求语义。"
+  configuration:
+    preferred_namespace: RABBIT_CODE_
+    legacy_namespace: PROMPT_OPTIMIZER_
+    window: "新键优先，旧键只读回退；兼容窗口内显示来源，禁止双写。"
+    deprecation: "删除旧键前必须新增 RC、迁移说明和旧配置测试。"
+  database:
+    current_schema: 1
+    supported_source_versions: [0, 1]
+    window: "支持 v0 -> v1 前向迁移；高于当前版本拒绝打开。"
+    deprecation: "不原地降级；版本删除前必须保留备份恢复路径和迁移公告。"
+  cli:
+    legacy_command: prompt-opt
+    replacement_command: rabbit prompt
+    window: "按 RC-051 保留迁移提示；删除或改变退出码需新 RC。"
+    deprecation: "旧命令继续输出迁移提示；删除入口或改变退出码前必须有新 RC 和旧命令回归。"
+
+migration_contract:
+  preflight:
+    - "读取版本、文件权限、磁盘空间和目标路径，不读取或记录秘密正文。"
+    - "高于当前版本直接拒绝；低于当前版本创建同目录 SQLite 热备和 manifest。"
+  forward_migration:
+    - "在事务中创建缺失表/列并保持现有记录可读。"
+    - "执行完整性检查、关键记录计数和 schema 版本校验。"
+    - "成功后原子提交并记录来源/目标版本和备份 SHA-256。"
+  rollback:
+    - "事务失败时回滚且保持原数据库字节内容不变。"
+    - "提交后验收失败时关闭应用，从迁移前备份恢复到独立目标。"
+    - "用户明确确认后才替换目标；不执行未知版本的原地降级。"
+  evidence_command: "python -m pytest backend/tests/test_storage_backup.py -q"
+
+test_data_versions:
+  - id: rc044-v0-legacy
+    schema_version: 0
+    purpose: "现有 V2 形状的 users、prompt_versions、tasks 数据，作为前向迁移输入。"
+    records:
+      users: 1
+      prompt_versions: 2
+      tasks: 1
+    secret_fields: []
+  - id: rc044-v1-current
+    schema_version: 1
+    purpose: "迁移后包含 owner/project 关联和当前任务字段的数据，作为读取/恢复基线。"
+    records:
+      users: 1
+      prompt_versions: 2
+      tasks: 1
+    secret_fields: []
+
+controlled_rollback:
+  trigger: "迁移事务异常、完整性检查失败、关键记录计数不一致或用户主动选择恢复。"
+  steps:
+    - "保留迁移前数据库和 manifest，不覆盖原文件。"
+    - "只读检查备份完整性和来源/目标版本。"
+    - "恢复到不存在的独立路径并再次检查记录计数。"
+    - "用户明确确认后原子替换应用目标，记录恢复事件。"
+  acceptance:
+    - "v0 数据成功前向迁移到 v1，users/prompt_versions/tasks 记录计数保持一致。"
+    - "注入迁移异常后原数据库哈希、版本号和完整性保持不变。"
+    - "备份可只读检查并恢复到独立目标；不触碰 `.runtime/` 或默认应用数据库。"
+  evidence_command: "python -m pytest backend/tests/test_storage_backup.py -q"
