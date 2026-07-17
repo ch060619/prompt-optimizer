@@ -1,0 +1,35 @@
+# RC ID: RC-060. Minimal desktop shell command allowlist.
+
+[desktop]
+name = "rabbit-code-desktop-shell"
+business_logic = false
+
+[[commands]]
+name = "open_window"
+purpose = "window lifecycle"
+requires_user_confirmation = false
+
+[[commands]]
+name = "pick_file"
+purpose = "native file picker"
+requires_user_confirmation = true
+
+[[commands]]
+name = "notify"
+purpose = "system notification"
+requires_user_confirmation = false
+
+[[commands]]
+name = "check_update"
+purpose = "update metadata request"
+requires_user_confirmation = true
+
+[[commands]]
+name = "store_secret"
+purpose = "OS secret-store bridge"
+requires_user_confirmation = true
+
+[[commands]]
+name = "start_sidecar"
+purpose = "App Server sidecar lifecycle"
+requires_user_confirmation = false
