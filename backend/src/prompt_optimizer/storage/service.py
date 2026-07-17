@@ -19,6 +19,7 @@ from prompt_optimizer.core.models import (
 from prompt_optimizer.identity import compatible_env
 from prompt_optimizer.paths import default_db_path
 from prompt_optimizer.storage.backup import BackupResult, backup_database, read_schema_version
+from prompt_optimizer.storage.files import FileStore
 
 # RC ID: RC-054. Prefer Rabbit Code configuration with a legacy fallback.
 
@@ -37,6 +38,7 @@ class StorageService:
     ) -> None:
         self.db_path = db_path or default_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.file_store = FileStore(self.db_path.parent / "files")
         self.backup_dir = backup_dir or self.db_path.parent / "backups"
         configured_path = config_path or compatible_env("CONFIG")
         self.config_path = Path(configured_path).expanduser() if configured_path else None
@@ -353,12 +355,16 @@ class StorageService:
         )
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.db_path)
+        connection = sqlite3.connect(self.db_path, timeout=30.0)
         connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA busy_timeout = 30000")
+        connection.execute("PRAGMA foreign_keys = ON")
         return connection
 
     def _init_db(self) -> None:
         with self._connect() as connection:
+            connection.execute("PRAGMA journal_mode = WAL")
+            connection.execute("PRAGMA synchronous = NORMAL")
             connection.execute("PRAGMA foreign_keys = ON")
             connection.execute(
                 """
