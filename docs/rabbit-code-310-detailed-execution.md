@@ -68,7 +68,7 @@
 | RC-036 | 2026-07-17 12:17:01 +08:00 | `8ec7253` | SUBMITTED WITH PENDING CONFIRMATION：六组来源、ADR/许可证/不复用索引和 M0/架构 Issue 门禁已提交；校验器与 Ruff 通过 | `docs/evidence/RC-036/README.md` | M0 逐份签收、重复 ADR-0003 修正和后续架构 Issue 决策映射待确认 |
 | RC-037 | 2026-07-17 12:25:00 +08:00 | `4d75ca9` | SUBMITTED WITH PENDING CONFIRMATION：五类 Persona、可测高频任务、优先级、冲突与核心能力覆盖已提交；校验器与 Ruff 通过，访谈未执行 | `docs/evidence/RC-037/README.md` | 真实用户访谈/问卷、P0 优先级和产品范围签收待确认 |
 | RC-038 | 2026-07-17 13:12:09 +08:00 | `bc9764d` | SUBMITTED WITH PENDING CONFIRMATION：Windows/Linux 首发平台矩阵、x86_64 正式基线、终端/Shell、CPU/GPU、未签名制品、SHA-256、验证环境和责任角色已冻结；组合实测待后续 RC | `docs/evidence/RC-038/README.md` | Linux 实机、未签名安装包、ARM/GPU 和 Fedora rpm 实测待后续平台/安装包/测试 RC；macOS 不在首发范围 |
-| RC-039 | 2026-07-17 13:46:04 +08:00 | 待本项记录提交后固定 | SUBMITTED WITH PENDING CONFIRMATION：十二个核心旅程、R1-R6 映射、失败/恢复分支、功能依赖和人工测试卡已提交；实现/E2E 待后续 RC | `docs/evidence/RC-039/README.md` | Agent、GUI、Provider、模型和跨平台 E2E 待后续 RC；RC-037 产品范围评审仍待确认 |
+| RC-039 | 2026-07-17 13:46:04 +08:00 | `e6b71e8` | SUBMITTED WITH PENDING CONFIRMATION：十二个核心旅程、R1-R6 映射、失败/恢复分支、功能依赖和人工测试卡已提交；实现/E2E 待后续 RC | `docs/evidence/RC-039/README.md` | Agent、GUI、Provider、模型和跨平台 E2E 待后续 RC；RC-037 产品范围评审仍待确认 |
 
 ### 进度记录一致性检查
 

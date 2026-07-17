@@ -4,7 +4,7 @@
 - 状态：已提交（核心场景与测试卡已定义；实现和 E2E 验证待后续 RC）
 - 负责人：Codex
 - 基线 Commit：`f141caf`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`e6b71e8`
 - 前置 RC：RC-038（已提交；平台正式格实测待后续 RC）
 - 修改文件：`docs/product/core-scenarios.yml`、`docs/product/core-scenarios.md`、`scripts/check_core_scenarios.py`、本证据和主计划进度记录
 - 用户可见行为：打开仓库到离线对话的十二个核心旅程均有前置、主流程、失败/恢复分支、功能依赖、R1-R6 映射和人工测试卡。
