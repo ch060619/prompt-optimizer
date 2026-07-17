@@ -1,0 +1,115 @@
+schema_version: 1
+rc_id: RC-041
+status: defined-not-release-validated
+scope: "MVP 是可验证的纵向最小闭环；首个稳定版覆盖当前 310 项计划和 R1-R6；增强项只能来自稳定版之外的新范围。"
+source_documents:
+  execution_plan: docs/rabbit-code-310-detailed-execution.md
+  requirement_traceability: docs/traceability/rc-index.md
+  capability_matrix: docs/product/capability-matrix.yml
+
+release_tracks:
+  mvp:
+    label: MVP
+    status: target-before-stable
+    purpose: "先打通工作区、Agent、权限、工具、CLI/无头、最小 GUI 和离线规则的可验证纵向闭环。"
+    requirement_ids: [R1, R3, R5, R6]
+    capability_ids:
+      - workspace-discovery
+      - context-assembly
+      - agent-loop
+      - plan-edit-permission
+      - tool-and-approval
+      - terminal-process
+      - diagnostics
+      - prompt-optimization
+      - offline-local-model
+    entry_conditions:
+      - "W0 基线可恢复，W1 的合法性、来源和产品范围门禁通过。"
+      - "共享事件、权限和存储边界已登记，Provider 默认走 Mock 或离线规则。"
+    exit_conditions:
+      - "至少一条 CLI/无头和一条 GUI 纵向路径可用同一核心服务完成请求、取消和恢复。"
+      - "原输入、权限拒绝和离线降级均有可观察状态；未验证的真实服务不被标记为通过。"
+
+  first_stable:
+    label: 首个稳定版
+    status: required
+    requirement_ids: [R1, R2, R3, R4, R5, R6]
+    wave_ids: [W0, W1, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12]
+    rc_ranges: ["RC-001..RC-310"]
+    plan_categories:
+      - 项目前期准备
+      - 开源调研
+      - 架构设计
+      - 核心功能开发
+      - GUI 设计
+      - 提示词优化
+      - API 接入
+      - 本地模型集成
+      - 整合测试
+      - 文档部署
+      - 优化迭代
+      - 开源发布
+    release_gates:
+      - "R1 的固定来源、clean-room、CLI 行为和 GUI 功能矩阵证据齐全。"
+      - "R2 的全部独立页面路由、RabbitMark、视觉回归和人工验收通过。"
+      - "R3 的 API、Loopback FastAPI、离线规则、revision 并发保护和两条 E2E 通过。"
+      - "R4 的 API/无 API 双入口、Gemma/Qwen 生命周期和统一工作区入口通过。"
+      - "R5 的 RC-001..RC-310 均可追踪到实现、测试或明确的稳定版发布证据，不接受仅文档完成。"
+      - "R6 的 OpenAI、Gemini、Claude/Anthropic 免费契约测试通过；真实连接仅在用户提供 Key 后手动验证。"
+      - "Windows/Linux 首发边界、未签名制品、SHA-256、SBOM、NOTICE 和发布文档门禁通过。"
+
+requirements:
+  R1:
+    stable: true
+    acceptance: "固定公开来源和 clean-room 记录、CLI 行为测试、GUI 功能矩阵均可追踪。"
+    dependency_waves: [W0, W1, W3, W6, W7, W9]
+  R2:
+    stable: true
+    acceptance: "每个独立 GUI 页面均有批准的兔兔素材或派生品牌元素，并通过视觉回归、布局和无障碍验收。"
+    dependency_waves: [W1, W7, W8, W9, W10]
+  R3:
+    stable: true
+    acceptance: "星星优化支持用户 API、Loopback FastAPI 和离线规则，保护 revision、原文、取消、降级和发送边界。"
+    dependency_waves: [W3, W4, W5, W7, W8, W9, W10]
+  R4:
+    stable: true
+    acceptance: "首页双入口、本地运行器、Gemma/Qwen 安装验证、切换、修复、卸载和统一工作区入口均有证据。"
+    dependency_waves: [W2, W4, W5, W7, W9, W10]
+  R5:
+    stable: true
+    acceptance: "当前 RC-001..RC-310 全部进入稳定版路线并通过实现、测试、文档和发布追踪，不把功能永久推迟。"
+    dependency_waves: [W0, W1, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12]
+  R6:
+    stable: true
+    acceptance: "OpenAI、Gemini、Claude/Anthropic 原生协议通过统一契约和 Mock；真实连接按用户自有 Key 的受控手动矩阵执行。"
+    dependency_waves: [W3, W4, W8, W9, W10]
+
+deferred_items:
+  - id: macos-and-apple-gpu
+    status: deferred-post-stable
+    requirement_ids: []
+    rc_ids: []
+    rationale: "当前首发范围明确为 Windows/Linux；macOS、Apple GPU、签名应用和公证不是 R1-R6 的首个稳定版前置。"
+    entry_conditions:
+      - "新增独立 RC，重新确认平台范围、许可证、安装包和密钥库边界。"
+      - "有固定 macOS 真实机器或 CI、维护负责人和可复现安装/升级/卸载测试。"
+      - "完成 Apple GPU、GUI、权限和发布渠道的独立验收后，才能加入支持承诺。"
+    review_trigger: "出现明确平台需求且固定验证环境和维护责任可用时复审。"
+  - id: arm64-and-additional-linux
+    status: deferred-post-stable
+    requirement_ids: []
+    rc_ids: []
+    rationale: "ARM64、额外发行版和 GPU 加速属于尽力支持扩展，不能用构建成功替代稳定版兼容性证据。"
+    entry_conditions:
+      - "为目标架构或发行版固定 CI/真实机器，并记录运行器、驱动、模型和制品哈希。"
+      - "完成 CLI、安装包、升级/卸载和本地模型生命周期测试，并明确不影响正式支持基线。"
+    review_trigger: "固定 runner 和维护负责人同时到位时复审。"
+  - id: signed-artifacts-and-store-channels
+    status: deferred-post-stable
+    requirement_ids: []
+    rc_ids: []
+    rationale: "当前零付费发布边界采用未签名 Windows/Linux 制品和 SHA-256；代码签名、公证及应用商店渠道不是首个稳定版前置。"
+    entry_conditions:
+      - "用户或维护组织明确提供签名证书、账户、密钥保管和撤销流程。"
+      - "完成构建来源、签名验证、密钥泄漏响应、各平台安装升级和商店审核测试。"
+    review_trigger: "发布治理和外部账户获得明确授权且不改变免费默认发布路径时复审。"
