@@ -1,0 +1,522 @@
+schema_version: 1
+rc_id: RC-039
+status: defined-not-e2e-validated
+scope: "首发 Windows/Linux 核心编码与提示词工作流场景定义；实现验证由后续 RC 完成。"
+requirement_coverage:
+  R1:
+    scenario_ids: [open-repository, coding-task, read-code, plan-task, edit-files, run-command, run-tests, review-diff, restore-session]
+    rationale: "终端行为、Agent 循环、工具和 GUI 工作流均以可观察场景表达。"
+  R2:
+    scenario_ids: [open-repository, coding-task, review-diff, optimize-prompt]
+    rationale: "GUI 场景卡要求页面可识别、可扫描且不遮挡工作内容；全页面视觉验收留给 RC-235/251。"
+  R3:
+    scenario_ids: [coding-task, optimize-prompt, offline-conversation]
+    rationale: "覆盖有 API、Loopback FastAPI、离线规则三条优化路径及原输入保护。"
+  R4:
+    scenario_ids: [open-repository, switch-model, offline-conversation]
+    rationale: "覆盖统一工作区入口、本地模型选择和无 API 对话路线；安装生命周期留给 RC-185 至 RC-200。"
+  R5:
+    scenario_ids: [open-repository, coding-task, read-code, plan-task, edit-files, run-command, run-tests, review-diff, restore-session, switch-model, optimize-prompt, offline-conversation]
+    rationale: "十二个场景共同覆盖仓库、Agent、工具、会话、Provider、优化和离线能力。"
+  R6:
+    scenario_ids: [switch-model, optimize-prompt]
+    rationale: "场景要求 Provider/模型能力、错误和数据边界可见；三种原生协议契约留给 RC-231/302。"
+
+scenarios:
+  - id: open-repository
+    title: 打开仓库并建立工作区
+    priority: P0
+    persona_ids: [individual-developer, open-source-contributor, team-maintainer]
+    requirement_ids: [R1, R2, R3, R4, R5]
+    status: planned
+    preconditions:
+      - "存在 Windows 11 x64 或 Ubuntu 24.04 x64 测试环境。"
+      - "目标目录分别覆盖 Git 仓库、非 Git 目录和包含中文/空格的路径。"
+      - "用户选择的 API、离线规则或本地路线状态可被读取，但不要求真实 API Key。"
+    main_flow:
+      - "用户从 CLI 或 GUI 选择目录，系统向上查找 Git 根目录并显示工作区路径。"
+      - "系统读取分支、worktree、脏状态、语言、包管理器、构建工具和适用项目指令。"
+      - "用户确认工作区与权限模式，系统创建可恢复会话并展示最近任务入口。"
+      - "用户可以从同一工作区进入阅读、计划或对话任务，而不重复选择仓库。"
+    failure_branches:
+      - id: not-a-git-directory
+        trigger: "目录不是 Git 仓库或 Git 状态命令失败。"
+        expected: "显示可操作原因，仍允许以普通目录打开；不得把失败目录误标为 Git 仓库。"
+        recovery: "用户可选择父目录、初始化前的只读分析或取消。"
+      - id: unsafe-path
+        trigger: "路径越界、符号链接逃逸、敏感目录或权限不足。"
+        expected: "阻止读取并显示命中的边界，不泄露文件内容。"
+        recovery: "用户改选工作区或明确授权后重新检查；拒绝时会话保持可取消。"
+    feature_dependencies:
+      - capability: "项目识别与分层指令"
+        rc_ids: [RC-080, RC-081, RC-083]
+      - capability: "工作区、权限与会话边界"
+        rc_ids: [RC-070, RC-088, RC-201, RC-205]
+      - capability: "统一本地入口"
+        rc_ids: [RC-058, RC-067]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-01
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；CLI 与 GUI 各一条路径。"
+      steps:
+        - "选择 Git 仓库、非 Git 目录和中文路径。"
+        - "核对工作区根、分支、脏状态、指令来源和权限提示。"
+        - "关闭并重新打开会话，确认工作区与上下文可恢复。"
+      pass_criteria:
+        - "三类目录均返回明确状态；非 Git 目录不被静默拒绝。"
+        - "越界/敏感路径被阻止，安全失败不包含源码正文。"
+        - "同一工作区可进入后续场景，状态没有重复创建或丢失。"
+
+  - id: coding-task
+    title: 发起编码任务并完成 Agent 循环
+    priority: P0
+    persona_ids: [individual-developer, team-maintainer]
+    requirement_ids: [R1, R2, R3, R5]
+    status: planned
+    preconditions:
+      - "已打开工作区并确认当前分支、权限模式和 Provider/本地路线。"
+      - "任务目标、范围、验收命令和取消方式已可输入。"
+      - "测试使用 Provider Mock 或 OfflineRuleProvider，不依赖项目付费资源。"
+    main_flow:
+      - "用户输入目标和验收条件，系统创建任务、上下文快照和预算。"
+      - "Agent 依次展示上下文、模型、工具请求、权限决定、工具结果和进度摘要。"
+      - "用户批准安全工具调用，Agent 修改或检查工作区并继续循环。"
+      - "任务以完成状态收敛，保留结果、事件、变更和验证摘要。"
+    failure_branches:
+      - id: approval-denied
+        trigger: "用户拒绝写入、命令或网络权限。"
+        expected: "拒绝成为结构化事件，Agent 不绕过批准继续执行。"
+        recovery: "用户可修改参数、切换只读计划或取消任务；原目标仍可重试。"
+      - id: budget-or-timeout
+        trigger: "轮次、Token、费用、墙钟或并发预算达到上限。"
+        expected: "任务安全停止，显示具体预算项和已用值，不丢失已完成检查点。"
+        recovery: "用户可调整预算后重试或查看部分结果；不得自动扩大授权。"
+    feature_dependencies:
+      - capability: "Agent 状态、事件和循环"
+        rc_ids: [RC-068, RC-071, RC-072, RC-073]
+      - capability: "Plan/Edit 权限与工具"
+        rc_ids: [RC-070, RC-090, RC-091, RC-097]
+      - capability: "结果与会话持久化"
+        rc_ids: [RC-064, RC-086, RC-089]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-02
+      environment: "WIN-TERM-PS、WIN-CMD、LINUX-GNOME-BASH；Provider Mock。"
+      steps:
+        - "提交带验收命令和明确范围的最小编码任务。"
+        - "批准一次读取、一次编辑和一次测试工具调用。"
+        - "拒绝一次危险调用，再从检查点重试或取消。"
+      pass_criteria:
+        - "事件顺序可重放，最终结果与已完成工具结果一致。"
+        - "拒绝、预算、取消和重试都有可见状态和恢复入口。"
+        - "未授权工具没有执行，原输入和已完成结果没有丢失。"
+
+  - id: read-code
+    title: 阅读代码并建立上下文
+    priority: P0
+    persona_ids: [individual-developer, open-source-contributor]
+    requirement_ids: [R1, R5]
+    status: planned
+    preconditions:
+      - "工作区包含多语言文件、二进制/大文件、`.gitignore` 和敏感路径夹具。"
+      - "用户可以指定文件、目录、代码选区或搜索词。"
+    main_flow:
+      - "用户请求理解模块或定位符号，系统先应用忽略、敏感路径和大小边界。"
+      - "系统展示搜索命中、相关文件、代码选区和来源，用户可移除上下文块。"
+      - "Agent 基于已确认内容给出带文件/行号依据的摘要，不把隐藏推理写入 UI。"
+      - "用户可继续追问或把当前上下文交给计划场景。"
+    failure_branches:
+      - id: ignored-or-sensitive
+        trigger: "目标文件被忽略、属于敏感路径或通过符号链接逃逸。"
+        expected: "显示拒绝类别和路径摘要，不读取正文。"
+        recovery: "用户改选安全文件或明确允许的工作区范围后重试。"
+      - id: context-too-large
+        trigger: "目录、附件或搜索结果超过大小/Token 预算。"
+        expected: "显示可解释的截断或预算错误，保留已选安全块。"
+        recovery: "用户缩小目录、选区或提高会话预算后重新组装上下文。"
+    feature_dependencies:
+      - capability: "上下文内容块和安全搜索"
+        rc_ids: [RC-082, RC-083, RC-084]
+      - capability: "工具结果与公开摘要"
+        rc_ids: [RC-090, RC-098, RC-079]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-03
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；离线规则或 Provider Mock。"
+      steps:
+        - "分别选择文件、目录、选区、搜索结果和被忽略/敏感路径。"
+        - "制造超大结果，核对预览、截断标记和移除操作。"
+        - "检查摘要依据、公开进度和日志内容。"
+      pass_criteria:
+        - "安全边界优先于搜索结果，敏感/逃逸内容不进入上下文。"
+        - "超限有明确恢复路径，已确认内容不被静默替换。"
+        - "用户看见依据和摘要，不看见隐藏推理或未授权正文。"
+
+  - id: plan-task
+    title: 规划任务并审查执行计划
+    priority: P0
+    persona_ids: [individual-developer, open-source-contributor, team-maintainer]
+    requirement_ids: [R1, R5]
+    status: planned
+    preconditions:
+      - "工作区已打开，用户目标包含范围、约束和验证要求。"
+      - "当前会话处于 Plan/只读模式，工具能力集合不含写入。"
+    main_flow:
+      - "用户请求计划，Agent 读取最小必要上下文并列出假设、步骤、依赖和验证。"
+      - "用户逐项审查计划，可要求补充文件、拆分任务或修改验收条件。"
+      - "系统保存计划版本和引用上下文，用户明确批准后才可切换到 Edit。"
+    failure_branches:
+      - id: missing-context
+        trigger: "关键文件、项目指令或验收命令无法确认。"
+        expected: "计划标记假设/待确认项，不伪造项目事实。"
+        recovery: "用户补充文件或拒绝继续；计划可保存为待确认状态。"
+      - id: write-in-plan-mode
+        trigger: "模型或工具请求在 Plan 模式写文件。"
+        expected: "权限层拒绝请求，计划内容和工作树不变。"
+        recovery: "用户明确切换 Edit 模式后重新发起新的工具调用。"
+    feature_dependencies:
+      - capability: "只读计划和模式切换"
+        rc_ids: [RC-068, RC-070, RC-081]
+      - capability: "版本/事件/审计"
+        rc_ids: [RC-086, RC-098, RC-215]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-04
+      environment: "WIN-TERM-PS、LINUX-GNOME-BASH；Provider Mock。"
+      steps:
+        - "在 Plan 模式提交范围不完整的任务。"
+        - "审查计划、假设、依赖和验证命令并保存一个版本。"
+        - "尝试触发写工具，确认拒绝；再明确切换 Edit 后重新请求。"
+      pass_criteria:
+        - "计划可审查、可修改、可保存，未知事实标为假设。"
+        - "Plan 模式没有文件、Git 或命令副作用。"
+        - "模式切换产生明确用户事件，旧任务权限不被扩大。"
+
+  - id: edit-files
+    title: 编辑文件并生成可审查变更
+    priority: P0
+    persona_ids: [individual-developer, open-source-contributor, team-maintainer]
+    requirement_ids: [R1, R5]
+    status: planned
+    preconditions:
+      - "用户已批准 Edit 模式和工作区范围，并有已审查的计划。"
+      - "目标文件包含中文、代码块、换行和可制造的并发修改夹具。"
+    main_flow:
+      - "Agent 在写入前展示目标、基线和变更意图，系统检查路径、权限和基线哈希。"
+      - "工具以原子补丁写入文件，生成结构化 diff 和检查点。"
+      - "用户查看变更，可接受、拒绝或要求修订；Agent 不自动覆盖用户新编辑。"
+    failure_branches:
+      - id: baseline-drift
+        trigger: "用户或其他进程修改了目标文件，基线哈希不再匹配。"
+        expected: "补丁拒绝且工作树不变，显示冲突范围。"
+        recovery: "用户查看新 diff 后重新规划/生成补丁，或取消本次编辑。"
+      - id: permission-or-encoding
+        trigger: "路径无写权限、文件为二进制或编码无法保留。"
+        expected: "写入前失败，不产生半写文件；原始文件保持可读。"
+        recovery: "用户改选文件、调整授权或用人工编辑后重新读取。"
+    feature_dependencies:
+      - capability: "Edit 权限和文件工具"
+        rc_ids: [RC-070, RC-087, RC-090, RC-095]
+      - capability: "工作区并发与 diff"
+        rc_ids: [RC-088, RC-098, RC-205]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-05
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；独立临时 Git 仓库。"
+      steps:
+        - "批准一个小范围编辑并在写入前修改目标文件制造基线漂移。"
+        - "确认补丁被拒绝且没有半写文件，再对未漂移文件执行成功编辑。"
+        - "审查 diff、检查点和接受/拒绝操作。"
+      pass_criteria:
+        - "基线漂移、路径越界和编码/二进制错误均在写入前阻断。"
+        - "成功编辑是原子的，并有可审查 diff 和检查点。"
+        - "用户修改不会被 Agent 旧结果覆盖。"
+
+  - id: run-command
+    title: 运行命令并处理进程输出
+    priority: P0
+    persona_ids: [individual-developer, team-maintainer]
+    requirement_ids: [R1, R5]
+    status: planned
+    preconditions:
+      - "工作区和命令权限已确认；命令使用临时仓库和无秘密环境。"
+      - "Windows 与 Linux 测试环境均有可重复的成功、非零退出、超时和长输出命令。"
+    main_flow:
+      - "用户审查命令、参数、工作目录和环境来源后批准执行。"
+      - "系统捕获 stdout、stderr、退出码、signal、耗时和截断状态，并可流式查看。"
+      - "用户可停止进程；结果转成诊断或任务事件并进入后续测试/审查。"
+    failure_branches:
+      - id: nonzero-exit
+        trigger: "命令返回非零退出码或 stderr 有错误。"
+        expected: "显示失败诊断，不把失败误报为工具崩溃或成功。"
+        recovery: "用户查看输出、修正参数后重试，或结束任务。"
+      - id: timeout-or-cancel
+        trigger: "命令超时、用户取消或进程树无法正常退出。"
+        expected: "向下传播取消，清理子进程并保留已捕获输出。"
+        recovery: "用户可调整超时重试；清理失败时显示残留风险。"
+    feature_dependencies:
+      - capability: "跨平台 Shell Adapter"
+        rc_ids: [RC-091, RC-094, RC-096]
+      - capability: "权限、进程和事件流"
+        rc_ids: [RC-070, RC-071, RC-202, RC-204]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-06
+      environment: "WIN-TERM-PS、WIN-CMD、WSL2-BASH、LINUX-GNOME-BASH。"
+      steps:
+        - "执行带空格/中文路径的成功命令和非零退出命令。"
+        - "执行长输出和超时命令，检查截断、退出码和诊断。"
+        - "取消运行中的父/子进程并确认状态回收。"
+      pass_criteria:
+        - "Windows/Linux 的参数、编码、退出码和 stderr 语义一致可解释。"
+        - "长输出有截断标记，内存不无限增长。"
+        - "取消不留下可继续执行的孤儿进程。"
+
+  - id: run-tests
+    title: 运行测试并归一化诊断
+    priority: P0
+    persona_ids: [individual-developer, open-source-contributor, team-maintainer]
+    requirement_ids: [R1, R5]
+    status: planned
+    preconditions:
+      - "工作区有成功测试、失败测试和测试发现错误的夹具。"
+      - "项目工具链可返回测试、Lint、类型或构建输出。"
+    main_flow:
+      - "用户选择测试范围或使用计划中的验证命令，系统显示命令和工作目录。"
+      - "系统运行测试并把结果映射为通过、失败、跳过、取消和环境错误诊断。"
+      - "Agent/用户根据文件、行号和原始输出定位问题，成功结果写入任务检查点。"
+    failure_branches:
+      - id: test-failure
+        trigger: "测试断言失败或 Lint/类型检查发现问题。"
+        expected: "失败项、命令、原始输出和文件位置可见，任务不被误标为完成。"
+        recovery: "用户回到编辑或计划场景后重跑同一验证。"
+      - id: tool-not-installed
+        trigger: "测试运行器、依赖或构建工具未安装。"
+        expected: "标记 environment-error，提供安装/替代命令，不静默跳过。"
+        recovery: "用户安装依赖、切换已有脚本或明确结束验证。"
+    feature_dependencies:
+      - capability: "命令、后台进程和诊断"
+        rc_ids: [RC-091, RC-093, RC-094, RC-096]
+      - capability: "任务状态与检查点"
+        rc_ids: [RC-068, RC-071, RC-087]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-07
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；现有 Python/Node 工具链。"
+      steps:
+        - "运行一次全绿测试和一次预置失败测试。"
+        - "卸载或隐藏一个工具，确认环境错误而非跳过。"
+        - "检查诊断文件/行号、原始输出、退出码和任务完成状态。"
+      pass_criteria:
+        - "通过、失败、取消和环境错误可区分。"
+        - "失败测试不会产生完成状态，重跑可沿用同一上下文。"
+        - "诊断在 CLI/GUI 使用同一字段语义。"
+
+  - id: review-diff
+    title: 审查 diff 并接受或回滚变更
+    priority: P0
+    persona_ids: [individual-developer, open-source-contributor, team-maintainer]
+    requirement_ids: [R1, R2, R3, R5]
+    status: planned
+    preconditions:
+      - "Agent 已产生一个或多个带检查点的变更，且用户可能有并发编辑。"
+      - "工作区可生成文件、行内和结构化 diff。"
+    main_flow:
+      - "用户按文件查看 Agent 变更、命令、测试结果、Provenance 和工作区状态。"
+      - "用户接受部分文件、拒绝部分文件或要求修订；系统不改变未选择的用户改动。"
+      - "用户可在可证明范围内回滚 Agent 变更，再重新运行测试。"
+    failure_branches:
+      - id: concurrent-edit
+        trigger: "用户在 Agent 任务期间修改同一文件。"
+        expected: "冲突和归属范围显式显示，不自动覆盖用户内容。"
+        recovery: "用户手动合并、只接受不冲突部分或取消回滚。"
+      - id: partial-verification
+        trigger: "部分测试失败或 diff 包含未验证文件。"
+        expected: "发布/接受按钮显示阻塞原因，不能以整体成功掩盖部分失败。"
+        recovery: "用户修复并重跑，或拒绝未验证变更。"
+    feature_dependencies:
+      - capability: "Diff、检查点和回滚"
+        rc_ids: [RC-087, RC-092, RC-095, RC-098]
+      - capability: "诊断、Provenance 和视觉审查"
+        rc_ids: [RC-093, RC-024, RC-256]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-08
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；GUI diff 与 CLI 输出各一份。"
+      steps:
+        - "审查正常多文件 diff、测试结果和来源字段。"
+        - "并发修改同一文件，确认冲突归属和用户改动保护。"
+        - "部分接受后运行测试，再回滚仅由 Agent 产生的变更。"
+      pass_criteria:
+        - "GUI/CLI 显示相同变更和验证结果，路径/行号不漂移。"
+        - "并发编辑不被覆盖，部分失败可见并阻断误接受。"
+        - "回滚范围可解释且不会删除用户已有改动。"
+
+  - id: restore-session
+    title: 恢复会话和未完成任务
+    priority: P0
+    persona_ids: [individual-developer, team-maintainer]
+    requirement_ids: [R1, R3, R5]
+    status: planned
+    preconditions:
+      - "会话包含消息、工具事件、检查点、工作区 ID、模型/Provider 元数据和待执行动作。"
+      - "测试可模拟正常关闭、App Server 崩溃、CLI 中断和数据库未完成事务。"
+    main_flow:
+      - "用户关闭并重新打开应用或 CLI，系统按会话 ID 加载最后一个已提交检查点。"
+      - "系统显示已完成、未完成、失败和不可安全重试的动作，要求用户选择继续/重试/结束。"
+      - "用户继续后恢复相同工作区、权限、模型和上下文，不重复提交已完成写操作。"
+    failure_branches:
+      - id: corrupted-session
+        trigger: "数据库、事件或附件校验失败。"
+        expected: "进入只读救援/备份恢复路径，不能静默丢弃会话。"
+        recovery: "用户导出、恢复副本、删除损坏附件或结束会话。"
+      - id: unsafe-retry
+        trigger: "上次中断点是不可确认是否已执行的写操作。"
+        expected: "标记为需要人工确认，不自动重放。"
+        recovery: "用户查看工作树/diff 后选择继续、回滚或新建任务。"
+    feature_dependencies:
+      - capability: "会话 CRUD、检查点和恢复"
+        rc_ids: [RC-073, RC-086, RC-087, RC-089]
+      - capability: "进程生命周期与一致存储"
+        rc_ids: [RC-067, RC-213, RC-214]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-09
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；临时 SQLite 和 Git 仓库。"
+      steps:
+        - "在读取、编辑和测试之间分别正常关闭、Ctrl+C 和强制结束进程。"
+        - "重新打开会话，核对检查点、工作区、权限和待执行动作。"
+        - "对不确定写操作选择人工确认、回滚和继续三条分支。"
+      pass_criteria:
+        - "已提交事件和检查点可恢复，未提交事件不被伪造为完成。"
+        - "安全可重试动作最多执行一次，危险写操作不会自动重复。"
+        - "损坏路径提供只读救援或恢复副本，不静默丢失用户数据。"
+
+  - id: switch-model
+    title: 切换 Provider 与会话模型
+    priority: P0
+    persona_ids: [multi-provider-developer, offline-user, team-maintainer]
+    requirement_ids: [R3, R4, R5, R6]
+    status: planned
+    preconditions:
+      - "至少有一个 Mock 云 Provider、一个离线规则 Provider 和一个未就绪本地模型条目。"
+      - "当前会话有未发送草稿和已选优化/对话模型。"
+    main_flow:
+      - "用户打开模型选择器，看到来源、能力、数据边界、健康状态和当前作用域。"
+      - "用户在不丢失草稿、会话和 diff 的情况下切换 Provider/模型。"
+      - "系统重新检查能力和认证状态，后续请求记录实际 Provider、模型和 local/cloud/fallback 元数据。"
+    failure_branches:
+      - id: unavailable-model
+        trigger: "模型不存在、未安装、能力不兼容或健康检查失败。"
+        expected: "保留原输入，显示具体错误并禁止发送到不兼容模型。"
+        recovery: "用户切换到已授权模型、离线规则或取消。"
+      - id: credential-error
+        trigger: "Provider 认证、限流、区域或网络失败。"
+        expected: "错误分类准确，密钥不进入日志/草稿，未经授权不切换云 Provider。"
+        recovery: "用户修复凭据、重试、切本地路线或保留草稿离开。"
+    feature_dependencies:
+      - capability: "Provider 能力和模型选择"
+        rc_ids: [RC-078, RC-148, RC-159, RC-169, RC-170, RC-172]
+      - capability: "共享配置与草稿保护"
+        rc_ids: [RC-065, RC-106, RC-137, RC-138]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-10
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；全部使用 Mock/离线规则，不发送真实 API。"
+      steps:
+        - "配置 Mock 云 Provider、离线规则和未就绪本地模型。"
+        - "在有未发送草稿和 diff 时切换模型，核对作用域和元数据。"
+        - "注入认证、限流、能力不兼容和未安装错误，分别切换/重试/取消。"
+      pass_criteria:
+        - "草稿、会话和 diff 在切换中不丢失，实际来源可见。"
+        - "不兼容或未授权请求在发送前被阻断。"
+        - "错误分类和恢复选项不泄露密钥，不静默换云 Provider。"
+
+  - id: optimize-prompt
+    title: 使用菱形星星优化输入并审查结果
+    priority: P0
+    persona_ids: [individual-developer, offline-user, multi-provider-developer]
+    requirement_ids: [R2, R3, R5, R6]
+    status: planned
+    preconditions:
+      - "Composer 有普通文本、中文、代码块、文件提及、变量和附件边界夹具。"
+      - "优化入口已绑定当前会话模型或 Loopback FastAPI；测试默认使用 Mock/规则。"
+    main_flow:
+      - "用户点击优化入口，系统记录输入 revision、光标、附件、目标和请求 ID。"
+      - "优化过程展示状态和来源，结果进入原文/结果比较视图，不自动发送消息。"
+      - "用户可编辑、全部/部分采用、重试、撤销或明确发送；系统保存必要元数据。"
+    failure_branches:
+      - id: concurrent-input
+        trigger: "优化返回前用户编辑了输入。"
+        expected: "旧结果不能覆盖新 revision，显示比较/重新优化选择。"
+        recovery: "用户保留新输入、查看旧结果或重新发起优化。"
+      - id: invalid-output
+        trigger: "模型输出破坏代码块、变量、语言、长度或不可改标记。"
+        expected: "结果不自动采用，显示可恢复验证错误和原文。"
+        recovery: "用户重试、只复制安全部分或取消。"
+      - id: provider-fallback
+        trigger: "云 Provider、本地模型或运行器不可用。"
+        expected: "显示 local/cloud/fallback 和原因；离线规则不冒充大模型。"
+        recovery: "用户采用规则结果、切换已授权路径或保留原文。"
+    feature_dependencies:
+      - capability: "星星状态、输入快照和 revision"
+        rc_ids: [RC-134, RC-135, RC-137, RC-138, RC-139]
+      - capability: "比较、采用、撤销和结构验证"
+        rc_ids: [RC-140, RC-142, RC-143, RC-146, RC-156]
+      - capability: "云/本地/离线优化路由"
+        rc_ids: [RC-147, RC-148, RC-149, RC-150, RC-152]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-11
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；Provider Mock、Loopback 和 OfflineRuleProvider。"
+      steps:
+        - "对普通中文、代码块、变量和文件提及各点击一次优化。"
+        - "延迟结果期间修改输入，检查 revision 冲突和原文保护。"
+        - "注入非法输出、Provider 错误和离线 fallback，分别比较/撤销/采用。"
+      pass_criteria:
+        - "快速连点只产生一个有效请求，旧响应不覆盖新输入。"
+        - "优化完成不自动发送；采用、撤销和发送均需明确动作。"
+        - "结构损坏不自动采用，降级来源和原因清楚可见。"
+
+  - id: offline-conversation
+    title: 无 API 本地/离线对话
+    priority: P0
+    persona_ids: [offline-user, individual-developer]
+    requirement_ids: [R3, R4, R5]
+    status: planned
+    preconditions:
+      - "网络关闭或被测试代理阻断；用户未配置云 API Key。"
+      - "离线规则 Provider 可用；Gemma/Qwen 本地模型分别覆盖未安装、就绪、OOM/超时状态。"
+      - "用户已阅读当前模型许可证和本地数据边界提示。"
+    main_flow:
+      - "用户从无 API 入口进入统一工作区，系统显示本地模型/运行器健康和数据处理位置。"
+      - "用户选择可用 Gemma/Qwen 或离线规则，发起对话/优化并看到流式或规则结果。"
+      - "系统允许取消、切换模型、查看资源状态、保存本地会话并在下次恢复。"
+    failure_branches:
+      - id: local-model-not-ready
+        trigger: "模型未安装、许可证未确认、运行器未启动或模型加载失败。"
+        expected: "阻止假装生成，给出安装/修复/离线规则入口和明确来源。"
+        recovery: "用户安装/导入、修复、选择另一个本地模型或使用规则回退。"
+      - id: oom-or-disk
+        trigger: "显存/内存不足、磁盘满或本地生成超时。"
+        expected: "保留原输入，停止生成并显示资源原因，不转发到云端。"
+        recovery: "用户降低模型/上下文、释放资源、重试或回到离线规则。"
+    feature_dependencies:
+      - capability: "双入口与凭据边界"
+        rc_ids: [RC-174, RC-176, RC-179, RC-183]
+      - capability: "本地运行器和模型生命周期"
+        rc_ids: [RC-187, RC-188, RC-193, RC-194, RC-196, RC-198]
+      - capability: "离线优化与数据边界"
+        rc_ids: [RC-149, RC-150, RC-216, RC-217]
+    verification:
+      mode: manual-test-card
+      card_id: RC039-12
+      environment: "WIN-LOCAL-X64、UBUNTU-LOCAL-X64；网络隔离、OfflineRuleProvider；本地模型实测留给 RC-193/237。"
+      steps:
+        - "断网后选择无 API 入口，核对数据位置、许可证状态和模型健康。"
+        - "用离线规则完成对话/优化，再对未就绪模型执行失败恢复。"
+        - "模拟 OOM/超时/磁盘不足，确认原输入、会话和取消状态。"
+      pass_criteria:
+        - "断网和无 Key 仍可完成规则路线，结果明确标记为离线规则。"
+        - "未安装/未就绪/资源不足不伪造模型结果、不发送云请求。"
+        - "恢复、切换和清理不丢失用户原文与本地会话。"
