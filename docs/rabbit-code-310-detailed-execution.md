@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 43 |
-| 最后完成项 | RC-058 |
-| 下一待执行项 | RC-059（RC-057 外部确认保留 pending） |
+| 已完成项数 | 44 |
+| 最后完成项 | RC-059 |
+| 下一待执行项 | RC-060（RC-057 外部确认保留 pending） |
 | 当前里程碑 | W2：共享协议、数据模型和 Agent Core |
-| 当前状态 | RC-058 已完成严格版本化 App Server、health、启动令牌/协议协商和 GUI `/api/v1` 迁移；RC-057 外部确认保留 pending，按用户指令自动进入 RC-059 |
-| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 的 Linux/Tauri/TypeScript 外部验证仍缺条件，不阻塞 RC-059 的本地可实现部分 |
-| 最近一次完整验证 | 2026-07-17：RC-058 严格 App Server 3 passed、旧 API/CLI 契约 9 passed、后端 77 passed、前端 9 passed、Ruff、Mypy、Lint、Build 和根级 workspace verify 通过；实际速度按周证据更新 |
-| 最近更新时间 | 2026-07-17 15:46:28 +08:00 |
+| 当前状态 | RC-059 已完成 InProcessRuntime/AppServerRuntime、统一 AgentEvent、CLI runtime 选择和 Mock SSE 契约；RC-057 外部确认保留 pending，按用户指令自动进入 RC-060 |
+| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 的 Linux/Tauri/TypeScript 外部验证仍缺条件，不阻塞 RC-060 的桌面壳边界分析 |
+| 最近一次完整验证 | 2026-07-17：RC-059 runtime 契约 1 passed、后端 78 passed、前端 9 passed、Ruff、Mypy、Lint、Build 和根级 workspace verify 通过；实际速度按周证据更新 |
+| 最近更新时间 | 2026-07-17 15:52:43 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -48,6 +48,7 @@
 | RC-056 | 2026-07-17 15:23:05 +08:00 | `04de5ae` | PASS：根级 workspace verify 通过；成员边界、统一版本和任务入口校验通过；后端 70 passed；前端 9 passed、Lint/Build；本地安装入口通过 | `docs/evidence/RC-056/README.md` | 现有实现路径按兼容策略保留；Agent Core、协议包、UI 包和 Tauri/CLI 真正迁移留给后续 RC；既有前端 jsdom 警告和路径迁移 DeprecationWarning 保留 |
 | RC-057 | 2026-07-17 15:33:52 +08:00 | `1d29f8e`; `fc7fe44` | SUBMITTED WITH PENDING CONFIRMATION：Python Agent Core、prototype App Server、CLI、统一事件/取消和 Windows probe 已通过；Linux/Tauri/TypeScript 验证未执行，未勾选完成 | `docs/evidence/RC-057/README.md` | 受阻条件已如实记录；按用户指令自动继续 RC-058 准备，不把外部平台结果伪造成通过 |
 | RC-058 | 2026-07-17 15:46:28 +08:00 | `0f595ab`; `f0abab1` | PASS：严格 App Server 3 passed；旧 API/CLI 契约 9 passed；后端 77 passed；前端 9 passed、Lint/Build；令牌/协议/health/单一 `/api/v1` OpenAPI 边界通过 | `docs/evidence/RC-058/README.md` | CLI service-mode、桌面壳令牌注入和取消传播留给 RC-059/060/063；RC-057 外部平台确认仍 pending |
+| RC-059 | 2026-07-17 15:52:43 +08:00 | `74a219d` | PASS：runtime 契约 1 passed；后端 78 passed；前端 9 passed、Lint/Build；InProcess/AppServer 同一 AgentEvent 模型和 CLI runtime 选择通过 | `docs/evidence/RC-059/README.md` | 生产 App Server endpoint 统一和桌面壳职责留给 RC-060/063；RC-057 外部平台确认仍 pending |
 | RC-015 | 2026-07-17 03:38:00 +08:00 | `5fc9361` | PASS：9 个 GitHub 来源的 URL、默认分支、HEAD SHA、commit URL、许可证元数据和状态已固定；YAML 校验器与 Ruff 通过；CI 已接入 source baseline 门禁 | `docs/evidence/RC-015/README.md` | 4 个来源无 SPDX 许可证，1 个来源已归档；仅保留研究元数据，法律和 clean-room 结论留给 RC-021 至 RC-030 |
 | RC-016 | 2026-07-17 03:50:47 +08:00 | `f88d8c2` | CLOSED BY USER：按用户指示将 RC-016 视为已完成；官方 Codex manual 获取 HTTP 403，未写入未经验证结论 | `docs/evidence/RC-016/README.md` | 未验证的 manual 结论不纳入本项目；本限制已记录，不阻塞 RC-017 |
 | RC-017 | 2026-07-17 03:56:37 +08:00 | `583848a` | PASS：来源登记包含 `open-source`、`public-doc`、`behavior-only`；固定 Codex SHA、README 与 manual 均已核对；manual HEAD/GET 均 HTTP 200；来源校验器与 Ruff 通过；无新增 Codex GUI 源码/资产 | `docs/evidence/RC-017/README.md` | 公开文档只按事实使用；桌面 GUI 继续按 behavior-only 处理，不复制专有源码或资产 |
@@ -2454,7 +2455,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-056** 采用 Monorepo 管理桌面端、CLI、Agent Core、FastAPI App Server、Provider、协议、UI、安装脚本、测试和文档。
 - [ ] **RC-057** 形成“共享 Agent Core + 本地 App Server + CLI/TUI + Tauri 桌面壳 + React GUI”的候选基线，并通过跨平台原型验证后锁定。
 - [x] **RC-058** FastAPI App Server 作为 GUI、CLI、提示词优化、本地模型和后台任务的统一本地服务入口。
-- [ ] **RC-059** CLI 可选择进程内调用共享核心或连接本地 App Server，但二者必须使用同一事件和数据模型。
+- [x] **RC-059** CLI 可选择进程内调用共享核心或连接本地 App Server，但二者必须使用同一事件和数据模型。
 - [ ] **RC-060** Tauri 只承担桌面窗口、系统集成、更新、密钥库桥接和 FastAPI sidecar 生命周期，业务逻辑不散落到桌面壳。
 - [ ] **RC-061** 定义版本化协议层，覆盖请求、会话、消息、内容块、工具调用、审批、流事件、diff、任务状态、错误和 Provider 能力。
 - [ ] **RC-062** 从 Pydantic/OpenAPI 生成 TypeScript 类型和客户端，禁止前后端手写两套漂移协议。
