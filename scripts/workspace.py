@@ -46,7 +46,7 @@ def lint() -> None:
 
 
 def typecheck() -> None:
-    _run(sys.executable, "-m", "mypy", "backend/src")
+    _run(sys.executable, "-m", "mypy", "backend/src", "backend/rabbit_code")
 
 
 def verify() -> None:
