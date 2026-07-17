@@ -9,7 +9,7 @@ import uvicorn
 from rich.console import Console
 from rich.table import Table
 
-from prompt_optimizer.api.app import create_app
+from prompt_optimizer.api.app import create_app, create_app_server
 from prompt_optimizer.core.models import ExportFormat, ModelProviderName, PromptAnalysis
 from prompt_optimizer.evaluation import EvaluationService
 from prompt_optimizer.identity import (
@@ -193,9 +193,14 @@ def evaluate(
 def serve(
     host: Annotated[str, typer.Option("--host")] = "127.0.0.1",
     port: Annotated[int, typer.Option("--port")] = 8000,
+    startup_token: Annotated[
+        str | None,
+        typer.Option("--startup-token", help="严格 App Server 模式的本地启动令牌"),
+    ] = None,
 ) -> None:
     """启动本地 Web 服务。"""
-    uvicorn.run(create_app(), host=host, port=port)
+    application = create_app_server(startup_token=startup_token) if startup_token else create_app()
+    uvicorn.run(application, host=host, port=port)
 
 
 def _print_analysis(analysis: PromptAnalysis) -> None:

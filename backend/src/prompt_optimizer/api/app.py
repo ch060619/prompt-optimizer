@@ -11,7 +11,7 @@ from uuid import uuid4
 from fastapi import APIRouter, BackgroundTasks, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from prompt_optimizer.core.models import (
@@ -40,12 +40,21 @@ from prompt_optimizer.services import AppServices
 # RC ID: RC-048. Preserve the V2 API while exposing the versioned compatibility surface.
 # RC ID: RC-054. Expose Rabbit Code as the canonical API product identity.
 # RC ID: RC-049. Translate Provider events into the existing SSE chunk contract.
+# RC ID: RC-058. Keep the strict versioned App Server boundary beside the compatibility factory.
 
 services = AppServices()
 logger = logging.getLogger("prompt_optimizer.api")
 
 
-def create_app(app_services: AppServices | None = None) -> FastAPI:
+def create_app(
+    app_services: AppServices | None = None,
+    *,
+    include_legacy: bool = True,
+    startup_token: str | None = None,
+    protocol_version: str = "v1",
+) -> FastAPI:
+    if startup_token == "":
+        raise ValueError("startup_token 不能为空。")
     current_services = app_services or services
     app = FastAPI(
         title=PRODUCT_NAME,
@@ -81,6 +90,36 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         )
         return response
 
+    if startup_token is not None:
+
+        @app.middleware("http")
+        async def app_server_boundary(
+            request: Request,
+            call_next: Callable[[Request], Awaitable[Response]],
+        ) -> Response:
+            is_health = request.url.path == "/api/v1/health"
+            if request.url.path.startswith("/api/v1") and not is_health:
+                if request.headers.get("X-Rabbit-Code-Startup-Token") != startup_token:
+                    return JSONResponse(
+                        status_code=401,
+                        content={"detail": "需要 App Server 启动令牌。"},
+                    )
+                requested_protocol = request.headers.get(
+                    "X-Rabbit-Code-Protocol",
+                    protocol_version,
+                )
+                if requested_protocol != protocol_version:
+                    return JSONResponse(
+                        status_code=426,
+                        content={
+                            "detail": "不支持的 App Server 协议版本。",
+                            "supported": [protocol_version],
+                        },
+                    )
+            response = await call_next(request)
+            response.headers["X-Rabbit-Code-Protocol"] = protocol_version
+            return response
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -90,6 +129,16 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
     )
 
     api_router = APIRouter()
+
+    if startup_token is not None:
+
+        @api_router.get("/health", tags=["health"])
+        def health() -> dict[str, object]:
+            return {
+                "status": "ok",
+                "protocol_version": protocol_version,
+                "startup_token_required": True,
+            }
 
     @api_router.post("/analyze", response_model=PromptAnalysis)
     def analyze(request: AnalyzeRequest) -> PromptAnalysis:
@@ -299,7 +348,8 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         }
         return Response(content=content, media_type=media_types[request.format])
 
-    app.include_router(api_router, prefix="/api", tags=["legacy"])
+    if include_legacy:
+        app.include_router(api_router, prefix="/api", tags=["legacy"])
     app.include_router(api_router, prefix="/api/v1", tags=["v1"])
 
     def custom_openapi() -> dict[str, Any]:
@@ -312,8 +362,10 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
                 tags=app.openapi_tags,
             )
             app.openapi_schema["x-api-version"] = "v1"
-            app.openapi_schema["x-legacy-prefix"] = "/api"
-            app.openapi_schema["x-rc-reference"] = "RC IDs: RC-048"
+            app.openapi_schema["x-legacy-prefix"] = "/api" if include_legacy else None
+            app.openapi_schema["x-rc-reference"] = (
+                "RC IDs: RC-048" if include_legacy else "RC IDs: RC-058"
+            )
         return app.openapi_schema
 
     app.openapi = custom_openapi  # type: ignore[method-assign]
@@ -323,6 +375,23 @@ def create_app(app_services: AppServices | None = None) -> FastAPI:
         app.mount("/", StaticFiles(directory=static_dir, html=True), name="web")
 
     return app
+
+
+def create_app_server(
+    app_services: AppServices | None = None,
+    *,
+    startup_token: str,
+    protocol_version: str = "v1",
+) -> FastAPI:
+    """Create the strict, versioned App Server while retaining the legacy factory."""
+    if not startup_token:
+        raise ValueError("startup_token 不能为空。")
+    return create_app(
+        app_services,
+        include_legacy=False,
+        startup_token=startup_token,
+        protocol_version=protocol_version,
+    )
 
 
 def _prepare_prompt(
