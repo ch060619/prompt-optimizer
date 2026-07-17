@@ -1,0 +1,331 @@
+schema_version: 1
+rc_id: RC-042
+status: defined-not-implementation-validated
+scope: "为 RC-040 的每项共享/GUI 能力定义统一的成功、失败、取消、重试、降级、离线、拒绝和恢复状态；登记错误码、UI 文案和非成功测试参数。"
+source_documents:
+  capability_matrix: docs/product/capability-matrix.yml
+  core_scenarios: docs/product/core-scenarios.yml
+
+state_contract:
+  success:
+    label: 成功
+    terminal: true
+    error_code: null
+    ui_copy_key: state.success
+  failure:
+    label: 失败
+    terminal: true
+    error_code: RC42-FEATURE-FAILED
+    ui_copy_key: state.failure
+  cancel:
+    label: 取消
+    terminal: true
+    error_code: RC42-TASK-CANCELLED
+    ui_copy_key: state.cancel
+  retry:
+    label: 重试
+    terminal: false
+    error_code: RC42-RETRY-AVAILABLE
+    ui_copy_key: state.retry
+  degraded:
+    label: 降级
+    terminal: true
+    error_code: RC42-DEGRADED
+    ui_copy_key: state.degraded
+  offline:
+    label: 离线
+    terminal: true
+    error_code: RC42-OFFLINE
+    ui_copy_key: state.offline
+  denied:
+    label: 拒绝
+    terminal: true
+    error_code: RC42-PERMISSION-DENIED
+    ui_copy_key: state.denied
+  recovery:
+    label: 恢复
+    terminal: true
+    error_code: RC42-RECOVERED
+    ui_copy_key: state.recovery
+
+error_codes:
+  RC42-FEATURE-FAILED:
+    class: failure
+    retryable: false
+    message: "功能执行失败：{reason}"
+  RC42-TASK-CANCELLED:
+    class: cancellation
+    retryable: true
+    message: "已取消，已完成结果已保留"
+  RC42-RETRY-AVAILABLE:
+    class: retry
+    retryable: true
+    message: "可以重试：{reason}"
+  RC42-DEGRADED:
+    class: degraded
+    retryable: false
+    message: "已降级：{source}；能力或数据边界未被静默改变"
+  RC42-OFFLINE:
+    class: offline
+    retryable: true
+    message: "当前离线：{reason}"
+  RC42-PERMISSION-DENIED:
+    class: permission
+    retryable: false
+    message: "已拒绝：{scope}"
+  RC42-RECOVERED:
+    class: recovery
+    retryable: false
+    message: "已恢复：{checkpoint}"
+
+ui_copy:
+  state.success: "已完成"
+  state.failure: "执行失败"
+  state.cancel: "已取消，已保留已完成内容"
+  state.retry: "可以重试"
+  state.degraded: "已降级，来源和限制已标明"
+  state.offline: "离线模式"
+  state.denied: "操作已拒绝"
+  state.recovery: "已从检查点恢复"
+
+features:
+  - id: workspace-discovery
+    requirement_ids: [R1, R5]
+    scenario_ids: [open-repository]
+    critical: true
+    acceptance:
+      success: {expected: "返回工作区根、Git 状态、指令来源和权限范围。"}
+      failure: {expected: "目录识别或 Git 查询失败时返回原因，不伪造仓库状态。"}
+      cancel: {expected: "用户取消目录选择后不创建空会话，已有工作区保持不变。"}
+      retry: {expected: "用户改选目录或重新扫描后只创建一个有效工作区状态。"}
+      degraded: {expected: "非 Git 目录仍可作为普通目录打开，并明确能力限制。"}
+      offline: {expected: "无网络时本地目录识别和 Git 读取仍可运行。"}
+      denied: {expected: "敏感路径、越界路径或权限不足被阻止且不读取正文。"}
+      recovery: {expected: "从已保存工作区检查点恢复根目录、分支和权限状态。"}
+  - id: context-assembly
+    requirement_ids: [R1, R5]
+    scenario_ids: [read-code, coding-task]
+    critical: true
+    acceptance:
+      success: {expected: "按忽略、敏感路径和大小规则组装可追溯内容块。"}
+      failure: {expected: "搜索、读取或解析失败时保留失败类别和已确认内容。"}
+      cancel: {expected: "取消搜索或组装不替换当前上下文。"}
+      retry: {expected: "缩小范围或预算后可以重试，旧结果不重复追加。"}
+      degraded: {expected: "超出预算时返回截断标记，不静默丢弃安全边界。"}
+      offline: {expected: "本地文件、搜索和上下文预览不依赖网络。"}
+      denied: {expected: "被忽略、敏感或符号链接逃逸的内容不进入上下文。"}
+      recovery: {expected: "从上下文快照恢复已确认内容块和移除记录。"}
+  - id: agent-loop
+    requirement_ids: [R1, R5]
+    scenario_ids: [coding-task, plan-task]
+    critical: true
+    acceptance:
+      success: {expected: "Agent 以有序事件完成任务并保留结果、工具结果和预算。"}
+      failure: {expected: "模型、工具或状态转换失败时任务安全终止并保留检查点。"}
+      cancel: {expected: "取消令牌停止后续调用，已完成事件可重放。"}
+      retry: {expected: "从最近检查点重试，不重复已确认副作用。"}
+      degraded: {expected: "预算或能力不足时明确减少范围，不扩大权限或静默换 Provider。"}
+      offline: {expected: "无网络时仅使用已授权本地/规则路径，并标注来源。"}
+      denied: {expected: "权限拒绝成为事件，Agent 不绕过拒绝继续工具循环。"}
+      recovery: {expected: "会话恢复后事件序列、任务状态和待处理动作一致。"}
+  - id: plan-edit-permission
+    requirement_ids: [R1, R5]
+    scenario_ids: [plan-task, edit-files]
+    critical: true
+    acceptance:
+      success: {expected: "只读、编辑和高权限模式准确限制可用工具集合。"}
+      failure: {expected: "策略解析或授权存储失败时使用最小权限并明确失败。"}
+      cancel: {expected: "取消审批不执行待批准操作，计划内容保持可审查。"}
+      retry: {expected: "修改参数或策略后可重新发起审批，不继承未批准决定。"}
+      degraded: {expected: "缺少交互时转为机器可读等待/拒绝，不静默放行。"}
+      offline: {expected: "本地权限判定不因断网而放宽。"}
+      denied: {expected: "拒绝记录范围、原因和请求摘要，不泄露秘密或源码正文。"}
+      recovery: {expected: "恢复会话后权限范围回到检查点记录，不沿用过期授权。"}
+  - id: tool-and-approval
+    requirement_ids: [R1, R5]
+    scenario_ids: [coding-task, run-command]
+    critical: true
+    acceptance:
+      success: {expected: "工具请求、批准、执行结果和审计事件按同一 Schema 关联。"}
+      failure: {expected: "工具启动或结果解析失败时返回分类错误和可恢复检查点。"}
+      cancel: {expected: "取消阻止未开始工具，并停止可取消的运行中工具。"}
+      retry: {expected: "仅对幂等或用户重新确认的工具重试。"}
+      degraded: {expected: "工具输出被截断时标记范围，不伪造完整结果。"}
+      offline: {expected: "本地文件和进程工具可离线运行，网络工具显示不可用。"}
+      denied: {expected: "没有批准的危险工具不执行，并返回稳定拒绝状态。"}
+      recovery: {expected: "从工具检查点恢复时区分已执行、未执行和需重新批准的调用。"}
+  - id: terminal-process
+    requirement_ids: [R1, R5]
+    scenario_ids: [run-command]
+    critical: true
+    acceptance:
+      success: {expected: "命令输出、退出码、工作目录和取消状态完整可见。"}
+      failure: {expected: "启动失败、非零退出或超时均有明确原因和退出码。"}
+      cancel: {expected: "终止进程后记录信号/退出状态，不把强制终止写成成功。"}
+      retry: {expected: "用户确认后按相同或修改后的命令重新执行。"}
+      degraded: {expected: "无 TTY 时使用捕获输出并标明交互能力缺失。"}
+      offline: {expected: "本地命令可执行，网络命令失败原因保持可见。"}
+      denied: {expected: "未获终端权限时命令不启动。"}
+      recovery: {expected: "恢复后显示命令检查点和最后已知输出，不重复危险副作用。"}
+  - id: git-diff-checkpoint
+    requirement_ids: [R1, R2, R5]
+    scenario_ids: [edit-files, review-diff]
+    critical: true
+    acceptance:
+      success: {expected: "变更、基线哈希、diff、检查点和接受/拒绝决定一致。"}
+      failure: {expected: "diff 或回滚失败时保留工作树状态和可操作原因。"}
+      cancel: {expected: "取消审查不自动接受或回滚变更。"}
+      retry: {expected: "重新计算 diff 时基线和 revision 可核对。"}
+      degraded: {expected: "大 diff 被分块或截断时明确范围和未检查部分。"}
+      offline: {expected: "本地 Git、diff 和检查点不依赖网络。"}
+      denied: {expected: "没有写入或 Git 权限时不执行接受、回滚或提交。"}
+      recovery: {expected: "从检查点恢复变更和审查游标，不能覆盖较新的用户编辑。"}
+  - id: session-history-recovery
+    requirement_ids: [R1, R3, R5]
+    scenario_ids: [restore-session]
+    critical: true
+    acceptance:
+      success: {expected: "会话列表、消息、任务、工具、检查点和审计链可查询。"}
+      failure: {expected: "会话读取或迁移失败时不覆盖原数据库并显示修复入口。"}
+      cancel: {expected: "取消恢复不改变当前活动会话。"}
+      retry: {expected: "修复或重新选择数据库后可重复恢复，避免重复消息。"}
+      degraded: {expected: "缺少部分历史时标记缺口，不伪造完整时间线。"}
+      offline: {expected: "本地历史浏览和恢复不依赖网络。"}
+      denied: {expected: "没有会话访问权限时只返回元数据级拒绝。"}
+      recovery: {expected: "按 session_id 恢复到最近一致检查点并保留恢复来源。"}
+  - id: task-progress-cancel
+    requirement_ids: [R1, R3, R5]
+    scenario_ids: [coding-task, run-tests]
+    critical: true
+    acceptance:
+      success: {expected: "进度、部分结果、最终状态和取消令牌一致。"}
+      failure: {expected: "任务失败显示阶段、原因和已完成部分，允许查看检查点。"}
+      cancel: {expected: "CLI、GUI、无头信号均收敛到同一取消终态。"}
+      retry: {expected: "调整预算或参数后从安全检查点重试。"}
+      degraded: {expected: "并发或预算不足时排队/降级状态明确，不静默丢任务。"}
+      offline: {expected: "离线任务仍提供本地进度和稳定终态。"}
+      denied: {expected: "没有取消/重试权限时返回机器可读拒绝。"}
+      recovery: {expected: "重启或断线后可恢复进度、部分结果和剩余动作。"}
+  - id: provider-model
+    requirement_ids: [R3, R4, R6]
+    scenario_ids: [switch-model, coding-task]
+    critical: true
+    acceptance:
+      success: {expected: "Provider、模型、能力、健康和密钥引用可选择且不保存明文密钥。"}
+      failure: {expected: "认证、余额、限流、区域、模型和协议错误分类稳定。"}
+      cancel: {expected: "取消请求停止流并保留已接收内容和请求元数据。"}
+      retry: {expected: "遵守重试策略和 Retry-After，不重复不可重试请求。"}
+      degraded: {expected: "能力不足时明确回退或拒绝，不静默换云 Provider。"}
+      offline: {expected: "无网络时只显示本地模型或离线规则来源。"}
+      denied: {expected: "没有凭据或用户授权时请求不发送。"}
+      recovery: {expected: "恢复会话后模型选择、Provider 引用和错误边界一致。"}
+  - id: prompt-optimization
+    requirement_ids: [R2, R3, R5, R6]
+    scenario_ids: [optimize-prompt]
+    critical: true
+    acceptance:
+      success: {expected: "原文、revision、优化结果、比较、采用和发送决定完整记录。"}
+      failure: {expected: "非法输出或 Provider 错误不自动采用，原文保持不变。"}
+      cancel: {expected: "取消优化不覆盖输入，已生成增量按取消状态保存。"}
+      retry: {expected: "用户确认后按当前 revision 重试，旧响应不能覆盖新输入。"}
+      degraded: {expected: "云/本地/离线规则来源和限制显式展示。"}
+      offline: {expected: "断网时规则或本地路径可用，并不冒充大模型。"}
+      denied: {expected: "没有发送或 Provider 权限时不发起优化请求。"}
+      recovery: {expected: "从历史恢复原文、结果、采用状态和 revision 决定。"}
+  - id: offline-local-model
+    requirement_ids: [R3, R4, R5]
+    scenario_ids: [offline-conversation]
+    critical: true
+    acceptance:
+      success: {expected: "本地运行器、模型或离线规则返回明确来源和本地会话。"}
+      failure: {expected: "未安装、许可证未确认、加载失败或 OOM 均阻止伪造生成。"}
+      cancel: {expected: "取消下载或生成后保留原输入和清理状态。"}
+      retry: {expected: "修复磁盘、资源或下载后按哈希验证重新尝试。"}
+      degraded: {expected: "本地模型不可用时只按用户选择进入离线规则或返回失败。"}
+      offline: {expected: "断网且无云凭据时仍能完成离线规则路线。"}
+      denied: {expected: "未确认模型许可证或本地数据边界时阻止运行。"}
+      recovery: {expected: "重启后恢复模型安装状态、会话和清理/修复入口。"}
+  - id: diagnostics
+    requirement_ids: [R1, R5]
+    scenario_ids: [run-tests, review-diff]
+    critical: true
+    acceptance:
+      success: {expected: "诊断包含文件、行号、级别、原始输出和稳定退出码。"}
+      failure: {expected: "测试、Lint 或类型检查失败时保留机器可读诊断。"}
+      cancel: {expected: "取消诊断显示已完成和未执行项目，不写成全绿。"}
+      retry: {expected: "修复后可只重跑受影响参数集并保留前次结果。"}
+      degraded: {expected: "工具缺失或输出不可解析时标为未验证，不伪造通过。"}
+      offline: {expected: "本地检查和诊断不依赖网络。"}
+      denied: {expected: "无法读取目标文件或执行检查时返回路径级拒绝。"}
+      recovery: {expected: "从任务检查点恢复诊断参数、输出引用和过滤器。"}
+  - id: export-audit
+    requirement_ids: [R1, R3, R5]
+    scenario_ids: [review-diff, restore-session]
+    critical: true
+    acceptance:
+      success: {expected: "导出格式、脱敏摘要、文件元数据和审计事件可核对。"}
+      failure: {expected: "导出失败不删除原会话或生成半成品冒充完成。"}
+      cancel: {expected: "取消导出清理临时文件并保留原数据。"}
+      retry: {expected: "调整路径或格式后可重试且不重复审计事件。"}
+      degraded: {expected: "敏感正文被脱敏或排除时显示字段级限制。"}
+      offline: {expected: "本地导出和删除不依赖网络。"}
+      denied: {expected: "没有导出或删除权限时不创建目标文件。"}
+      recovery: {expected: "恢复后导出继续使用同一会话版本和脱敏策略。"}
+  - id: window-management
+    requirement_ids: [R2]
+    scenario_ids: [open-repository, coding-task]
+    critical: true
+    acceptance:
+      success: {expected: "窗口、焦点、大小和关闭行为不改变共享业务状态。"}
+      failure: {expected: "窗口初始化失败时给出可操作错误，不丢失核心任务。"}
+      cancel: {expected: "用户关闭窗口只取消明确选择的任务，不静默终止其他会话。"}
+      retry: {expected: "重新打开窗口后可继续渲染当前共享状态。"}
+      degraded: {expected: "小窗口或无系统集成时功能限制清晰可见。"}
+      offline: {expected: "窗口导航和本地状态展示不依赖网络。"}
+      denied: {expected: "系统通知或窗口权限拒绝不改变任务权限。"}
+      recovery: {expected: "窗口重启后恢复路由、焦点和当前会话引用。"}
+  - id: drag-drop
+    requirement_ids: [R2, R3]
+    scenario_ids: [read-code, optimize-prompt]
+    critical: true
+    acceptance:
+      success: {expected: "拖入文件转为统一内容块，预览、敏感性和大小边界可见。"}
+      failure: {expected: "读取或转换失败时不把附件当作成功上下文。"}
+      cancel: {expected: "取消拖放处理不改变已确认内容块。"}
+      retry: {expected: "用户重新选择安全文件后只产生一个新内容块。"}
+      degraded: {expected: "大文件或不支持类型显示截断/不支持原因。"}
+      offline: {expected: "本地拖放和内容块预览不依赖网络。"}
+      denied: {expected: "敏感路径或越界附件被阻止且不读取正文。"}
+      recovery: {expected: "恢复会话后附件引用、预览状态和移除记录一致。"}
+  - id: system-notifications
+    requirement_ids: [R2, R5]
+    scenario_ids: [coding-task, restore-session]
+    critical: true
+    acceptance:
+      success: {expected: "通知只由共享任务事件派生，内容与任务终态一致。"}
+      failure: {expected: "通知发送失败不改变任务失败/成功状态，并记录诊断。"}
+      cancel: {expected: "取消任务不发送误导性的完成通知。"}
+      retry: {expected: "通知失败可按用户设置重试，不重复业务任务。"}
+      degraded: {expected: "系统通知不可用时使用 GUI 内状态、CLI 或 JSON 事件替代。"}
+      offline: {expected: "本地任务完成通知可在无网络时产生。"}
+      denied: {expected: "用户关闭通知后不绕过设置发送系统通知。"}
+      recovery: {expected: "恢复会话后通知游标不会重复发送旧终态。"}
+
+test_parameters:
+  - {id: RC042-workspace-discovery-failure, feature_id: workspace-discovery, branch: failure, fixture: "非 Git 目录和不可读路径", expected_state: failure, expected_error_code: RC42-FEATURE-FAILED, expected_ui_copy_key: state.failure}
+  - {id: RC042-context-assembly-denied, feature_id: context-assembly, branch: denied, fixture: "敏感文件和符号链接逃逸夹具", expected_state: denied, expected_error_code: RC42-PERMISSION-DENIED, expected_ui_copy_key: state.denied}
+  - {id: RC042-agent-loop-cancel, feature_id: agent-loop, branch: cancel, fixture: "Mock Agent 在工具事件后收到取消", expected_state: cancel, expected_error_code: RC42-TASK-CANCELLED, expected_ui_copy_key: state.cancel}
+  - {id: RC042-permission-denied, feature_id: plan-edit-permission, branch: denied, fixture: "Plan 模式请求写工具", expected_state: denied, expected_error_code: RC42-PERMISSION-DENIED, expected_ui_copy_key: state.denied}
+  - {id: RC042-tool-approval-denied, feature_id: tool-and-approval, branch: denied, fixture: "危险命令未获批准", expected_state: denied, expected_error_code: RC42-PERMISSION-DENIED, expected_ui_copy_key: state.denied}
+  - {id: RC042-terminal-process-cancel, feature_id: terminal-process, branch: cancel, fixture: "长运行本地命令收到取消", expected_state: cancel, expected_error_code: RC42-TASK-CANCELLED, expected_ui_copy_key: state.cancel}
+  - {id: RC042-git-diff-failure, feature_id: git-diff-checkpoint, branch: failure, fixture: "基线哈希变化后的回滚请求", expected_state: failure, expected_error_code: RC42-FEATURE-FAILED, expected_ui_copy_key: state.failure}
+  - {id: RC042-session-recovery-failure, feature_id: session-history-recovery, branch: failure, fixture: "损坏的会话检查点", expected_state: failure, expected_error_code: RC42-FEATURE-FAILED, expected_ui_copy_key: state.failure}
+  - {id: RC042-task-cancel, feature_id: task-progress-cancel, branch: cancel, fixture: "Mock 任务收到 Ctrl+C/终止信号", expected_state: cancel, expected_error_code: RC42-TASK-CANCELLED, expected_ui_copy_key: state.cancel}
+  - {id: RC042-provider-denied, feature_id: provider-model, branch: denied, fixture: "无凭据 Provider 请求", expected_state: denied, expected_error_code: RC42-PERMISSION-DENIED, expected_ui_copy_key: state.denied}
+  - {id: RC042-optimization-revision, feature_id: prompt-optimization, branch: failure, fixture: "优化返回前修改输入 revision", expected_state: failure, expected_error_code: RC42-FEATURE-FAILED, expected_ui_copy_key: state.failure}
+  - {id: RC042-local-model-offline, feature_id: offline-local-model, branch: offline, fixture: "断网、无 Key、OfflineRuleProvider", expected_state: offline, expected_error_code: RC42-OFFLINE, expected_ui_copy_key: state.offline}
+  - {id: RC042-diagnostics-failure, feature_id: diagnostics, branch: failure, fixture: "测试命令返回非零退出码", expected_state: failure, expected_error_code: RC42-FEATURE-FAILED, expected_ui_copy_key: state.failure}
+  - {id: RC042-export-denied, feature_id: export-audit, branch: denied, fixture: "无导出权限的目标路径", expected_state: denied, expected_error_code: RC42-PERMISSION-DENIED, expected_ui_copy_key: state.denied}
+  - {id: RC042-window-recovery, feature_id: window-management, branch: recovery, fixture: "GUI 重启后恢复活动会话路由", expected_state: recovery, expected_error_code: RC42-RECOVERED, expected_ui_copy_key: state.recovery}
+  - {id: RC042-drag-drop-denied, feature_id: drag-drop, branch: denied, fixture: "拖入敏感路径文件", expected_state: denied, expected_error_code: RC42-PERMISSION-DENIED, expected_ui_copy_key: state.denied}
+  - {id: RC042-notification-degraded, feature_id: system-notifications, branch: degraded, fixture: "系统通知权限关闭", expected_state: degraded, expected_error_code: RC42-DEGRADED, expected_ui_copy_key: state.degraded}
