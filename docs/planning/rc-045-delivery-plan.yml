@@ -1,0 +1,129 @@
+schema_version: 1
+rc_id: RC-045
+status: target-baseline-not-commitment
+scope: "为 RC-001..RC-310 提供可展开的工作量、依赖、负责人、评审者、里程碑和缓冲计划；日期是单执行者本地容量基线，不是外部人员承诺。"
+planning_baseline:
+  as_of: 2026-07-17
+  execution_owner: Codex
+  default_reviewer: project-maintainer
+  planning_unit: workday
+  capacity: "单一执行槽；每周 5 个工作日，提交/验证占用已计入工作量。"
+  update_cadence: weekly
+  completion_rule: "只按可复现提交、验证命令和证据更新完成状态，不使用主观进度数值。"
+
+work_packages:
+  - id: P0-foundation
+    rc_ranges: ["RC-001..RC-055"]
+    effort_days: 20
+    buffer_days: 5
+    start: 2026-07-20
+    target: 2026-08-21
+    depends_on: []
+    owner_role: Codex
+    reviewer_role: product-and-compliance-reviewer
+    milestone: M0 合法性、产品范围、版本策略和 V2 基线冻结
+    acceptance: "R1-R6 解释、来源/素材/命名门禁、版本策略、现有 V2 回归和追踪入口有提交证据。"
+  - id: P1-core-protocol
+    rc_ranges: ["RC-056..RC-099"]
+    effort_days: 25
+    buffer_days: 5
+    start: 2026-08-24
+    target: 2026-10-02
+    depends_on: [P0-foundation]
+    owner_role: Codex
+    reviewer_role: architecture-reviewer
+    milestone: M1 共享协议、数据模型、Agent Core、工具和权限纵向闭环
+    acceptance: "协议版本、事件/存储 Schema、状态机、工具元数据和权限事件通过自动测试与回放检查。"
+  - id: P2-cli-gui-shell
+    rc_ranges: ["RC-100..RC-133"]
+    effort_days: 18
+    buffer_days: 4
+    start: 2026-10-05
+    target: 2026-11-06
+    depends_on: [P1-core-protocol]
+    owner_role: Codex
+    reviewer_role: cli-gui-reviewer
+    milestone: M2 CLI/TUI、无头输出和 GUI 壳的可导航最小闭环
+    acceptance: "CLI、GUI、无头调用同一核心；路由、权限、事件和 JSON/JSONL 退出语义有测试证据。"
+  - id: P3-prompt-optimization
+    rc_ranges: ["RC-134..RC-158"]
+    effort_days: 15
+    buffer_days: 3
+    start: 2026-11-09
+    target: 2026-12-04
+    depends_on: [P1-core-protocol, P2-cli-gui-shell]
+    owner_role: Codex
+    reviewer_role: prompt-quality-reviewer
+    milestone: M3 菱形星星比较、采用、撤销和 revision 保护闭环
+    acceptance: "API、本地、离线规则三路线明确；取消、并发编辑、结构验证和原文保护测试通过。"
+  - id: P4-provider-local-model
+    rc_ranges: ["RC-159..RC-200"]
+    effort_days: 24
+    buffer_days: 5
+    start: 2026-12-07
+    target: 2027-01-15
+    depends_on: [P1-core-protocol, P3-prompt-optimization]
+    owner_role: Codex
+    reviewer_role: provider-and-license-reviewer
+    milestone: M4 Provider、密钥、本地运行器和 Gemma/Qwen 生命周期
+    acceptance: "三原生协议 Mock、密钥引用、本地模型许可/哈希、离线回退和生命周期测试有证据。"
+  - id: P5-security-quality
+    rc_ranges: ["RC-201..RC-243"]
+    effort_days: 25
+    buffer_days: 5
+    start: 2027-01-18
+    target: 2027-02-26
+    depends_on: [P1-core-protocol, P4-provider-local-model]
+    owner_role: Codex
+    reviewer_role: security-and-qa-reviewer
+    milestone: M5 安全、性能、故障恢复、诊断和测试门禁
+    acceptance: "密钥/路径/命令/本地端口/依赖/迁移/大仓库和取消恢复门禁通过，未验证项保持阻塞。"
+  - id: P6-cross-surface-validation
+    rc_ranges: ["RC-244..RC-261"]
+    effort_days: 15
+    buffer_days: 3
+    start: 2027-03-01
+    target: 2027-03-26
+    depends_on: [P2-cli-gui-shell, P3-prompt-optimization, P5-security-quality]
+    owner_role: Codex
+    reviewer_role: integration-and-ux-reviewer
+    milestone: M6 CLI/GUI/无头一致性、用户旅程、视觉和无障碍验收
+    acceptance: "共享状态、十二个旅程、视觉/A11y、跨表面 E2E 和 Windows/Linux 支持矩阵有证据。"
+  - id: P7-release-governance
+    rc_ranges: ["RC-262..RC-289"]
+    effort_days: 20
+    buffer_days: 4
+    start: 2027-03-29
+    target: 2027-04-30
+    depends_on: [P5-security-quality, P6-cross-surface-validation]
+    owner_role: Codex
+    reviewer_role: release-and-license-reviewer
+    milestone: M7 文档、未签名制品、SHA-256、SBOM/NOTICE 和开源治理
+    acceptance: "Windows/Linux 未签名制品可复现，校验和、依赖许可证、NOTICE、升级说明和发布门禁齐全。"
+  - id: P8-final-acceptance
+    rc_ranges: ["RC-290..RC-310"]
+    effort_days: 12
+    buffer_days: 3
+    start: 2027-05-03
+    target: 2027-05-28
+    depends_on: [P6-cross-surface-validation, P7-release-governance]
+    owner_role: Codex
+    reviewer_role: go-no-go-reviewer
+    milestone: M8 R1-R6 追踪、全新环境复现、Go/No-Go 和后续看板
+    acceptance: "全部稳定版门槛可追踪，独立环境复现通过，阻塞项有明确 Go/No-Go 决策。"
+
+risk_buffer_policy:
+  minimum_buffer_days: 3
+  use_order:
+    - "先处理测试失败、用户数据保护和高风险依赖，不用缓冲掩盖未验证事实。"
+    - "缓冲消耗超过工作包一半时，在周报中记录原因、影响和重新估算。"
+    - "工作包目标日期变化必须保留原目标、变更原因和新的验收条件。"
+
+weekly_evidence:
+  required_fields:
+    - completed_rc_ids
+    - commit_ids
+    - verification_commands
+    - blockers
+    - next_week_target
+  review_rule: "每周只更新证据和目标；没有提交/测试证据的项保持 pending。"
