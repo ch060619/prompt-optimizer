@@ -4,7 +4,7 @@
 - 状态：已提交（MVP、首个稳定版和后续增强版边界已定义；发布验收待后续 RC）
 - 负责人：Codex
 - 基线 Commit：`e9f70c3`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`8898769`
 - 前置 RC：RC-040（已提交；三表面实现对账待后续 RC）
 - 修改文件：`docs/product/release-scope.yml`、`docs/product/release-scope.md`、`scripts/check_release_scope.py`、本证据和主计划/追踪记录
 - 用户可见行为：版本范围明确区分 MVP、首个稳定版和增强项；R1-R6 与当前 `RC-001..RC-310` 全部进入稳定版路线，增强项有理由、复审触发和进入条件。
