@@ -20,14 +20,14 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 46 |
-| 最后完成项 | RC-062 |
-| 下一待执行项 | RC-063（RC-057/RC-060 外部确认保留 pending） |
+| 已完成项数 | 47 |
+| 最后完成项 | RC-063 |
+| 下一待执行项 | RC-064（RC-057/RC-060 外部确认保留 pending） |
 | 当前里程碑 | W2：共享协议、数据模型和 Agent Core |
-| 当前状态 | RC-062 已从实时 FastAPI OpenAPI 生成 TypeScript schema/client，前端 DTO 改为生成类型出口，root/CI 已接入 drift 门禁；按用户指令自动进入 RC-063 |
-| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 Linux/Tauri/TypeScript 和 RC-060 Rust/Tauri/Keychain 外部验证仍缺条件，不阻塞 RC-063 本地传输边界工作 |
-| 最近一次完整验证 | 2026-07-17：RC-062 生成 drift 契约 2 passed；root verify 通过；后端 83 passed；前端 9 passed、Ruff、Mypy、Lint、Build 和追踪校验通过；现有迁移/脚本环境警告保留 |
-| 最近更新时间 | 2026-07-17 16:22:05 +08:00 |
+| 当前状态 | RC-063 已接受 HTTP/SSE/WebSocket/JSON-RPC 传输边界；共享协议提供 SSE 游标/回放、心跳、取消、JSON-RPC 信封和工具幂等账本；RC-064 处理持久化存储边界 |
+| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 Linux/Tauri/TypeScript 和 RC-060 Rust/Tauri/Keychain 外部验证仍缺条件；RC-063 进程内回放不提供崩溃恢复，持久化留给 RC-064/067/071/073，不阻塞 RC-064 |
+| 最近一次完整验证 | 2026-07-17：RC-063 定向传输契约 5 passed；root verify 通过；后端 88 passed；前端 9 passed；Ruff、Mypy、Lint、Build、生成 drift、追踪和交付计划校验通过；既有迁移/脚本环境警告与 jsdom navigation 警告保留 |
+| 最近更新时间 | 2026-07-17 16:39:48 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -82,6 +82,7 @@
 | RC-044 | 2026-07-17 14:39:40 +08:00 | `223eaab` | PASS：SemVer、API/配置/数据库/CLI 兼容窗口、弃用规则、v0/v1 测试数据、前向迁移和受控回滚策略通过；Ruff、SQLite 迁移/回滚 4 passed、追踪检查通过 | `docs/evidence/RC-044/README.md` | 未来 schema、兼容窗口到期、安装升级和跨平台发布迁移留给后续 RC；不执行原地降级 |
 | RC-045 | 2026-07-17 14:50:05 +08:00 | `6fc3f39` | PASS：RC-001..RC-310 唯一覆盖、工作量/缓冲/依赖日期/负责人/评审者/里程碑和周证据字段通过；Ruff、追踪查询和空白检查通过 | `docs/evidence/RC-045/README.md` | 实际开发速度、人工维护者和外部平台资源按周更新；下一未完成项为 RC-049 |
 | RC-062 | 2026-07-17 16:22:05 +08:00 | `1da1f5e` | PASS：OpenAPI 生成 schema/client；root generate-api/check/verify 和 PowerShell 入口通过；RC-062 drift 契约 2 passed；后端 83 passed；前端 9 passed、Ruff/Mypy、Lint/Build、追踪校验通过 | `docs/evidence/RC-062/README.md` | RC-063 处理 SSE/WebSocket/JSON-RPC 传输边界；RC-057/060 外部平台确认仍 pending |
+| RC-063 | 2026-07-17 16:39:48 +08:00 | `300e450` | PASS：Accepted transport ADR；RC-063 传输契约 5 passed；root verify；后端 88 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪和交付计划校验通过 | `docs/evidence/RC-063/README.md` | 事件回放和工具账本当前为进程内实现；崩溃恢复、跨进程持久化和 Provider 取消留给 RC-064/067/071/073；RC-057/060 外部平台确认仍 pending |
 
 ### 进度记录一致性检查
 
@@ -2462,7 +2463,7 @@ git diff --exit-code -- frontend\src\generated
 - [ ] **RC-060** Tauri 只承担桌面窗口、系统集成、更新、密钥库桥接和 FastAPI sidecar 生命周期，业务逻辑不散落到桌面壳。
 - [x] **RC-061** 定义版本化协议层，覆盖请求、会话、消息、内容块、工具调用、审批、流事件、diff、任务状态、错误和 Provider 能力。
 - [x] **RC-062** 从 Pydantic/OpenAPI 生成 TypeScript 类型和客户端，禁止前后端手写两套漂移协议。
-- [ ] **RC-063** 统一同步、SSE、WebSocket 或 JSON-RPC 的使用边界，支持流式文本、工具事件、进度、取消和断线恢复。
+- [x] **RC-063** 统一同步、SSE、WebSocket 或 JSON-RPC 的使用边界，支持流式文本、工具事件、进度、取消和断线恢复。
 - [ ] **RC-064** 使用 SQLite 保存本地结构化数据，文件系统保存大型日志、缓存、模型和附件，并定义事务与并发访问策略。
 - [ ] **RC-065** 建立配置分层：应用默认、用户全局、工作区、会话和临时覆盖，明确优先级与敏感字段存储位置。
 - [ ] **RC-066** 将 Agent、Provider、工具、权限、存储、提示词优化和 UI 解耦，允许独立测试与替换。
