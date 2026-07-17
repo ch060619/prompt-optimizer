@@ -4,7 +4,7 @@
 - 状态：已提交（17 项功能的八状态验收、统一错误码/UI 文案和非成功参数集已定义；实现验证待后续 RC）
 - 负责人：Codex
 - 基线 Commit：`ab09158`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`a187b2c`
 - 前置 RC：RC-041（已提交；版本范围和稳定版门槛已冻结）
 - 修改文件：`docs/product/state-acceptance.yml`、`docs/product/state-acceptance.md`、`scripts/check_state_acceptance.py`、本证据和主计划/追踪记录
 - 用户可见行为：每项 CLI/GUI/无头共享或 GUI 专属能力均有成功、失败、取消、重试、降级、离线、拒绝和恢复口径；错误码、UI 文案和至少一个非成功测试参数统一登记。
