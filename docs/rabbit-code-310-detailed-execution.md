@@ -72,7 +72,7 @@
 | RC-040 | 2026-07-17 13:58:40 +08:00 | `16f773c` | SUBMITTED WITH PENDING CONFIRMATION：CLI、GUI、无头三表面共享核心、唯一事件/存储 Schema 和 GUI 专属差异已冻结；实现对账待后续 RC | `docs/evidence/RC-040/README.md` | Agent/Provider/会话/权限/优化共享实现、事件重放、存储对账和跨表面 E2E 待后续 RC；现有 V2 API 仅为迁移依赖 |
 | RC-041 | 2026-07-17 14:15:28 +08:00 | `8898769` | PASS：MVP、首个稳定版和增强边界校验通过；R1-R6、原初 12 类计划和 RC-001..RC-310 均进入稳定版路线；Ruff、追踪查询和空白检查通过 | `docs/evidence/RC-041/README.md` | 真实实现、Provider、本地模型、跨平台实机、视觉回归和发布验收留给后续 RC；增强项需按登记的进入条件新增 RC |
 | RC-042 | 2026-07-17 14:29:12 +08:00 | `a187b2c` | PASS：17 项 RC-040 能力的成功/失败/取消/重试/降级/离线/拒绝/恢复状态、统一错误码/UI 文案和非成功参数完整；校验器、Ruff、追踪查询和空白检查通过 | `docs/evidence/RC-042/README.md` | 状态参数执行、真实实现、Provider、本地模型、GUI/CLI/无头 E2E 和实机验收留给后续 RC |
-| RC-044 | 2026-07-17 14:39:40 +08:00 | 待本项记录提交后固定 | PASS：SemVer、API/配置/数据库/CLI 兼容窗口、弃用规则、v0/v1 测试数据、前向迁移和受控回滚策略通过；Ruff、SQLite 迁移/回滚 4 passed、追踪检查通过 | `docs/evidence/RC-044/README.md` | 未来 schema、兼容窗口到期、安装升级和跨平台发布迁移留给后续 RC；不执行原地降级 |
+| RC-044 | 2026-07-17 14:39:40 +08:00 | `223eaab` | PASS：SemVer、API/配置/数据库/CLI 兼容窗口、弃用规则、v0/v1 测试数据、前向迁移和受控回滚策略通过；Ruff、SQLite 迁移/回滚 4 passed、追踪检查通过 | `docs/evidence/RC-044/README.md` | 未来 schema、兼容窗口到期、安装升级和跨平台发布迁移留给后续 RC；不执行原地降级 |
 
 ### 进度记录一致性检查
 

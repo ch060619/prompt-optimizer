@@ -4,7 +4,7 @@
 - 状态：已提交（版本、兼容与迁移策略 ADR 已接受；实际发布迁移由后续 RC 持续执行）
 - 负责人：Codex
 - 基线 Commit：`24aa31d`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`223eaab`
 - 前置 RC：RC-043（已完成；追踪基础设施和反向索引可用）
 - 修改文件：`docs/adr/0006-version-and-migration-policy.md`、`docs/migrations/version-migration-policy.yml`、`scripts/check_version_migration_policy.py`、本证据和主计划/追踪记录
 - 用户可见行为：SemVer、API/配置/数据库/CLI 兼容窗口、弃用规则、前向迁移、备份、恢复和受控回滚边界均有明确登记。
