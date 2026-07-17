@@ -190,7 +190,8 @@ export function App() {
 
   function applyOptimizeResult(result: OptimizeResponse) {
     setAnalysis(result.analysis);
-    setActiveVersion(result.version_id);
+    // RC ID: RC-062. Respect the optional version_id generated from OpenAPI.
+    setActiveVersion(result.version_id ?? null);
     setProviderMetadata(result.metadata);
   }
 

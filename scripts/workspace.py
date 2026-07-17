@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""RC ID: RC-056. Provide root install, check, test, build, and verify tasks."""
+"""RC IDs: RC-056, RC-062. Provide root workspace tasks and API drift checks."""
 
 from __future__ import annotations
 
@@ -24,10 +24,15 @@ def install() -> None:
     _run(NPM, "--prefix", "frontend", "install")
 
 
+def generate_api() -> None:
+    _run(sys.executable, "scripts/generate_api.py")
+
+
 def check() -> None:
     errors = validate_workspace(REPOSITORY_ROOT)
     if errors:
         raise SystemExit("\n".join(f"ERROR: {error}" for error in errors))
+    _run(sys.executable, "scripts/generate_api.py", "--check")
     _run(sys.executable, "scripts/check_rc_traceability.py", "--check")
     _run(sys.executable, "scripts/check_delivery_plan.py")
 
@@ -67,6 +72,7 @@ def verify() -> None:
 
 COMMANDS = {
     "install": install,
+    "generate-api": generate_api,
     "check": check,
     "test": test,
     "build": build,

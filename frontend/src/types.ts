@@ -1,113 +1,25 @@
-export type Priority = "high" | "medium" | "low";
-
-export interface ScoreDimension {
-  name: string;
-  label: string;
-  score: number;
-  weight: number;
-  reason: string;
-}
-
-export interface ScoreBreakdown {
-  total_score: number;
-  dimensions: ScoreDimension[];
-}
-
-export interface Suggestion {
-  dimension: string;
-  title: string;
-  detail: string;
-  example: string;
-  priority: Priority;
-}
-
-export interface PromptAnalysis {
-  prompt: string;
-  optimized_prompt?: string | null;
-  score: ScoreBreakdown;
-  suggestions: Suggestion[];
-  strengths: string[];
-  created_at: string;
-}
-
-export interface PromptTemplate {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  tags: string[];
-  template: string;
-  variables: string[];
-  best_practices: string[];
-}
-
-export interface UserPublic {
-  id: number;
-  username: string;
-  created_at: string;
-}
-
-export interface AuthResponse {
-  access_token: string;
-  token_type: string;
-  user: UserPublic;
-}
-
-export interface OptimizeResponse {
-  version_id: number | null;
-  analysis: PromptAnalysis;
-  metadata: {
-    provider_requested: string;
-    provider_used: string;
-    fallback_used: boolean;
-    latency_ms: number;
-    error_summary?: string | null;
-  };
-}
-
-export type StreamEventName =
-  | "started"
-  | "analysis"
-  | "chunk"
-  | "fallback"
-  | "saved"
-  | "completed"
-  | "error";
-
-export interface StreamEvent {
-  event: StreamEventName;
-  data: unknown;
-}
-
-export interface TaskCreateResponse {
-  task_id: string;
-  status: "queued" | "running" | "succeeded" | "failed";
-}
-
-export interface TaskRecord {
-  id: string;
-  owner_id: number;
-  kind: "optimize" | "export" | "evaluate";
-  status: "queued" | "running" | "succeeded" | "failed";
-  result_json?: unknown;
-  error?: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface VersionSummary {
-  id: number;
-  original_preview: string;
-  optimized_preview: string;
-  score: number;
-  created_at: string;
-}
-
-export interface DiffResult {
-  old_id: number;
-  new_id: number;
-  old_score: number;
-  new_score: number;
-  score_delta: number;
-  diff_lines: string[];
-}
+// RC ID: RC-062. API DTOs are generated from the versioned OpenAPI contract.
+export type {
+  AnalyzeRequest,
+  AuthRequest,
+  AuthResponse,
+  DiffResult,
+  EvaluateTaskRequest,
+  ExportRequest,
+  HTTPValidationError,
+  OptimizationSuggestion,
+  OptimizeMetadata,
+  OptimizeRequest,
+  OptimizeResponse,
+  ProjectSpace,
+  PromptAnalysis,
+  PromptTemplate,
+  PromptVersion,
+  ScoreBreakdown,
+  ScoreDimension,
+  TaskCreateResponse,
+  TaskRecord,
+  UserPublic,
+  ValidationError,
+  VersionSummary
+} from "./generated/schema";

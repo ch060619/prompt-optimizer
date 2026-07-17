@@ -1,31 +1,24 @@
+import { createApiClient } from "./generated/client";
 import type {
-  AuthResponse,
-  DiffResult,
-  OptimizeResponse,
-  PromptAnalysis,
-  PromptTemplate,
-  StreamEvent,
-  TaskCreateResponse,
-  TaskRecord,
-  VersionSummary
+  ExportRequest,
+  OptimizeRequest,
+  OptimizeResponse
 } from "./types";
 
-// RC ID: RC-058. New GUI calls use the single versioned App Server prefix.
-const API_PREFIX = "/api/v1";
-
+// RC IDs: RC-058, RC-062. New GUI calls use the generated versioned App Server client.
 let accessToken: string | null = localStorage.getItem("prompt_optimizer_token");
+const generatedClient = createApiClient({ getToken: () => accessToken });
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
-    headers: authHeaders(init?.headers),
-    ...init
-  });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(payload.detail ?? response.statusText);
-  }
-  return (await response.json()) as T;
-}
+type Provider = NonNullable<OptimizeRequest["provider"]>;
+type StreamEventName =
+  | "started"
+  | "analysis"
+  | "chunk"
+  | "fallback"
+  | "saved"
+  | "completed"
+  | "error";
+type StreamEvent = { event: StreamEventName; data: unknown };
 
 export const api = {
   setToken(token: string | null) {
@@ -40,46 +33,33 @@ export const api = {
     return accessToken;
   },
   register(username: string, password: string) {
-    return request<AuthResponse>(`${API_PREFIX}/auth/register`, {
-      method: "POST",
-      body: JSON.stringify({ username, password })
-    });
+    return generatedClient.register({ username, password });
   },
   login(username: string, password: string) {
-    return request<AuthResponse>(`${API_PREFIX}/auth/login`, {
-      method: "POST",
-      body: JSON.stringify({ username, password })
-    });
+    return generatedClient.login({ username, password });
   },
   me() {
-    return request<AuthResponse["user"]>(`${API_PREFIX}/auth/me`);
+    return generatedClient.me();
   },
   analyze(prompt: string) {
-    return request<PromptAnalysis>(`${API_PREFIX}/analyze`, {
-      method: "POST",
-      body: JSON.stringify({ prompt })
-    });
+    return generatedClient.analyze({ prompt });
   },
-  optimize(prompt: string, templateId?: string, provider = "offline") {
-    return request<OptimizeResponse>(`${API_PREFIX}/optimize`, {
-      method: "POST",
-      body: JSON.stringify({ prompt, template_id: templateId, provider })
-    });
+  optimize(prompt: string, templateId?: string, provider: Provider = "offline") {
+    return generatedClient.optimize({ prompt, template_id: templateId, provider });
   },
   async streamOptimize(
     prompt: string,
     templateId: string | undefined,
-    provider: string,
+    provider: Provider,
     onEvent: (event: StreamEvent) => void
   ) {
-    const response = await fetch(`${API_PREFIX}/optimize/stream`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ prompt, template_id: templateId, provider })
+    const response = await generatedClient.optimizeStream({
+      prompt,
+      template_id: templateId,
+      provider
     });
-    if (!response.ok || !response.body) {
-      const payload = await response.json().catch(() => ({ detail: "流式优化失败" }));
-      throw new Error(payload.detail ?? "流式优化失败");
+    if (!response.body) {
+      throw new Error("流式优化失败");
     }
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -108,49 +88,32 @@ export const api = {
       }
     }
   },
-  createOptimizeTask(prompt: string, templateId?: string, provider = "offline") {
-    return request<TaskCreateResponse>(`${API_PREFIX}/tasks/optimize`, {
-      method: "POST",
-      body: JSON.stringify({ prompt, template_id: templateId, provider })
-    });
+  createOptimizeTask(prompt: string, templateId?: string, provider: Provider = "offline") {
+    return generatedClient.createOptimizeTask({ prompt, template_id: templateId, provider });
   },
   task(taskId: string) {
-    return request<TaskRecord>(`${API_PREFIX}/tasks/${taskId}`);
+    return generatedClient.getTask(taskId);
   },
-  taskResult(taskId: string) {
-    return request<OptimizeResponse>(`${API_PREFIX}/tasks/${taskId}/result`);
+  async taskResult(taskId: string) {
+    return (await generatedClient.getTaskResult(taskId)) as unknown as OptimizeResponse;
   },
   templates(category?: string) {
-    const query = category ? `?category=${encodeURIComponent(category)}` : "";
-    return request<PromptTemplate[]>(`${API_PREFIX}/templates${query}`);
+    return generatedClient.templates(category);
   },
   history() {
-    return request<VersionSummary[]>(`${API_PREFIX}/history`);
+    return generatedClient.history();
   },
   diff(oldId: number, newId: number) {
-    return request<DiffResult>(`${API_PREFIX}/history/${oldId}/diff/${newId}`);
+    return generatedClient.diff(oldId, newId);
   },
   async export(versionId: number, format: string) {
-    const response = await fetch(`${API_PREFIX}/export`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ version_id: versionId, format })
+    const response = await generatedClient.export({
+      version_id: versionId,
+      format: format as ExportRequest["format"]
     });
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({ detail: "导出失败" }));
-      throw new Error(payload.detail ?? "导出失败");
-    }
     return response.text();
   }
 };
-
-function authHeaders(headers?: HeadersInit): HeadersInit {
-  return {
-    "Content-Type": "application/json",
-    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    ...(headers ?? {})
-  };
-}
 
 function parseStreamEvent(raw: string): StreamEvent | null {
   const eventLine = raw.split("\n").find((line) => line.startsWith("event: "));
@@ -159,7 +122,7 @@ function parseStreamEvent(raw: string): StreamEvent | null {
     return null;
   }
   return {
-    event: eventLine.slice("event: ".length) as StreamEvent["event"],
+    event: eventLine.slice("event: ".length) as StreamEventName,
     data: JSON.parse(dataLine.slice("data: ".length)) as unknown
   };
 }
