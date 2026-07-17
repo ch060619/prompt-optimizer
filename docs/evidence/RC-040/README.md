@@ -4,7 +4,7 @@
 - 状态：已提交（CLI/GUI/无头一致性边界已定义；实现对账待后续 RC）
 - 负责人：Codex
 - 基线 Commit：`848477c`
-- 完成 Commit：待本项记录提交后固定
+- 完成 Commit：`16f773c`
 - 前置 RC：RC-039（已提交；场景实现和 E2E 待后续 RC）
 - 修改文件：`docs/product/capability-matrix.yml`、`docs/product/capability-matrix.md`、`scripts/check_capability_matrix.py`、本证据和主计划进度记录
 - 用户可见行为：CLI、GUI、无头模式的共享能力、唯一事件/存储 Schema 和 GUI 专属差异均有明确登记；无头缺少交互批准时必须返回机器可读状态。

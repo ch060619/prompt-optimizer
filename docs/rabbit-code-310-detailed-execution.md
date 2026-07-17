@@ -69,7 +69,7 @@
 | RC-037 | 2026-07-17 12:25:00 +08:00 | `4d75ca9` | SUBMITTED WITH PENDING CONFIRMATION：五类 Persona、可测高频任务、优先级、冲突与核心能力覆盖已提交；校验器与 Ruff 通过，访谈未执行 | `docs/evidence/RC-037/README.md` | 真实用户访谈/问卷、P0 优先级和产品范围签收待确认 |
 | RC-038 | 2026-07-17 13:12:09 +08:00 | `bc9764d` | SUBMITTED WITH PENDING CONFIRMATION：Windows/Linux 首发平台矩阵、x86_64 正式基线、终端/Shell、CPU/GPU、未签名制品、SHA-256、验证环境和责任角色已冻结；组合实测待后续 RC | `docs/evidence/RC-038/README.md` | Linux 实机、未签名安装包、ARM/GPU 和 Fedora rpm 实测待后续平台/安装包/测试 RC；macOS 不在首发范围 |
 | RC-039 | 2026-07-17 13:46:04 +08:00 | `e6b71e8` | SUBMITTED WITH PENDING CONFIRMATION：十二个核心旅程、R1-R6 映射、失败/恢复分支、功能依赖和人工测试卡已提交；实现/E2E 待后续 RC | `docs/evidence/RC-039/README.md` | Agent、GUI、Provider、模型和跨平台 E2E 待后续 RC；RC-037 产品范围评审仍待确认 |
-| RC-040 | 2026-07-17 13:58:40 +08:00 | 待本项记录提交后固定 | SUBMITTED WITH PENDING CONFIRMATION：CLI、GUI、无头三表面共享核心、唯一事件/存储 Schema 和 GUI 专属差异已冻结；实现对账待后续 RC | `docs/evidence/RC-040/README.md` | Agent/Provider/会话/权限/优化共享实现、事件重放、存储对账和跨表面 E2E 待后续 RC；现有 V2 API 仅为迁移依赖 |
+| RC-040 | 2026-07-17 13:58:40 +08:00 | `16f773c` | SUBMITTED WITH PENDING CONFIRMATION：CLI、GUI、无头三表面共享核心、唯一事件/存储 Schema 和 GUI 专属差异已冻结；实现对账待后续 RC | `docs/evidence/RC-040/README.md` | Agent/Provider/会话/权限/优化共享实现、事件重放、存储对账和跨表面 E2E 待后续 RC；现有 V2 API 仅为迁移依赖 |
 
 ### 进度记录一致性检查
 
@@ -2420,7 +2420,7 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-037** 定义目标用户：个人开发者、无 API 用户、多 Provider 用户、开源贡献者和团队开发者。
 - [x] **RC-038** 定义首发平台：Windows、Linux，并分别列出 CPU 架构、终端、Shell、GPU 和未签名安装包支持矩阵。
 - [x] **RC-039** 定义核心场景：打开仓库、发起编码任务、阅读代码、规划、编辑、运行命令、测试、审查 diff、恢复会话、切换模型、优化提示词和本地离线对话。
-- [ ] **RC-040** 定义 CLI、GUI 和无头模式的功能一致性范围，明确哪些能力共享核心、哪些仅属于桌面显示层。
+- [x] **RC-040** 定义 CLI、GUI 和无头模式的功能一致性范围，明确哪些能力共享核心、哪些仅属于桌面显示层。
 - [ ] **RC-041** 定义 MVP、首个稳定版和后续增强版边界，但所有原始要求必须进入首个稳定版，不得以“后续考虑”永久搁置。
 - [ ] **RC-042** 为每项功能定义成功、失败、取消、重试、降级、离线、权限拒绝和数据恢复的验收状态。
 - [x] **RC-043** 建立需求 ID、设计、代码、测试、文档和发布说明之间的可追踪关系。
