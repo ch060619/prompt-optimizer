@@ -4,9 +4,16 @@ from collections.abc import Iterator
 from time import perf_counter
 
 from prompt_optimizer.core.optimizer import Optimizer
-from prompt_optimizer.providers.base import ModelRequest, ModelResponse
+from prompt_optimizer.providers.base import (
+    ModelRequest,
+    ModelResponse,
+    ProviderCapabilities,
+    ProviderEvent,
+    ProviderEventType,
+)
 
 # RC ID: RC-050. Describe the offline rules backend without presenting it as a model.
+# RC ID: RC-049. Adapt the existing offline stream to the shared Provider events.
 
 
 class OfflineRuleProvider:
@@ -14,6 +21,7 @@ class OfflineRuleProvider:
     display_name = "离线规则"
     is_model = False
     network_access = False
+    capabilities = ProviderCapabilities(streaming=True)
     fallback_triggers = (
         "provider_error",
         "provider_timeout",
@@ -34,8 +42,13 @@ class OfflineRuleProvider:
             latency_ms=latency_ms,
         )
 
-    def stream(self, request: ModelRequest) -> Iterator[str]:
+    def stream(self, request: ModelRequest) -> Iterator[ProviderEvent]:
         response = self.optimize(request)
         optimized = response.analysis.optimized_prompt or ""
+        yield ProviderEvent(ProviderEventType.STARTED)
         for start in range(0, len(optimized), 120):
-            yield optimized[start : start + 120]
+            yield ProviderEvent(
+                ProviderEventType.DELTA,
+                text=optimized[start : start + 120],
+            )
+        yield ProviderEvent(ProviderEventType.COMPLETED)

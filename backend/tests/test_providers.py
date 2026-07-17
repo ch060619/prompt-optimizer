@@ -3,17 +3,40 @@ from __future__ import annotations
 import httpx
 
 from prompt_optimizer.core.analyzer import Analyzer
-from prompt_optimizer.providers.base import ModelRequest, ProviderConfig, ProviderRateLimitError
+from prompt_optimizer.providers.base import (
+    ModelProvider,
+    ModelRequest,
+    ProviderConfig,
+    ProviderEventType,
+    ProviderRateLimitError,
+)
 from prompt_optimizer.providers.http import HttpChatProvider
 from prompt_optimizer.providers.offline import OfflineRuleProvider
+from prompt_optimizer.providers.openai import OpenAICompatibleAdapter
+from prompt_optimizer.providers.registry import ProviderRegistry
+
+# RC ID: RC-049. Verify the shared Provider contract with deterministic Mock transports.
 
 
 def test_offline_provider_uses_rule_optimizer() -> None:
-    response = OfflineRuleProvider().optimize(ModelRequest(prompt="帮我写一封邮件"))
+    provider = OfflineRuleProvider()
+    response = provider.optimize(ModelRequest(prompt="帮我写一封邮件"))
 
     assert response.provider_used == "offline"
     assert response.analysis.optimized_prompt is not None
     assert response.latency_ms >= 0
+    assert isinstance(provider, ModelProvider)
+    assert provider.capabilities.text is True
+    assert provider.capabilities.streaming is True
+
+
+def test_offline_provider_uses_unified_stream_events() -> None:
+    events = list(OfflineRuleProvider().stream(ModelRequest(prompt="写一份报告")))
+
+    assert events[0].type is ProviderEventType.STARTED
+    assert events[-1].type is ProviderEventType.COMPLETED
+    assert all(event.type is ProviderEventType.DELTA for event in events[1:-1])
+    assert "".join(event.text or "" for event in events[1:-1])
 
 
 def test_http_provider_parses_chat_response() -> None:
@@ -36,7 +59,7 @@ def test_http_provider_parses_chat_response() -> None:
             },
         )
 
-    provider = HttpChatProvider(
+    provider = OpenAICompatibleAdapter(
         ProviderConfig(
             name="openai",
             base_url="https://example.test/chat",
@@ -52,6 +75,29 @@ def test_http_provider_parses_chat_response() -> None:
     assert response.provider_used == "openai"
     assert response.analysis.optimized_prompt is not None
     assert response.analysis.score.total_score > 0
+
+
+def test_openai_compatible_adapter_does_not_guess_other_response_protocols() -> None:
+    provider = OpenAICompatibleAdapter(
+        ProviderConfig(
+            name="openai",
+            base_url="https://example.test/chat",
+            api_key="test-key",
+            model="demo",
+        ),
+        client=httpx.Client(
+            transport=httpx.MockTransport(
+                lambda request: httpx.Response(200, json={"output": "other protocol"})
+            )
+        ),
+    )
+
+    try:
+        provider.optimize(ModelRequest(prompt="写报告"))
+    except RuntimeError as exc:
+        assert "无法解析模型响应" in str(exc)
+    else:
+        raise AssertionError("non-OpenAI response should be rejected")
 
 
 def test_http_provider_retries_timeout_then_succeeds() -> None:
@@ -128,7 +174,7 @@ def test_http_provider_streams_chat_chunks() -> None:
             ),
         )
 
-    provider = HttpChatProvider(
+    provider = OpenAICompatibleAdapter(
         ProviderConfig(
             name="openai",
             base_url="https://example.test/chat",
@@ -138,4 +184,24 @@ def test_http_provider_streams_chat_chunks() -> None:
         client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
 
-    assert list(provider.stream(ModelRequest(prompt="写报告"))) == ["优化", "提示词"]
+    events = list(provider.stream(ModelRequest(prompt="写报告")))
+
+    assert [event.type for event in events] == [
+        ProviderEventType.STARTED,
+        ProviderEventType.DELTA,
+        ProviderEventType.DELTA,
+        ProviderEventType.COMPLETED,
+    ]
+    assert [event.text for event in events[1:-1]] == ["优化", "提示词"]
+
+
+def test_http_provider_compatibility_alias_points_to_explicit_adapter() -> None:
+    assert HttpChatProvider is OpenAICompatibleAdapter
+
+
+def test_registry_returns_explicit_openai_compatible_adapter() -> None:
+    provider = ProviderRegistry().get("openai")
+
+    assert isinstance(provider, OpenAICompatibleAdapter)
+    assert provider.capabilities.streaming is True
+    provider.client.close()

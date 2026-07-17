@@ -14,11 +14,16 @@ from prompt_optimizer.providers import (
     ModelProviderError,
     ModelRequest,
     ModelResponse,
+    ProviderCapabilities,
+    ProviderEvent,
+    ProviderEventType,
     ProviderRegistry,
 )
 from prompt_optimizer.services import AppServices
 from prompt_optimizer.storage.service import StorageService
 from prompt_optimizer.storage.version_service import VersionService
+
+# RC ID: RC-049. Verify the API consumes shared Provider events without changing core logic.
 
 
 @fixture
@@ -302,6 +307,7 @@ def test_api_optimize_stream_can_use_provider_chunks(tmp_path: Path) -> None:
 
 class FailingProvider:
     name = "openai"
+    capabilities = ProviderCapabilities()
 
     def optimize(self, request: ModelRequest) -> ModelResponse:
         raise ModelProviderError("boom")
@@ -312,10 +318,13 @@ class FailingProvider:
 
 class StreamingProvider:
     name = "openai"
+    capabilities = ProviderCapabilities(streaming=True)
 
     def optimize(self, request: ModelRequest) -> ModelResponse:
         raise AssertionError("streaming path should not call optimize")
 
     def stream(self, request: ModelRequest):  # type: ignore[no-untyped-def]
-        yield "流式"
-        yield "优化"
+        yield ProviderEvent(ProviderEventType.STARTED)
+        yield ProviderEvent(ProviderEventType.DELTA, text="流式")
+        yield ProviderEvent(ProviderEventType.DELTA, text="优化")
+        yield ProviderEvent(ProviderEventType.COMPLETED)

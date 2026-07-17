@@ -34,11 +34,12 @@ from prompt_optimizer.core.models import (
 )
 from prompt_optimizer.identity import PRODUCT_NAME
 from prompt_optimizer.paths import PROJECT_ROOT
-from prompt_optimizer.providers import ModelProviderError, ModelRequest
+from prompt_optimizer.providers import ModelProviderError, ModelRequest, ProviderEventType
 from prompt_optimizer.services import AppServices
 
 # RC ID: RC-048. Preserve the V2 API while exposing the versioned compatibility surface.
 # RC ID: RC-054. Expose Rabbit Code as the canonical API product identity.
+# RC ID: RC-049. Translate Provider events into the existing SSE chunk contract.
 
 services = AppServices()
 logger = logging.getLogger("prompt_optimizer.api")
@@ -434,7 +435,10 @@ def _stream_provider_result(
     try:
         provider = current_services.providers.get(request.provider)
         provider_used = provider.name
-        for chunk in provider.stream(ModelRequest(prompt=prompt, template=template)):
+        for event in provider.stream(ModelRequest(prompt=prompt, template=template)):
+            if event.type is not ProviderEventType.DELTA or not event.text:
+                continue
+            chunk = event.text
             streamed_chunks.append(chunk)
             yield _sse("chunk", {"text": chunk})
     except (ModelProviderError, RuntimeError, ValueError) as exc:

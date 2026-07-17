@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Protocol
+from enum import StrEnum
+from typing import Protocol, runtime_checkable
 
 from prompt_optimizer.core.models import PromptAnalysis, PromptTemplate
+
+# RC ID: RC-049. Define the shared Provider protocol, capabilities, and events.
 
 
 @dataclass(frozen=True)
@@ -31,6 +34,31 @@ class ModelResponse:
     latency_ms: int
 
 
+@dataclass(frozen=True)
+class ProviderCapabilities:
+    text: bool = True
+    streaming: bool = False
+    image: bool = False
+    tools: bool = False
+    structured_output: bool = False
+    context_length: int | None = None
+    model_listing: bool = False
+    token_usage: bool = False
+    cost_info: bool = False
+
+
+class ProviderEventType(StrEnum):
+    STARTED = "started"
+    DELTA = "delta"
+    COMPLETED = "completed"
+
+
+@dataclass(frozen=True)
+class ProviderEvent:
+    type: ProviderEventType
+    text: str | None = None
+
+
 class ModelProviderError(RuntimeError):
     pass
 
@@ -43,11 +71,13 @@ class ProviderRateLimitError(ModelProviderError):
     pass
 
 
+@runtime_checkable
 class ModelProvider(Protocol):
     name: str
+    capabilities: ProviderCapabilities
 
     def optimize(self, request: ModelRequest) -> ModelResponse:
         pass
 
-    def stream(self, request: ModelRequest) -> Iterator[str]:
+    def stream(self, request: ModelRequest) -> Iterator[ProviderEvent]:
         pass

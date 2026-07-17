@@ -3,10 +3,11 @@ from __future__ import annotations
 from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.identity import compatible_env
 from prompt_optimizer.providers.base import ModelProvider, ProviderConfig
-from prompt_optimizer.providers.http import HttpChatProvider
 from prompt_optimizer.providers.offline import OfflineRuleProvider
+from prompt_optimizer.providers.openai import OpenAICompatibleAdapter
 
 # RC ID: RC-054. Prefer Rabbit Code Provider environment names with a legacy fallback.
+# RC ID: RC-049. Register the explicit OpenAI-compatible adapter for compatible endpoints.
 
 
 class ProviderRegistry:
@@ -23,7 +24,7 @@ class ProviderRegistry:
         if name in self._providers:
             return self._providers[name]
         config = self._config_from_env(name)
-        provider = HttpChatProvider(config)
+        provider = OpenAICompatibleAdapter(config)
         self._providers[name] = provider
         return provider
 
