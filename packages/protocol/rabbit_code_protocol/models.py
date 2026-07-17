@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # RC ID: RC-061. Define versioned cross-surface request, event, task, and capability schemas.
 
@@ -48,6 +48,39 @@ class AgentRequest(ProtocolModel):
     model: str | None = None
 
 
+JsonRpcId = int | str
+
+
+class JsonRpcRequest(ProtocolModel):
+    jsonrpc: Literal["2.0"] = "2.0"
+    id: JsonRpcId | None = None
+    method: str = Field(min_length=1)
+    params: dict[str, Any] | list[Any] | None = None
+
+
+class JsonRpcError(ProtocolModel):
+    code: int
+    message: str = Field(min_length=1)
+    data: Any | None = None
+
+
+class JsonRpcResponse(ProtocolModel):
+    jsonrpc: Literal["2.0"] = "2.0"
+    id: JsonRpcId | None = None
+    result: Any | None = None
+    error: JsonRpcError | None = None
+
+    @model_validator(mode="after")
+    def validate_result_or_error(self) -> "JsonRpcResponse":
+        if self.result is not None and self.error is not None:
+            raise ValueError("JSON-RPC 响应必须且只能包含 result 或 error。")
+        if self.result is None and self.error is None and not (
+            {"result", "error"} & self.model_fields_set
+        ):
+            raise ValueError("JSON-RPC 响应必须且只能包含 result 或 error。")
+        return self
+
+
 class ApprovalRequest(ProtocolModel):
     approval_id: str = Field(min_length=1)
     request_id: str = Field(min_length=1)
@@ -59,6 +92,7 @@ class ApprovalRequest(ProtocolModel):
 class StreamEventType(StrEnum):
     STARTED = "started"
     DELTA = "delta"
+    PROGRESS = "progress"
     TOOL_CALL = "tool_call"
     APPROVAL_REQUIRED = "approval_required"
     COMPLETED = "completed"
@@ -72,6 +106,11 @@ class StreamEvent(ProtocolModel):
     type: StreamEventType
     payload: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class StreamCursor(ProtocolModel):
+    request_id: str = Field(min_length=1)
+    after_seq: int = Field(default=-1, ge=-1)
 
 
 class DiffPayload(ProtocolModel):
