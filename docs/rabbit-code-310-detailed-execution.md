@@ -64,7 +64,7 @@
 | RC-032 | 2026-07-17 05:00:51 +08:00 | `bb1f6b4` | SUBMITTED WITH PENDING CONFIRMATION：32 个直接/构建依赖全部登记；PyPI/npm 官方 metadata 已记录；THIRD_PARTY_NOTICES 可生成且对账通过；10 个条目仍 review-required | `docs/evidence/RC-032/README.md` | 未确认 license 和自定义 GSAP 条目不得发布；传递依赖/SBOM 逐层审计留给后续发布门禁 |
 | RC-033 | 2026-07-17 05:05:44 +08:00 | `7d8d455` | SUBMITTED WITH PENDING CONFIRMATION：clean-room 行为规格、双候选方案、独立测试、Provenance、实现者记录、原创历史和相似性门禁已定义；流程校验通过，正式实现 PR 待确认 | `docs/evidence/RC-033/README.md` | 未有核心实现需要重写；在角色签署和实现 PR 前维持 restricted 材料隔离 |
 | RC-034 | 2026-07-17 05:13:20 +08:00 | `3b85662` | SUBMITTED WITH PENDING CONFIRMATION：名称/渠道公开入口登记、保守的 404 风险校验和商标数据库待检索状态已提交；校验器与 Ruff 通过 | `docs/evidence/RC-034/README.md` | 具体商标检索、负责人/法务签署、域名/组织/包名控制权和应用商店核验待确认 |
-| RC-035 | 2026-07-17 12:08:19 +08:00 | `f72ef6e` | SUBMITTED WITH PENDING CONFIRMATION：用户确认仓库兔兔素材身份并声明 AI 生成，授权未知，已建立 SHA-256 登记与发布阻断门禁；校验器与 Ruff 通过 | `docs/evidence/RC-035/README.md` | 原始来源、权利人书面声明、生成服务条款、许可证、署名条款和发布批准待确认 |
+| RC-035 | 2026-07-17 12:08:19 +08:00 | `f72ef6e`; 修正 `5fc4d75` | SUBMITTED WITH PENDING CONFIRMATION：用户确认仓库兔兔素材身份并声明 AI 生成，授权未知，已建立 SHA-256 登记与发布阻断门禁；校验器与 Ruff 通过 | `docs/evidence/RC-035/README.md` | 原始来源、权利人书面声明、生成服务条款、许可证、署名条款和发布批准待确认 |
 
 ### 进度记录一致性检查
 
