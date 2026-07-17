@@ -1,0 +1,34 @@
+{
+  "captured_at": "2026-07-17T15:31:17+08:00",
+  "rc_id": "RC-057",
+  "platform": "Windows (win32)",
+  "candidate": {
+    "agent_core_python_source_bytes": 4005,
+    "event_contract": ["started", "delta", "completed", "cancelled"],
+    "provider_requests": "none"
+  },
+  "prototype_app_server": {
+    "alive_after_shutdown": false,
+    "exit_code": 1,
+    "protocol": "rc-057-agent-prototype-v1",
+    "ready": true,
+    "startup_ms": 1343,
+    "stream_events": ["started", "delta", "delta", "delta", "completed"]
+  },
+  "existing_react_vite_dist": {
+    "bytes": 896309,
+    "files": 5
+  },
+  "typescript_alternative": {
+    "status": "not_built",
+    "reason": "No separate TypeScript Agent Core was implemented; a comparison would otherwise be fabricated."
+  },
+  "linux": {
+    "status": "not_run",
+    "reason": "No supported Linux test machine is available in this workspace."
+  },
+  "tauri": {
+    "status": "not_built",
+    "reason": "The desktop shell remains a later boundary; no Tauri dependency was introduced in RC-057."
+  }
+}
