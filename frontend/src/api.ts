@@ -10,6 +10,9 @@ import type {
   VersionSummary
 } from "./types";
 
+// RC ID: RC-058. New GUI calls use the single versioned App Server prefix.
+const API_PREFIX = "/api/v1";
+
 let accessToken: string | null = localStorage.getItem("prompt_optimizer_token");
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -37,28 +40,28 @@ export const api = {
     return accessToken;
   },
   register(username: string, password: string) {
-    return request<AuthResponse>("/api/auth/register", {
+    return request<AuthResponse>(`${API_PREFIX}/auth/register`, {
       method: "POST",
       body: JSON.stringify({ username, password })
     });
   },
   login(username: string, password: string) {
-    return request<AuthResponse>("/api/auth/login", {
+    return request<AuthResponse>(`${API_PREFIX}/auth/login`, {
       method: "POST",
       body: JSON.stringify({ username, password })
     });
   },
   me() {
-    return request<AuthResponse["user"]>("/api/auth/me");
+    return request<AuthResponse["user"]>(`${API_PREFIX}/auth/me`);
   },
   analyze(prompt: string) {
-    return request<PromptAnalysis>("/api/analyze", {
+    return request<PromptAnalysis>(`${API_PREFIX}/analyze`, {
       method: "POST",
       body: JSON.stringify({ prompt })
     });
   },
   optimize(prompt: string, templateId?: string, provider = "offline") {
-    return request<OptimizeResponse>("/api/optimize", {
+    return request<OptimizeResponse>(`${API_PREFIX}/optimize`, {
       method: "POST",
       body: JSON.stringify({ prompt, template_id: templateId, provider })
     });
@@ -69,7 +72,7 @@ export const api = {
     provider: string,
     onEvent: (event: StreamEvent) => void
   ) {
-    const response = await fetch("/api/optimize/stream", {
+    const response = await fetch(`${API_PREFIX}/optimize/stream`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ prompt, template_id: templateId, provider })
@@ -106,29 +109,29 @@ export const api = {
     }
   },
   createOptimizeTask(prompt: string, templateId?: string, provider = "offline") {
-    return request<TaskCreateResponse>("/api/tasks/optimize", {
+    return request<TaskCreateResponse>(`${API_PREFIX}/tasks/optimize`, {
       method: "POST",
       body: JSON.stringify({ prompt, template_id: templateId, provider })
     });
   },
   task(taskId: string) {
-    return request<TaskRecord>(`/api/tasks/${taskId}`);
+    return request<TaskRecord>(`${API_PREFIX}/tasks/${taskId}`);
   },
   taskResult(taskId: string) {
-    return request<OptimizeResponse>(`/api/tasks/${taskId}/result`);
+    return request<OptimizeResponse>(`${API_PREFIX}/tasks/${taskId}/result`);
   },
   templates(category?: string) {
     const query = category ? `?category=${encodeURIComponent(category)}` : "";
-    return request<PromptTemplate[]>(`/api/templates${query}`);
+    return request<PromptTemplate[]>(`${API_PREFIX}/templates${query}`);
   },
   history() {
-    return request<VersionSummary[]>("/api/history");
+    return request<VersionSummary[]>(`${API_PREFIX}/history`);
   },
   diff(oldId: number, newId: number) {
-    return request<DiffResult>(`/api/history/${oldId}/diff/${newId}`);
+    return request<DiffResult>(`${API_PREFIX}/history/${oldId}/diff/${newId}`);
   },
   async export(versionId: number, format: string) {
-    const response = await fetch("/api/export", {
+    const response = await fetch(`${API_PREFIX}/export`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ version_id: versionId, format })

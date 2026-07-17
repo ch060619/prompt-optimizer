@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { PRODUCT_NAME } from "./brand";
 
 // RC ID: RC-054. Render the Rabbit Code brand across the public shell.
+// RC ID: RC-058. Keep public API examples on the versioned App Server prefix.
 
 type ProductSpec = {
   path: string;
@@ -38,7 +39,7 @@ const productSpecs: Record<string, ProductSpec> = {
     features: ["Clarity score", "Specificity score", "Context score", "Output format", "Constraint coverage", "Role signals", "Examples", "Executability", "Before and after delta"],
     narrativeTitle: "A score is useful when it points to the next edit.",
     narrative: "The analyzer returns weighted dimensions and a suggestion list. Each result stays close to the original prompt so the person making the edit can judge the tradeoff.",
-    details: ["Analysis is available without a remote model.", "The score breakdown is returned by `/api/analyze`.", "Evaluation task support remains available for batches."]
+  details: ["Analysis is available without a remote model.", "The score breakdown is returned by `/api/v1/analyze`.", "Evaluation task support remains available for batches."]
   },
   "/observability": {
     path: "/observability",
@@ -71,7 +72,7 @@ const productSpecs: Record<string, ProductSpec> = {
     features: ["SSE stream", "Started event", "Analysis event", "Text chunks", "Fallback event", "Saved event", "Completed event", "Task polling", "Export jobs"],
     narrativeTitle: "The chain is the interface.",
     narrative: "The existing application exposes each optimization path separately. A shared workflow language makes the state transitions legible without changing the server behavior.",
-    details: ["Streaming uses `/api/optimize/stream`.", "Background optimization uses `/api/tasks/optimize`.", "Export and evaluation tasks use the same task service boundary."]
+  details: ["Streaming uses `/api/v1/optimize/stream`.", "Background optimization uses `/api/v1/tasks/optimize`.", "Export and evaluation tasks use the same task service boundary."]
   }
 };
 

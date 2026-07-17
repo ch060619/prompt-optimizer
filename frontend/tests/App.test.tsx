@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
 import { api } from "../src/api";
 
+// RC ID: RC-058. Verify the GUI uses the versioned App Server paths.
+
 // RC ID: RC-050. Verify the UI identifies offline rules instead of a model.
 // RC ID: RC-054. Verify the public UI uses the Rabbit Code identity.
 
@@ -14,13 +16,13 @@ function stubFetch(handler?: (url: string) => Promise<ResponseLike>) {
       if (handler) {
         return handler(url);
       }
-      if (url.startsWith("/api/templates")) {
+  if (url.startsWith("/api/v1/templates")) {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve([])
         });
       }
-      if (url === "/api/history") {
+  if (url === "/api/v1/history") {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve([])
@@ -91,13 +93,13 @@ describe("App", () => {
   it("shows initialization errors from the API", async () => {
     visitWorkspace();
     stubFetch((url: string) => {
-      if (url.startsWith("/api/templates")) {
+  if (url.startsWith("/api/v1/templates")) {
         return Promise.resolve({
           ok: false,
           json: () => Promise.resolve({ detail: "模板加载失败" })
         });
       }
-      if (url === "/api/history") {
+  if (url === "/api/v1/history") {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve([])
@@ -123,13 +125,13 @@ describe("App", () => {
       created_at: "2026-06-15T00:00:00Z"
     };
     stubFetch((url: string) => {
-      if (url.startsWith("/api/templates")) {
+  if (url.startsWith("/api/v1/templates")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
       }
-      if (url === "/api/history") {
+  if (url === "/api/v1/history") {
         return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
       }
-      if (url === "/api/optimize/stream") {
+  if (url === "/api/v1/optimize/stream") {
         const payload = [
           `event: started\ndata: {"provider":"offline"}`,
           `event: analysis\ndata: ${JSON.stringify(analysis)}`,
@@ -172,10 +174,10 @@ describe("App", () => {
     window.history.replaceState({}, "", "/register");
     let sawAuthHeader = false;
     stubFetch((url: string) => {
-      if (url.startsWith("/api/templates")) {
+  if (url.startsWith("/api/v1/templates")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
       }
-      if (url === "/api/auth/register") {
+  if (url === "/api/v1/auth/register") {
         return Promise.resolve({
           ok: true,
           json: () =>
@@ -186,7 +188,7 @@ describe("App", () => {
             })
         });
       }
-      if (url === "/api/history") {
+  if (url === "/api/v1/history") {
         const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls;
         const headers = calls[calls.length - 1]?.[1]?.headers as Record<string, string> | undefined;
         sawAuthHeader = headers?.Authorization === "Bearer token-1";
@@ -213,25 +215,25 @@ describe("App", () => {
       created_at: "2026-06-15T00:00:00Z"
     };
     stubFetch((url: string) => {
-      if (url.startsWith("/api/templates")) {
+  if (url.startsWith("/api/v1/templates")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
       }
-      if (url === "/api/history") {
+  if (url === "/api/v1/history") {
         return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
       }
-      if (url === "/api/auth/me") {
+  if (url === "/api/v1/auth/me") {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ id: 1, username: "task-user", created_at: "2026-06-15T00:00:00Z" })
         });
       }
-      if (url === "/api/tasks/optimize") {
+  if (url === "/api/v1/tasks/optimize") {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ task_id: "task-1", status: "queued" })
         });
       }
-      if (url === "/api/tasks/task-1") {
+  if (url === "/api/v1/tasks/task-1") {
         return Promise.resolve({
           ok: true,
           json: () =>
@@ -245,7 +247,7 @@ describe("App", () => {
             })
         });
       }
-      if (url === "/api/tasks/task-1/result") {
+  if (url === "/api/v1/tasks/task-1/result") {
         return Promise.resolve({
           ok: true,
           json: () =>
