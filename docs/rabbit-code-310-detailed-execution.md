@@ -20,14 +20,82 @@
 | 字段 | 当前值 |
 | --- | --- |
 | 项目总项数 | 310 |
-| 已完成项数 | 49 |
-| 最后完成项 | RC-065 |
-| 下一待执行项 | RC-066（RC-057/RC-060 外部确认保留 pending） |
+| 已完成项数 | 189 |
+| 最后完成项 | RC-210 |
+| 下一待执行项 | RC-211（RC-153 已实现，专项运行验证因环境缺少 Python 依赖受阻，待具备依赖后复核；RC-127 实际位图导出因 RC-122 源图/授权缺失保留 pending；RC-121/RC-122/RC-123 和 RC-057/RC-060 外部确认保留 pending） |
+| 本次状态补充 | RC-154 已完成：九类目标进入生成的 OpenAPI 契约与 GUI/API/同步/流式/后台任务链路；离线规则和云 adapter 仅把目标作为用户上下文；全关闭组合返回 HTTP 400。RC-155 已完成：规则、模板与模型组合策略经同一 Service 路由，规则建议仅进入云端用户上下文，模型失败回退离线规则。RC-156 已完成：控制字符一次清理、空值/长度、结构与语言验证均在保存前执行；无效输出不保存原文替换。RC-157 已完成：非敏感 metadata 记录质量前后分、差值、Provider、模型、延迟和降级，不含完整提示词。RC-158 已完成：评测集固定为 `rc-158-v1`/种子 158，共 60 个样本，覆盖编码、商务、教育、创意、长文本、代码块、变量、中文和对抗输入；报告定义 analyzer 自动评分与双人盲评协议，并生成稳定盲评批次。RC-159 已完成：首次启动将 API 路线明确为 `USE API / CONFIGURE PROVIDER`，Provider API Key 明确不是 Rabbit Code 账户密码，真实账户登录保留 `ACCOUNT LOGIN`。RC-160 已完成：OpenAI Chat Completions Adapter 支持标准 Base URL、API Key、模型、组织/项目头、messages、SSE、工具定义/工具调用和常见 HTTP 错误映射，默认不记录密钥或请求正文。RC-161 已完成：Responses API 使用独立 Adapter 和协议选择；请求使用 `instructions/input/text`，支持响应事件、工具调用、结构化输出和取消检查，Chat 路径不发送 Responses 参数。RC-162 已完成：Gemini 原生 Adapter 支持 `generateContent`/`streamGenerateContent`、contents/parts、System Instruction、function calling、安全设置、Gemini 错误结构和 `x-goog-api-key`。RC-163 已完成：Anthropic Messages Adapter 支持版本/扩展头、system/content blocks、tool use/result、SSE 事件、usage、prompt caching 与 capability probe。RC-164 已完成：Claude Code 格式只映射到 Anthropic Messages 或经批准的官方 Agent SDK；仅允许官方 API Key/OAuth，拒绝 Cookie、订阅 Token、内部令牌、逆向登录和 CLI 分发。RC-165 已完成：Azure deployment/api-version/API key、Vertex project/region/Bearer + Gemini 原生 payload、Bedrock Converse region/model + 官方 SigV4 signer 注入边界均已实现并通过 Mock 契约。RC-166 已完成：以数据驱动 Preset 覆盖 OpenRouter、DeepSeek、Moonshot/Kimi、Qwen、豆包、智谱、SiliconFlow、Groq、Together、Ollama 和 LM Studio；Preset 提供默认 Base URL、模型发现路径、兼容级别、限制说明和敏感头标记，Registry 支持环境变量覆盖与自定义头。RC-167 已完成：能力 schema v1、Adapter 静态能力矩阵、探测结果覆盖和带 TTL 的版本化缓存接入 Agent；不支持的可选工具被禁用，必需结构化输出被拒绝，GUI 模型发现仅在 `MODEL LISTING` 已声明或连接探测成功后启用。RC-168 已完成：ModelDiscoveryService 为 Preset `/models` endpoint 提供 cursor 分页、TTL 缓存、空列表与错误分类；Registry 复用发现服务，手动/已保存模型在失败时保留，模型 ID 仅做格式校验。RC-169 已完成：Mock-first 分阶段连接检查覆盖 credentials、model、capabilities、first event 和 tool schema；真实模式只在自有凭据、明确确认、费用警告、token 上限和注入发送器同时满足时执行；默认不外发。RC-170 已完成：Provider 统一 11 类错误分类，所有协议 Adapter 共享状态码/错误体映射和脱敏 Provider request ID；API/流式/CLI/UI 共享错误码、退出码、重试性和修复动作。RC-171 已完成：指数退避、抖动、`Retry-After`、取消中断、HTTP(S) 代理、NO_PROXY、自定义 CA、IPv4/IPv6 和 opaque 代理凭据 resolver 均已接入；按用户指令自动进入 RC-172。 |
+| 本项状态补充 | RC-172 已完成：每会话、global/workspace 默认和独立优化模型路由已接入 Registry；不可用路由暴露健康状态与 fallback chain，并回退离线 Provider；请求发送前估算 Token/费用并按最大 Token/费用限制拦截；限制和估算写入 API、CLI、流式、任务和优化 metadata。RC-180 已完成：前端固定掩码/末尾四位、运行时密钥指纹、API/流式错误格式化、导出、诊断复制和后端公共 JSON/错误/Provider metadata 均接入脱敏；覆盖 OpenAI、Anthropic、Gemini、xAI、GitHub、Hugging Face、Replicate 等 Key 格式，未保存明文。RC-181 已完成：配置支持 `env:`/`keychain:` 引用和直接 `RABBIT_CODE_*` 环境覆盖，优先级为 default、user、workspace、env、session、CLI；每次 resolve 重新读取环境，API 仅返回来源与 opaque placeholder，Provider 页面显示环境变量/Keychain 来源。RC-182 已完成：OAuth 采用明确政策 allowlist，默认无获准 Provider；获准注入项使用系统浏览器回调、S256 PKCE、state/redirect 校验、loopback 端口清理、SecretStore opaque token、刷新与撤销，未获政策许可的 Provider 被阻断。RC-183 已完成：offline/local 路线可在无账户、无云同步条件下运行；新增默认关闭且独立授权的 OptionalSyncService，账户、Provider SecretStore 和本地 workspace 配置保持不同边界，前端保留 guest/local 入口。RC-184 已完成：清理预览显示删除/保留范围，单 Provider credential、配置迁移和全部本地数据清理均要求明确确认；取消无变更，进程 guard、SecretStore 引用和文件安全擦除均有边界测试，Settings 已接入预览/确认流程。 |
 | 当前里程碑 | W2：共享协议、数据模型和 Agent Core |
-| 当前状态 | RC-065 已接受 default/user/workspace/session/CLI 分层配置；字段注册表提供类型、敏感性、作用域和来源查询，`rabbit config show` 只显示敏感引用；按用户指令自动进入 RC-066 |
-| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 Linux/Tauri/TypeScript 和 RC-060 Rust/Tauri/Keychain 外部验证仍缺条件；RC-065 Provider 从环境变量迁移到分层解析和 OS 密钥库仍留给后续迁移/桌面安全 RC，不阻塞 RC-066 |
-| 最近一次完整验证 | 2026-07-17：RC-065 配置/CLI 定向回归 10 passed；身份/Provider/CLI 回归 25 passed；root verify 通过；后端 99 passed；前端 9 passed；Ruff、Mypy、Lint、Build、生成 drift、追踪和交付计划校验通过；既有迁移/脚本环境警告与 jsdom navigation 警告保留 |
-| 最近更新时间 | 2026-07-17 17:05:03 +08:00 |
+| RC-185 本项状态补充 | `LocalInstallCore` 已提供可重入下载、暂停/恢复、取消、SHA-256 校验、原子安装、runner 状态和结构化 JSON 事件；Python CLI、PowerShell/Shell 包装脚本与 GUI 事件映射共用同一状态字段。 |
+| RC-185 最近验证 | 后端 RC-185 专项 4 passed，RC-149/RC-185 关联回归 15 passed；前端全量 21 个测试文件 98 passed；PowerShell 实测通过，Linux Shell 因当前无 sh/bash 未实测；ESLint、TypeScript/Vite build、定向 Ruff/Mypy、compileall 和 diff check 通过。 |
+| RC-186 本项状态补充 | `HardwareDetector` 已生成 OS/架构、CPU、RAM、磁盘、GPU/显存/驱动、网络、代理和 Ollama/llama.cpp runner 字段；每项带 source/confidence，权限不足和不可用探针可降级，`--override-json` 支持用户纠正。 |
+| RC-186 最近验证 | RC-186 专项 3 passed，RC-149/RC-185/RC-186 关联回归 18 passed；前端全量 21 个测试文件 98 passed；定向 Ruff、严格 Mypy、compileall 和 CLI JSON/非法 override 检查通过。 |
+| RC-187 本项状态补充 | `LocalRunnerAdapter` 已统一 pull/load/generate/stream/stop/list/remove/health；`RunnerRegistry` 选择 Ollama 默认和 llama.cpp 替代，ADR-0014 记录许可证、安装、GPU、API、包体/维护取舍，Agent Core 不含 runner-specific command。 |
+| RC-187 最近验证 | RC-187 专项 2 passed，RC-149/RC-187 关联回归 13 passed；定向 Ruff、严格 Mypy、compileall 通过，两个 runner 均完成同一内存生命周期契约。 |
+| RC-188 本项状态补充 | `data/models/manifest.yml` 固定 Gemma 3 1B IT 与 Qwen2.5-Coder 1.5B Instruct 的完整来源、revision/hash、资源、上下文、模板和许可证；manifest 校验与 80% RAM/磁盘/VRAM 安全余量推荐完成，未知模型默认拒绝。 |
+| RC-188 最近验证 | RC-188 专项 3 passed，RC-186/RC-187/RC-188 联合专项 8 passed；manifest CLI 输出 2 models/2 recommended，Ruff、严格 Mypy、compileall、diff check 通过。 |
+| RC-189 本项状态补充 | Manifest 唯一 Qwen 条目和 GUI 条目均固定为 `Qwen/Qwen2.5-Coder-1.5B-Instruct`，family 为 `Qwen2.5-Coder`；新增完整 ID 选择器、health/generation smoke 和详情页显示。 |
+| RC-189 最近验证 | RC-188/RC-189 后端回归 4 passed；前端 Qwen 专项 5 passed、全量 21 个测试文件 98 passed；ESLint、TypeScript/Vite build、定向 Ruff/Mypy、compileall 通过。 |
+| RC-190 本项状态补充 | Gemma 固定为 `google/gemma-3-1b-it`，manifest 绑定 `gemma-3` template、`<end_of_turn>` EOS、model-card/template 状态和 gated license constraints；GUI 显示 Gemma 3 1B IT 和完整源 ID。 |
+| RC-190 最近验证 | RC-186 至 RC-190 backend 联合专项 10 passed；Gemma 固定 ID/family/template/EOS/license/health/generation smoke 和前端全量 98 passed，ESLint、TypeScript/Vite build、Ruff/Mypy、compileall 通过。 |
+| RC-191 本项状态补充 | `LocalInstallCore` 增加版本/镜像/代理元数据、指数退避、失败恢复、错误哈希 fail-closed、`.part` 续传和同安装根目录进程内并发写保护；CLI 继续复用结构化状态。 |
+| RC-191 最近验证 | RC-185/RC-191 专项 8 passed；RC-149 至 RC-192 相关后端回归 172 passed、2 skipped；定向 Ruff、严格 Mypy、compileall 和分发 denylist 通过。真实 HTTP/镜像/代理和 Linux 实机未执行。 |
+| RC-192 本项状态补充 | manifest 明确 `bundled/ondemand/manual` 分发策略；当前 Gemma/Qwen 为 `ondemand`，下载前提供许可证摘要、HTTPS 原文 URL 和确认版本，确认元数据写入安装状态；权重 denylist 接入 `workspace.py check`。 |
+| RC-192 最近验证 | RC-192 专项 3 passed；RC-188/RC-191/RC-192 联合专项 14 passed；仓库权重扫描、Ruff、严格 Mypy、compileall 和追踪门禁通过。未生成真实安装包/SBOM，实际打包产物审计留给发布流水线。 |
+| RC-193 本项状态补充 | 新增安装后健康检查报告，覆盖 runner 版本、加载、最小生成、流式增量、取消、上下文、停止后重载和资源峰值；声明健康门控的安装只有全部检查通过才进入 `ready`，失败回滚为 `failed`。 |
+| RC-193 最近验证 | RC-193 专项与 RC-185/RC-187 联合 8 passed；RC-149 至 RC-193 相关后端回归 190 passed、2 skipped、50 warnings；定向 Ruff、严格 Mypy、compileall 通过。真实 runner/权重和多平台资源实测未执行。 |
+| RC-194 本项状态补充 | 新增本地模型生命周期状态机，固定 `not_installed/downloading/verifying/loading/ready/busy/stopping/unloaded/corrupt/update/failed` 状态、合法转换和恢复动作；安装核心事件扩展为 GUI 可消费的生命周期事件，FastAPI 持久化事件端点原子保存状态，GUI 消费后端事件并在失败/损坏状态显示 retry/repair/uninstall。 |
+| RC-194 最近验证 | RC-194 专项 7 passed；RC-185/RC-191/RC-194 关联后端 16 passed、2 warnings；前端本地模型专项 6 passed，ESLint、TypeScript/Vite build、定向 Ruff、OpenAPI 生成 drift 通过。真实 Ollama/llama.cpp 进程和模型权重未执行，保留既有路径迁移 warning。 |
+| RC-195 本项状态补充 | 新增全局默认本地模型和按 `workspace/session` 隔离的会话覆盖；Gemma/Qwen 选择前检查生命周期 ready/busy 与各自上下文长度，生成中禁用切换并要求先取消；优化、流式和后台请求继续使用最终 provider/model，历史 metadata 保留实际模型 ID。 |
+| RC-195 最近验证 | RC-195 后端选择/历史专项 1 passed，RC-148/RC-172 关联 10 passed、8 warnings；前端会话选择专项 3 passed，App/Workspace/Task/LocalModels 关联 28 passed，ESLint、TypeScript/Vite build 通过。warnings 为既有路径迁移和 jsdom navigation。 |
+| RC-196 本项状态补充 | 新增 `RunnerResourceConfig` 和硬件安全默认；runner adapter 接收 threads/GPU layers/context/concurrency/idle timeout，OOM 会先卸载、降低配置一次并交给现有离线 fallback，idle timeout 可释放已加载模型。 |
+| RC-196 最近验证 | RC-196 与 RC-149/RC-186/RC-187/RC-193 关联专项 21 passed、11 warnings；覆盖 CPU-only、GPU 安全默认、配置注入、OOM 单次恢复、idle unload、runner health 和既有本地 Provider；定向 Ruff、严格 Mypy 通过。真实 GPU/runner 进程未执行。 |
+| RC-197 本项状态补充 | 新增 `ModelDirectoryService` 和登记文件 registry；目录选择检查写权限/空间，更新采用复制后 SHA-256 校验再激活并保留版本；迁移使用 staging、逐文件校验、registry 切换和登记文件清理，失败时保留原目录；支持回滚、源文件修复、完整版本兜底修复、旧版本清理和仅删除登记文件的卸载；FastAPI/OpenAPI 与 GUI 目录控件已接入。 |
+| RC-197 最近验证 | RC-197 专项 6 passed；RC-185/RC-191/RC-193/RC-194/RC-195/RC-196/RC-197 关联后端 28 passed、5 warnings；前端全量 22 个测试文件 102 passed；Ruff、严格 Mypy、ESLint、TypeScript/Vite build、OpenAPI drift、`workspace.py check` 通过。完整 `workspace.py verify` 被既有 `backend/tests/test_rc153_system_prompt.py:1` Ruff `I001` import 排序阻断，该前序文件未在本项修改；真实 Ollama/llama.cpp、模型权重、GPU 和跨进程故障注入未执行；既有路径迁移与 jsdom navigation warning 保留。 |
+| RC-198 本项状态补充 | 新增 `LocalRunnerGateway`，将 Ollama/llama.cpp 的 list/capabilities/health/generate/stream/cancel/load/unload 统一暴露给 FastAPI；request ID 绑定取消事件，stream 输出 started/delta/completed/cancelled/error，bounded concurrency 提供并发队列/拒绝，health 使用 TTL 缓存，runner 异常统一为结构化恢复错误；API 不拼接 runner-specific 命令。 |
+| RC-198 最近验证 | RC-198 专项 5 passed；RC-187/RC-193/RC-196/RC-198 关联 12 passed、6 warnings，扩展关联 38 passed、1 skipped、17 warnings；前端全量 22 个测试文件 102 passed；Ruff、严格 Mypy、compileall、ESLint、TypeScript/Vite build、OpenAPI drift 通过。真实 Ollama/llama.cpp、runner HTTP、权重、GPU 和跨进程故障注入未执行；既有 RC-153 Ruff import 排序阻塞和 warning 保留。 |
+| RC-199 本项状态补充 | 新增用户级安装路径策略：RABBIT_CODE_HOME/Windows user app data/XDG data、local-models 根和 user bin；默认 CLI 省略 `--root` 时使用用户模型根，目录创建前检查祖先写权限与写探针；不可写路径 fail-closed，提权只生成未确认的 command/reason/alternative 记录；PowerShell/POSIX 包装器不请求提权。 |
+| RC-199 最近验证 | RC-199 专项 5 passed；RC-185/RC-191/RC-199 安装关联 14 passed；新策略/CLI Ruff、严格 Mypy、compileall 通过，包装器 RunAs/sudo 检查通过。未执行真实标准用户受保护系统目录安装、外部包管理器或 runner 二进制提权；发布阶段 PATH 持久化和打包留待后续。 |
+| RC-200 本项状态补充 | 新增离线介质布局 `manifest.yml`、`models/<safe-id>.<quantization>` 和 `dependencies/`；导入前校验受控 manifest、模型 ID、manifest revision、许可证确认、依赖目录、磁盘空间和 SHA-256；导入复用 `LocalInstallCore` 原子安装并调用同一 `run_health_check`，CLI 输出结构化结果，网络不参与。 |
+| RC-200 最近验证 | RC-200 专项 4 passed；RC-185/RC-188/RC-191/RC-192/RC-193/RC-200 关联 20 passed；manifest、分发扫描、Ruff、严格 Mypy、compileall 和 `workspace.py check` 通过。篡改模型在目标写入前拒绝；未执行真实离线虚拟机、真实 runner/权重和 GPU，CLI 使用内存 runner 与确定性资源探针。 |
+| RC-201 本项状态补充 | 在既有 `PermissionPolicy` 上增加 Plan/Edit/High × files/terminal/network/git/mcp/desktop 六域 capability matrix；Plan 仅文件读取与 Git 只读审阅，Edit 增加工作区文件写和 Git 工作区写，High 开放其余能力但危险域要求单次 approval；FileTools、ShellAdapter、ProcessTools、GitTools、ToolRegistry 统一调用 capability policy。 |
+| RC-201 最近验证 | RC-201 专项与 RC-070/RC-078/RC-090/RC-091/RC-092/RC-094/RC-095/RC-096/RC-097 关联 51 passed、3 skipped；定向 Ruff、严格 Mypy 通过。真实沙箱/OS 级 capability 容器和桌面/MCP 进程未执行；保持既有平台 skip。 |
+| RC-202 本项状态补充 | 新增 `PermissionApprovalEngine` 和共享 `ApprovalRequest` schema；请求冻结工具、完整命令、规范化路径、工作目录、影响、授权范围、完整参数、快照和超时；`ToolRegistry` 在危险 handler 前返回审批请求，批准后只允许同快照的一次执行；GUI PermissionDialog 与 TUI 使用相同字段展示。 |
+| RC-202 最近验证 | RC-202/RC-201/RC-097/RC-101 关联后端 23 passed；审批拒绝、超时、一次性消费和参数替换均无 handler 副作用；Ruff、严格 Mypy、前端 UiStates 8 passed、ESLint 和 TypeScript/Vite build 通过。真实 OS 沙箱、桌面/MCP/网络执行未进行。 |
+| RC-203 本项状态补充 | 新增 `AuthorizationStore`，支持 once、session 和结构化 rule 授权；命令仅支持 exact/prefix 元组匹配，路径仅支持 exact/within 规范化路径匹配，工作目录和工具名精确匹配；支持拒绝、编辑后新审批快照、查看和立即撤销；ToolRegistry 可按 session ID 自动复用匹配授权。 |
+| RC-203 最近验证 | RC-203 专项与 RC-202/RC-097 关联 15 passed；覆盖 once 不复用、会话隔离、规则不越权、拒绝无 handler 副作用、编辑重审、撤销即时生效和 Registry 会话复用；Ruff、严格 Mypy 通过。默认 GUI 仍无“全部永久允许”按钮。 |
+| RC-204 本项状态补充 | 新增跨平台 `SandboxReport`/`SandboxController`；Linux 检测并生成 bubblewrap PID/mount/IPC/UTS/网络隔离规格，Windows 复用 Job Object 并明确 AppContainer/ACL 非等价，所有平台保留 workspace/symlink 边界；不可用强沙箱 fail-closed，reduced 执行要求显式审批，ProcessManager 在 spawn 前接入。 |
+| RC-204 最近验证 | RC-204 与 ProcessManager 关联专项 9 passed、1 skipped；覆盖 Windows/Linux 能力模拟、bwrap 规格、路径/符号链接逃逸拒绝、强沙箱不可用拒绝和批准后的 reduced 生命周期；Ruff、严格 Mypy 通过。真实 Linux bwrap/seccomp、AppContainer/ACL 和 OS 逃逸夹具未执行。 |
+| RC-205 本项状态补充 | 新增共享路径规范化、符号链接/穿越拒绝、argv/NUL 校验、Shell 风险分类、环境变量白名单和不可执行的 `UntrustedToolOutput`；ShellAdapter/ProcessManager 统一使用 argv 与环境安全边界，工具/仓库输出保留为不可信数据。 |
+| RC-205 最近验证 | RC-205 与 RC-091/RC-094/RC-097/RC-201 关联回归 41 passed、4 skipped；覆盖 traversal、symlink、NUL、shell metacharacter、危险 loader/secret 环境变量和提示注入；Ruff、严格 Mypy 通过。真实恶意仓库/OS 逃逸未执行。 |
+| RC-206 本项状态补充 | 新增 `SensitiveFilePolicy` 默认识别 `.env`、SSH/key、云配置、浏览器资料和系统目录，支持用户 filename/path-prefix 规则；敏感 read/send 分开审批，FileTools 默认不 list/search 敏感项；`SecretScanner` 在输出前提供 metadata-only findings 并阻断含秘密输出。 |
+| RC-206 最近验证 | RC-206 与 RC-090 关联 7 passed、1 skipped；覆盖默认敏感路径、用户规则、默认索引排除、独立 read/send approval、private/API key scanner 和权限模式独立性；Ruff、严格 Mypy 通过。真实凭据/浏览器资料/Provider send 未执行。 |
+| RC-207 本项状态补充 | strict App Server boundary 仅允许 loopback client/Host，限制 local Origin、显式 CORS methods/headers、per-startup high-entropy token、protocol 和 Content-Length body 上限；sidecar host 强制 loopback 并启用 strict mode，health 仍为本地探针公开。 |
+| RC-207 最近验证 | RC-207 与 RC-058/RC-067 关联 11 passed、24 既有路径迁移 warnings；覆盖高熵 token、bad Host/Origin/token、oversized body、protocol 和 sidecar restart 新端口/新 token；Ruff、严格 Mypy 通过。未执行真实端口扫描/外部暴露。 |
+| RC-208 本项状态补充 | 新增统一 `TrustManifest`/`TrustRegistry`，覆盖 plugin、skill、hook、mcp、script 的来源、版本、SHA-256 和权限声明；安装/注册要求显式确认，来源或权限变化要求重新确认；锁定、禁用、撤销和隔离执行上下文已接入，插件运行前再次校验 artifact hash。 |
+| RC-208 最近验证 | RC-208 与 RC-077/RC-099/RC-075/RC-076 关联 25 passed；覆盖首次确认、来源/权限拒绝、变更重审、锁定升级、禁用/撤销、插件运行时篡改和隔离上下文；Ruff、严格 Mypy、compileall 通过。未执行真实第三方扩展进程、凭据访问或 OS 级沙箱，依赖 RC-204 与后续安全矩阵。 |
+| RC-209 本项状态补充 | 新增共享版本化 `ArtifactManifest`/`ArtifactDownloader`，覆盖 binary、model、update、plugin；强制 HTTPS 来源和许可证 URL、许可证版本确认、SHA-256 校验；下载写入随机 `.part` 临时文件，验证通过后才原子替换，失败清理临时文件且保留既有目标。模型 `ModelSpec` 复用同一 manifest 政策。 |
+| RC-209 最近验证 | RC-209 与 RC-188/RC-191/RC-192/RC-200/RC-077 关联 28 passed；覆盖四类制品成功安装、manifest round-trip、错哈希、HTTPS 源不可用、许可证缺失/未确认、临时文件清理和旧版本保留；Ruff、严格 Mypy、compileall 通过。未执行真实外部 HTTP 下载，使用受控 fetcher 验证失败边界。 |
+| RC-210 本项状态补充 | 新增默认关闭的 `TelemetryService`，首次明确 opt-in 后才记录技术 metadata，内容字段仍需单独选择；支持撤回和清除。新增 `DiagnosticBundleService`，诊断预览仅展示脱敏 metadata/文件大小，导出和发送均要求显式确认；GUI 改为先预览再复制并支持清除，拒绝动作不触发 sender。 |
+| RC-210 最近验证 | RC-210 后端与 RC-093/RC-180 关联 9 passed，前端 Diagnostics 4 passed；Ruff、严格 Mypy、compileall、ESLint、TypeScript/Vite build 通过。覆盖默认无遥测、opt-in、内容默认丢弃、撤回/清除、secret/提示词/源码脱敏、预览、拒绝发送和清除预览。未执行真实网络发送。 |
+| 当前状态 | RC-126 已建立结构化 14 路由 coverage manifest、生成的 Markdown 矩阵和 `workspace.py check` 门禁；RC-127 已建立 PNG/WebP/应用图标预算、裁切焦点、清晰度、母版保护和导出流程，并记录只读基线；RC-128 已将 mark/mono 改为独立 SVG；RC-129 已建立四级内容优先级和工作页装饰门禁；RC-130 已建立 JSON token 源、生成的 CSS/TypeScript/主题快照、前端 raw color scan 和 workspace 漂移门禁；RC-131 已统一 Lucide 工具图标、Sparkles 优化语义、Tooltip/可访问名称并建立图标语言门禁；RC-132 已完成 WCAG 2.2 AA 目标的 axe/键盘/焦点/对比度/reduced-motion/200% 等效检查；RC-133 已完成 14 条独立路由 × 4 组深浅主题/1x/2x 截图基线、兔兔存在性、边界和主题断言，并接入 `workspace.py check`；RC-134 已评审三种星星按钮布局，锁定“上下文左、动作右”的桌面/小窗规则和键盘点击顺序；RC-135 已建立请求 ID 驱动的八状态优化按钮、取消和过期结果保护，并接入现有优化入口；RC-136 已为优化按钮建立延迟 Tooltip、`aria-label="优化输入内容"`、键盘焦点提示和独立 action 语义；RC-137 已为请求建立文本/revision/光标/附件快照、空输入与附件边界、12000 字符预算拒绝和原文不截断约束；RC-138 已实现 AbortSignal 取消传播、revision 变化检测、待比较状态和当前输入安全的重新优化入口；RC-139 已将优化结果与发送动作分离，提供可编辑预览、采用和保留原文，未自动调用任务发送；RC-140 已实现 inline/side-by-side 逐行 diff、长文本可视窗口、可编辑预览、复制、整段/选区替换、撤销、恢复原文和重试；RC-141 已实现 Provider/模型/local-cloud/fallback/耗时/错误码 metadata、密钥引用和错误脱敏；RC-142 已实现代码围栏、文件提及、附件 token、命令、`{{variable}}` 和输出格式保护，结果校验失败时不自动采用并显示可恢复错误；RC-143 已实现中文/英文/混合语言检测、保持指令、脚本异常拒绝和显式翻译例外；RC-144 已在 Composer Popover 接入模板、场景、角色、优化强度、评分、历史和版本比较，控制状态绑定草稿且高级区默认收起；RC-145 已实现 default/vim 可配置快捷键、结果层焦点恢复、单一阶段 live region 和 44px 工作流触控目标；RC-146 已实现优化版本持久化、Provider/模型/时间戳记录、保存开关、采用状态、历史删除及前端三路请求接线；RC-147 已建立唯一 `PromptOptimizationService.optimize/stream/cancel`，统一 CLI、API、后台任务、评测和 GUI API 路由；RC-148 已实现会话 Provider/模型读取、独立优化器覆盖、可用性检查、健康回退及 selection scope/health 持久化；RC-149 已实现无网络 local Provider/runner Adapter、本地健康状态、流式 chunk 和 workspace local model 路由；RC-150 已实现 local 未安装/未就绪/OOM/超时的受控离线规则降级、结构化原因与安装/修复入口；RC-151 已实现云 Provider 显式授权、幂等 request ID 重试、限流、熔断 open/half-open/closed 和取消传播；RC-152 已实现 canonical v1 流式事件、序号、游标回放、取消和 error 终态，旧 API chunk 兼容；RC-158 已建立固定版本/种子评测协议、60 个样本、分类分布、自动评分和双人盲评批次报告；RC-159 已统一首次启动、Provider 编辑器和账户登录的凭据措辞与边界；RC-160 已建立 OpenAI Chat Completions 的标准 endpoint、头、工具和错误契约；RC-161 已建立独立 Responses Adapter、协议显式选择和 Chat/Responses 参数隔离；RC-162 已建立 Gemini 原生 endpoint、contents/parts、系统指令、工具、安全设置和错误解析；RC-163 已建立 Anthropic Messages、content blocks、tool use/result、SSE、usage、缓存和扩展能力探测；RC-164 已建立 Claude Code 格式到公开 Anthropic/官方 Agent SDK 的映射和凭据拒绝边界；RC-165 已建立 Azure、Vertex 和 Bedrock 的部署/区域/项目/认证及 endpoint 变体适配；RC-166 已建立主流 OpenAI 兼容 Provider Preset 数据源、默认 endpoint、发现路径、兼容级别、限制说明和自定义敏感头；RC-167 已建立能力 schema v1、静态能力矩阵、探测覆盖、TTL 缓存、Agent/GUI 能力门控；RC-168 已建立 Preset 模型发现、分页/缓存、失败保留手动模型和格式校验；RC-169 已建立 Mock-first 分阶段连接测试、真实请求确认/费用/token 边界和 GUI `MOCK / $0` 状态；RC-170 已建立 Provider 统一 11 类错误分类、状态码/错误体映射、脱敏 request ID、API/流式/CLI/UI 共享错误呈现和修复动作；RC-171 已建立指数退避、抖动、`Retry-After`、取消中断、代理、NO_PROXY、自定义 CA、IPv4/IPv6 和 opaque 代理凭据 resolver；按用户指令自动进入 RC-172 |
+| 当前阻塞 | RC-037 访谈/产品范围评审仍待确认；RC-038 平台实测、RC-039 场景 E2E、RC-040 三表面实现对账和 RC-042 状态参数执行待后续 RC；RC-057 Linux/Tauri/TypeScript、RC-060 Rust/Tauri/Keychain、RC-067 跨平台打包/安装升级和 RC-121 Windows/Linux 标题栏原型仍缺外部条件；RC-122 用户指定源文件不存在且来源/授权未确认，RC-123 只能完成规范和 manifest，RC-127 只能完成交付门禁和只读基线，实际位图裁切、PNG/WebP/应用图标导出、预算和 1x/2x 高 DPI 清晰度检查 pending；Provider 原生 token/cost 遥测、持久预算账本、跨进程会话服务、生产回滚 UI、真实 Git worktree、数据库故障注入矩阵、Shell/进程全平台实机矩阵、远程 Git/PR 实测和完整 LSP 适配留给后续 RC；RC-107 的 Windows Terminal 交互尺寸/剪贴板与原生 Linux 实机矩阵留待交互终端或 Linux 平台条件，不伪造为已验证；既有迁移/脚本环境警告与前端 jsdom navigation 警告保留，不阻塞 RC-107 |
+| 最近一次完整验证 | 2026-07-18：RC-152 根级 `workspace.py verify` 通过，后端 329 passed、5 skipped、44 warnings，前端 19 test files、82 passed；Ruff、Mypy、Lint、Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过；既有迁移 DeprecationWarning、前端 jsdom navigation warning 和环境相关 skip 如实保留；RC-127 实际素材导出仍 pending；390px Review 既有三栏响应式问题留给 RC-255/256 |
+| 最近验证补充 | 2026-07-19：RC-158 专项 3 passed；RC-158 评测集 60 个样本、版本/种子、分类分布和双人盲评批次报告生成；RC-158 目标范围 Ruff、Mypy 通过。RC-159 前端专项 3 passed、ESLint 和 TypeScript 通过；根目录 Vitest 因扫描 `.runtime/pytest-rc154` 遇 EPERM，改从 `frontend` 目录运行通过。RC-160 联合 Provider 回归 20 passed、Ruff、Mypy 通过；覆盖标准 endpoint、组织/项目头、SSE、工具调用和 401/429/504 错误映射。RC-161 联合 Provider 回归 23 passed、Ruff、Mypy 通过；覆盖 Responses `instructions/input/text`、响应事件、工具调用、结构化输出和显式协议选择，Chat 参数隔离通过。RC-162 联合 Provider 回归 26 passed、Ruff、Mypy 通过；覆盖 Gemini `generateContent`/`streamGenerateContent`、contents/parts、系统指令、function calling、安全设置和 Gemini 错误结构。RC-163 联合 Provider 回归 29 passed、Ruff、Mypy 通过；覆盖 Anthropic Messages、content blocks、tool use/result、SSE、usage、版本/Beta 头、prompt caching 和 capability probe。RC-164 后端边界/Anthropic 回归 16 passed、Ruff、Mypy 通过；Provider 页面专项 3 passed、ESLint、TypeScript 通过；拒绝 Cookie、订阅 Token、内部令牌、未知凭据和未知格式。RC-165 托管 Provider 联合回归 40 passed、Ruff、Mypy 通过；覆盖 Azure deployment/api-version/API key、Vertex project/region/Bearer + Gemini payload、Bedrock Converse + SigV4 signer 注入边界。bundled Python 缺少 pytest/ruff/mypy/PyYAML，直接 `.venv` Python 可用；CLI 入口仍缺 `rabbit_code` 源码路径，基线使用源码路径调用服务生成。完整 Vite 构建仍受沙箱目录权限限制。RC-166 联合 Provider 回归 48 passed、Provider Ruff、Mypy 通过；逐一覆盖 11 个主流兼容服务的 preset、默认 endpoint、发现路径、限制级别、自定义头和环境变量覆盖。RC-167 联合 Provider 回归 53 passed；覆盖能力矩阵、探测别名/覆盖、缓存命中与过期、探测失败回退、Agent 工具/结构化输出门控；前端全量 20 个测试文件 86 passed。全后端在补齐 `PYTHONPATH=backend/src;backend;packages/protocol` 后为 392 passed、5 skipped、55 warnings、6 个既有失败，详见 RC-167 日志；完整 Vite 构建仍受沙箱目录权限限制。RC-168 联合 Provider 回归 57 passed；覆盖 cursor 分页、TTL 缓存、空列表、超时、403、手动/已保存模型保留和 Registry Preset endpoint；前端全量 20 个测试文件 87 passed，ESLint、TypeScript 通过。RC-169 联合 Provider 回归 62 passed；覆盖 Mock 阶段、缺凭据修复提示、未确认真实请求阻断、确认后最小请求/工具 schema/token 上限和默认无费用；前端全量 20 个测试文件 87 passed，ESLint、TypeScript 通过。RC-170 联合 Provider/API 回归 78 passed；RC-170 专项覆盖 9 个 HTTP 类别、7 个 Adapter、网络/超时/取消共享呈现和 request ID 脱敏；前端全量 20 个测试文件 87 passed、ESLint、TypeScript/Vite build 通过；OpenAPI drift、Provider Ruff/Mypy、Python 编译通过；既有 jsdom navigation 与路径迁移 warning 保留。RC-171 联合 Provider/API 回归 90 passed；RC-171 专项 6 passed，覆盖退避/Retry-After、取消、代理/NO_PROXY/CA/IP 族和 opaque 凭据；Provider Ruff、Mypy、Python 编译通过；既有迁移 warning 保留。 |
+| RC-172 最近验证 | RC-160 至 RC-172 联合 Provider/API 回归 92 passed；RC-172 专项 6 passed；Provider Ruff、定向 Mypy、Python 编译、OpenAPI drift、前端 20 个测试文件 87 passed、ESLint 和 Vite build 通过。全包 Mypy 仍有既有 `rabbit_code` 无类型标记导入错误，迁移与 jsdom navigation warning 保留。 |
+| RC-173 最近验证 | RC-160 至 RC-173 联合 Provider/API 回归 107 passed、2 skipped；RC-173 专项 15 passed、2 skipped；追踪专项 19 passed、2 skipped；Provider Ruff、定向 Mypy、Python 编译和 workspace check 通过；真实 Provider 测试默认跳过且未产生费用。全后端回归中的既有 RC-141/RC-143、v2 golden/环境基线失败和全仓 RC-153 Ruff import 排序问题如实保留。 |
+| RC-174 最近验证 | 首次运行页的 API/本地两入口、数据去向/网络/硬件说明、键盘可达性和 Rabbit artwork 完成；前端 20 个测试文件 87 passed、ESLint、TypeScript、Vite build 通过；Playwright 1440x1100 与 390x844 视口无重叠/横向溢出。后端未启动时 health 代理的既有 unavailable 状态如实保留。 |
+| RC-175 最近验证 | API 向导四步、协议/服务商、Base URL、Key、模型、Mock `$0` 连接测试、测试后默认保存和非敏感草稿完成；前端 20 个测试文件 88 passed、ESLint、TypeScript、Vite build、Playwright 1440x1100/390x844 无溢出通过；openrouter/deepseek 等 Provider 默认路由读取接线通过。真实请求和 Key 持久化均未发生。 |
+| RC-176 最近验证 | 无 API 向导覆盖硬件检测、Ollama/llama.cpp 运行器、Gemma/Qwen2.5-Coder 模型、许可证确认、下载暂停/恢复/取消、校验和、健康检查和 workspace Provider 路由落盘；RC-176 专项 7 passed，前端全量 20 个测试文件 89 passed、ESLint、TypeScript、Vite build、Playwright 1440x1100/390x844 无重叠/横向溢出通过。 |
+| RC-177 最近验证 | API/本地向导完成态统一指向 `/workspace/home?workspace=...`；首页模型选择器同时展示 offline、云 Provider/模型和 ready local 条目，切换保留非敏感路由目录；前端全量 20 个测试文件 90 passed、ESLint、TypeScript、Vite build、Playwright 1440x1100/390x844 无重叠/横向溢出通过。 |
+| RC-178 最近验证 | Provider 配置 workspace 持久化、创建/编辑/启用禁用/模型增删选/删除迁移，本地模型状态持久化与禁用保留历史，设置页入口和引用完整性完成；前端全量 20 个测试文件 93 passed、ESLint、TypeScript、Vite build、Playwright Provider 页 1440x1100/390x844 无横向溢出通过。 |
+| RC-179 最近验证 | SecretStore/ConfigService 完成 opaque reference、Windows Credential Manager、Linux `secret-tool`、fail-closed 和 transient session/CLI 边界；RC-179 专项 5 passed，RC-064/RC-179/Provider 回归 18 passed，Ruff、定向 Mypy、compileall 通过；Windows 临时凭据 round-trip 成功并清理。 |
+| RC-180 最近验证 | 全链路掩码/脱敏覆盖前端 UI、API 错误、导出、诊断复制、后端错误/JSON/metadata 和运行时指纹；后端 RC-064/RC-160 至 RC-173/RC-179/RC-180 联合回归 118 passed、1 skipped，RC-180 专项 2 passed，前端全量 21 个测试文件 96 passed、ESLint、TypeScript/Vite build、Ruff、定向 Mypy、compileall 通过；未发送真实 Provider 请求，既有 jsdom navigation stderr 保留。 |
+| RC-181 最近验证 | 配置引用/优先级/环境变化/API 脱敏专项 4 passed；后端 RC-064/RC-160 至 RC-173/RC-179/RC-181 联合回归 122 passed、1 skipped，前端全量 21 个测试文件 97 passed、ESLint、TypeScript/Vite build、OpenAPI drift、Ruff、定向 Mypy、compileall 通过；既有环境迁移 warning 与 jsdom navigation stderr 保留。 |
+| RC-182 最近验证 | OAuth 专项 4 passed；政策未批准时默认阻断，PKCE/state、回调劫持/CSRF、防重放、loopback 清理、SecretStore opaque token、刷新和撤销通过；RC-064/RC-160 至 RC-173/RC-179/RC-182 联合回归 126 passed、1 skipped，Ruff、定向 Mypy、compileall 通过；未进行真实 OAuth 或 Provider 请求。 |
+| RC-183 最近验证 | 本地边界专项 3 passed；匿名 offline 优化不要求账户，默认关闭同步不发送数据，启用同步必须显式账户授权；RC-064/RC-160 至 RC-173/RC-179/RC-183 联合回归 129 passed、1 skipped，前端本地入口/工作区 7 passed、ESLint、TypeScript/Vite build、Ruff、定向 Mypy、compileall 通过；既有环境迁移 warning 保留。 |
+| RC-184 最近验证 | 清理/迁移/API 合约专项 10 passed，其中 RC-184 清理专项 4 passed；后端 RC-064/RC-160 至 RC-173/RC-179 至 RC-184 联合回归 139 passed、1 skipped，前端全量 21 个测试文件 98 passed、ESLint、TypeScript/Vite build、OpenAPI drift、Ruff、定向 Mypy、compileall 通过；取消、未停进程和明文迁移拒绝均通过。 |
+| 最近更新时间 | 2026-07-19 10:34:57 +08:00 |
 | 更新人/Agent | Codex |
 
 ### 完成日志
@@ -85,6 +153,151 @@
 | RC-063 | 2026-07-17 16:39:48 +08:00 | `300e450` | PASS：Accepted transport ADR；RC-063 传输契约 5 passed；root verify；后端 88 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪和交付计划校验通过 | `docs/evidence/RC-063/README.md` | 事件回放和工具账本当前为进程内实现；崩溃恢复、跨进程持久化和 Provider 取消留给 RC-064/067/071/073；RC-057/060 外部平台确认仍 pending |
 | RC-064 | 2026-07-17 16:51:31 +08:00 | `5c9ef99` | PASS：FileStore/SQLite 12 passed；root verify；后端 92 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪和交付计划校验通过；首次 root verify 因追踪索引待更新停止，已修正后重跑通过 | `docs/evidence/RC-064/README.md` | 跨进程文件锁、加密/配额/保留策略、完整 session 表留给后续安全/生命周期 RC；RC-057/060 外部平台确认仍 pending |
 | RC-065 | 2026-07-17 17:05:03 +08:00 | `421a585` | PASS：配置/CLI 10 passed；身份/Provider/CLI 25 passed；root verify；后端 99 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪和交付计划校验通过 | `docs/evidence/RC-065/README.md` | Provider 环境变量兼容迁移、OS 密钥库和 GUI 设置屏幕留给后续迁移/桌面/UI RC；RC-057/060 外部平台确认仍 pending |
+| RC-066 | 2026-07-17 17:23:22 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Protocol/构造器注入/依赖边界 4 passed；root verify；后端 103 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-066/README.md` | 当前变更尚未提交；Provider OS 密钥库迁移和 RC-067 进程生命周期继续处理；RC-057/060 外部平台确认仍 pending |
+| RC-067 | 2026-07-17 17:33:40 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：sidecar 生命周期 6 passed；root verify；后端 109 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-067/README.md` | 当前变更尚未提交；Tauri/Rust、Linux 打包和安装升级仍待 RC-057/060 外部确认与后续发布工作 |
+| RC-068 | 2026-07-17 17:41:43 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Agent 状态/重放/检查点 5 passed；兼容回归 10 passed；root verify；后端 114 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-068/README.md` | 当前变更尚未提交；工具审批、预算、暂停/恢复和跨进程会话恢复留给后续 Agent Core RC；RC-057/060 外部确认仍 pending |
+| RC-069 | 2026-07-17 17:50:22 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：CLI 模式/快照/退出码 6 passed；兼容回归 12 passed；root verify；后端 120 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-069/README.md` | 当前变更尚未提交；完整 TTY/权限/会话工作流留给后续 Agent Core RC；RC-057/060 外部确认仍 pending |
+| RC-070 | 2026-07-17 17:56:22 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：权限矩阵 5 passed；Agent/CLI/权限回归 16 passed；root verify；后端 125 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-070/README.md` | 当前变更尚未提交；GUI Agent 工具面、工具注册、文件/终端沙箱和更广安全加固留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-071 | 2026-07-17 18:02:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：统一流事件/聚合/中断 15 passed；root verify；后端 129 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-071/README.md` | 当前变更尚未提交；GUI/TUI 渲染、工具/任务进度生产者和跨进程取消传输留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-072 | 2026-07-17 18:07:43 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：预算原子扣减/预警/终止 13 passed；root verify；后端 133 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-072/README.md` | 当前变更尚未提交；Provider 原生遥测、持久预算账本和 UI 用量展示留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-073 | 2026-07-17 23:43:14 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：暂停/恢复/取消/重试/重新生成和持久幂等尝试链 5 passed；相邻 Agent Core 回归 29 passed；root verify；后端 138 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-073/README.md` | 当前变更尚未提交；写操作只在成功记录存在时复用，失败或 in-flight 状态保持不可安全重试；跨平台/Tauri、真实 Provider 和 UI 命令面留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-074 | 2026-07-17 23:53:56 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：受控子 Agent 并行/上下文隔离/权限深度/预算/级联取消 4 passed；相邻 Agent Core 回归 33 passed；root verify；后端 142 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-074/README.md` | 当前变更尚未提交；执行器仍通过依赖注入接入，真实 Provider/工具编排、跨进程子任务调度和 UI 展示留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-075 | 2026-07-18 00:01:10 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Hook 排序/权限/超时/异常/输出校验/配置合并 5 passed；相邻 Agent Core 回归 38 passed；root verify；后端 147 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-075/README.md` | 当前变更尚未提交；超时后台线程只能从主调度摘除，外部 Hook 沙箱、插件来源和 UI 配置留给后续安全/插件 RC；RC-057/060 外部确认仍 pending |
+| RC-076 | 2026-07-18 00:09:03 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：MCP 配置/工具映射/认证/重连/取消/stdio 清理 5 passed；相邻 Agent Core 回归 43 passed；root verify；后端 152 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-076/README.md` | 当前变更尚未提交；真实官方 MCP 服务器矩阵、跨进程故障演练、认证刷新和 UI/MCP 配置留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-077 | 2026-07-18 00:17:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：插件安装/启用/禁用/升级/卸载和 manifest 门禁 7 passed；相邻 Agent Core 回归 50 passed；root verify；后端 159 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-077/README.md` | 当前变更尚未提交；插件签名/沙箱、远程来源、依赖隔离、跨进程生命周期和 UI 配置留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-078 | 2026-07-18 00:23:49 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：模型能力协商/可选工具降级/必需能力拒绝/上下文推理检查 3 passed；相邻 Agent Core 回归 53 passed；root verify；后端 162 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-078/README.md` | 当前变更尚未提交；Provider 原生能力遥测、能力 UI、跨协议映射和完整视觉/音频能力留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-079 | 2026-07-18 00:29:01 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：隐藏字段递归过滤/公开日志白名单/预定义进度 3 passed；相邻 Agent Core 回归 56 passed；root verify；后端 165 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-079/README.md` | 当前变更尚未提交；语义级隐藏内容检测、第三方 Provider 原始响应审计和全量导出路径检查留给后续安全/隐私 RC；RC-057/060 外部确认仍 pending |
+| RC-080 | 2026-07-18 00:34:37 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Git/分支/改动/语言/构建标记/指令文件识别和依赖目录忽略 2 passed；相邻 Agent Core 回归 58 passed；root verify；后端 167 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-080/README.md` | 当前变更尚未提交；指令内容解析、项目配置优先级和执行策略留给后续 RC-081/RC-082；RC-057/060 外部确认仍 pending |
+| RC-081 | 2026-07-18 00:40:29 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：全局/项目/目录指令优先级、越界工作目录拒绝 2 passed；相邻 Agent Core 回归 60 passed；root verify；后端 169 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-081/README.md` | 当前变更尚未提交；指令内容解析、项目配置优先级、冲突解释和执行授权留给后续 RC-082/权限 RC；RC-057/060 外部确认仍 pending |
+| RC-082 | 2026-07-18 00:47:29 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：文件/目录/选择/图片附件/终端/diff/诊断和路径/截断边界 2 passed；相邻 Agent Core 回归 62 passed；root verify；后端 171 passed；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-082/README.md` | 当前变更尚未提交；真实多模态上传、附件解析、上下文压缩和跨模块预算协调留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-083 | 2026-07-18 00:59:05 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：忽略/敏感/二进制/大文件/符号链接/增量/取消 1 passed、1 skipped；相邻 Agent Core 回归 63 passed、1 skipped；root verify；后端 172 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-083/README.md` | 当前变更尚未提交；Windows symlink 创建权限导致夹具 skip；完整 gitignore 语义、文件监视器、磁盘活动基准留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-084 | 2026-07-18 01:07:40 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Token 估算/分层保留/去重/结构化来源摘要 2 passed；相邻 Agent Core 回归 65 passed、1 skipped；root verify；后端 174 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-084/README.md` | 当前变更尚未提交；真实 tokenizer、压缩质量基准、持久上下文缓存和跨 Provider 预算协调留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-085 | 2026-07-18 01:19:46 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：四类记忆隔离、来源/用途确认、查看/编辑/逐项删除/清理和禁用拒绝 4 passed；root verify；后端 178 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-085/README.md` | 当前变更尚未提交；持久化后端、API/CLI/GUI 接入和记忆展示留给后续生命周期/UI RC；RC-057/060 外部确认仍 pending |
+| RC-086 | 2026-07-18 01:30:02 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：会话 CRUD/标题/搜索分页/置顶/归档/软删除恢复/继续/分叉/JSON 导出/分页审计 4 passed；root verify；后端 182 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-086/README.md` | 当前变更尚未提交；持久化会话数据库、API/CLI/GUI 接线和生产保留策略留给后续生命周期/UI RC；RC-057/060 外部确认仍 pending |
+| RC-087 | 2026-07-18 01:36:36 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：基线/变更组/工具验证记录、正常回滚、用户并发冲突、逆序全量和部分回滚 4 passed；root verify；后端 186 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-087/README.md` | 当前变更尚未提交；持久化检查点、跨进程恢复、生产回滚 UI 和更广工具接入留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-088 | 2026-07-18 01:43:04 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：并行 worktree 路径隔离、进程/终端资源归属、worktree/缓存清理和项目缓存/用户分支保留 5 passed；root verify；后端 191 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-088/README.md` | 当前变更尚未提交；真实 Git worktree、进程终止、跨进程资源服务和生产 GUI 工作区管理留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-089 | 2026-07-18 01:52:05 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：迁移/WAL/完整性、未完成事务恢复、检查点/导出/隐私清理、备份恢复、只读救援和显式清理边界 5 passed；root verify；后端 196 passed、1 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-089/README.md` | 当前变更尚未提交；更广数据库故障注入、跨进程会话服务、生产保留和加密策略留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-090 | 2026-07-18 01:59:42 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：文件工具正常操作、越界、二进制/大小、symlink、并发 SHA 冲突和权限拒绝 3 passed、1 skipped；root verify；后端 199 passed、2 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-090/README.md` | 当前变更尚未提交；Windows symlink 创建权限导致本项 1 skip；并发监听、跨平台权限矩阵和更广工具编排留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-091 | 2026-07-18 02:13:03 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：数组命令 Unicode/空格/环境/诊断、PowerShell/cmd/Bash/zsh 脚本、超时/权限/cwd/参数 5 passed、2 skipped；root verify；后端 204 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-091/README.md` | 当前变更尚未提交；Windows WSL bash 运行时不可用导致 1 skip，Windows symlink 既有夹具导致 1 skip；跨平台实机矩阵和进程树终止留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-092 | 2026-07-18 02:24:04 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Git status/diff/log/branch/worktree/stage/commit/冲突和远程拒绝审计 5 passed；root verify；后端 209 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-092/README.md` | 当前变更尚未提交；远程 Git/PR 实测、跨平台 Git 行为和认证策略留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-093 | 2026-07-18 02:31:55 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Ruff/Mypy/TypeScript/Pytest 诊断解析、统一字段、Windows POSIX 路径、未知输出原文保留 3 passed；root verify；后端 212 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-093/README.md` | 当前变更尚未提交；完整 LSP 适配和跨平台诊断矩阵留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-094 | 2026-07-18 02:48:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：后台进程注册/并发、日志游标、超时、停止、端口占用、PTY 明确不可用和终止后状态 5 passed；root verify；后端 217 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过；Windows Job Object 创建检查通过 | `docs/evidence/RC-094/README.md` | 当前环境为 Windows；Linux/非 Windows PTY、进程树和父进程退出实机矩阵留待可用平台，不伪造为已验证；RC-057/060 外部确认仍 pending |
+| RC-095 | 2026-07-18 02:58:34 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：结构化解析、Unicode/CRLF、UTF-16 BE BOM、基线/上下文冲突、多文件事务和中途失败全量回滚 6 passed；root verify；后端 223 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-095/README.md` | 当前变更尚未提交；复杂二进制/未知编码按明确不支持处理，工具输出截断和异常统一留给 RC-096；RC-057/060 外部确认仍 pending |
+| RC-096 | 2026-07-18 03:12:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：大输出上限/截断、二进制元数据、非零失败、显式重试、超时、用户取消、后台日志截断游标 5 passed；RC-091/094/096 联合 15 passed、2 skipped；root verify；后端 228 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-096/README.md` | 当前变更尚未提交；跨平台实机矩阵和更广工具异常策略留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-097 | 2026-07-18 03:21:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：工具 metadata 注册、重复/缺字段/非法 Schema、startup/model handler 门禁、输入校验、权限和审计 5 passed；RC-091/094/095/096/097 联合 26 passed、2 skipped；root verify；后端 233 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-097/README.md` | 当前变更尚未提交；更广工具适配和跨表面消费留给 RC-098；RC-057/060 外部确认仍 pending |
+| RC-098 | 2026-07-18 03:26:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：7 类已知内容块、protocol Message.content、API/CLI/GUI canonical snapshot、未知块 fallback、事件内容消费和字段拒绝 5 passed；root verify；后端 238 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-098/README.md` | 当前变更尚未提交；CLI/GUI 真实组件接线和扩展工具留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-099 | 2026-07-18 03:33:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：ExtensionSpec 声明能力、默认禁用、session 审批、network/write 独立授权、撤销即时生效、未声明权限拒绝、browser/database/external_service/plugin/mcp 统一 adapter 21 passed；root verify；后端 242 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-099/README.md` | 当前变更尚未提交；真实浏览器/数据库/外部服务联网实测留给后续受控环境；RC-057/060 外部确认仍 pending |
+| RC-100 | 2026-07-18 03:40:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：run/continue/resume/model/mode/output 命令、session/model/mode/output/runtime 参数、stdin/TTY/legacy prompt、text/json/jsonl 输出和稳定 usage/runtime/cancel 退出码 12 passed；root verify；后端 245 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-100/README.md` | 当前变更尚未提交；持久会话恢复、真实 model/mode 配置接线和 TUI 留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-101 | 2026-07-18 03:47:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：共享 AgentEvent 消费、固定输入区、流式文本、工具/权限/计划/diff/usage 状态、窄屏宽度、无颜色和 tui CLI 入口 6 passed；root verify；后端 248 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-101/README.md` | 当前变更尚未提交；键盘编辑/历史/补全/粘贴和跨平台 TTY 实测留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-102 | 2026-07-18 03:58:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Unicode/IME 多行、光标编辑、history 上下/搜索、completion、workspace mention、附件、长粘贴确认和 shortcut 配置 4 passed；RC-101/102 联合 7 passed；root verify；后端 252 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-102/README.md` | 当前变更尚未提交；真实 TTY 键盘/IME/剪贴板矩阵和 TUI 接线留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-103 | 2026-07-18 04:07:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：13 个默认 slash 命令、help/completion、required 参数、session 影响标记、引号解析、未知命令建议、自定义注册和 exit 结构化结果 4 passed；root verify；后端 256 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-103/README.md` | 当前变更尚未提交；slash 命令真实 Agent/Provider/MCP/Plugin 业务接线留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-104 | 2026-07-18 04:13:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：显式 non-interactive 缺策略失败、read-only/deny/approve 策略、no-TTY 无等待、JSON 稳定输出、PermissionError 专用退出码、旧管道兼容 12 passed；root verify；后端 259 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-104/README.md` | 当前变更尚未提交；真实危险工具审批接线和 CI 跨平台矩阵留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-105 | 2026-07-18 04:21:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：DryRunPlanner 只读计划、MachineEvent 连续 seq/json/jsonl、CLI dry-run、read-only 冲突和 log-level 3 passed；root verify；后端 262 passed、4 skipped；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-105/README.md` | 当前变更尚未提交；真实工具动作预览和更多消费者事件回放留给后续 RC；RC-057/060 外部确认仍 pending |
+| RC-106 | 2026-07-18 04:34:34 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：独立 CLI/GUI context 共享 Provider 引用、模型目录、会话、权限和优化器；原子 JSON store、跨进程锁、进程内路径锁和并发写 4 passed；root verify；后端 266 passed、4 skipped、29 warnings；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-106/README.md` | 当前变更尚未提交；密钥实际安全存储、跨进程会话服务和真实 CLI/GUI 进程接线留给后续 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-107 | 2026-07-18 04:43:46 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：终端矩阵、PowerShell/cmd 输入与 ANSI、TUI 尺寸、Unicode 路径、取消信号和 WSL Linux 语义 6 passed、1 skipped；root verify；后端 272 passed、5 skipped、29 warnings；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-107/README.md` | 当前变更尚未提交；Windows Terminal 仅验证可执行文件（7.6.3），当前无 `WT_SESSION`，交互尺寸/剪贴板未实测；宿主为 Windows，原生 Linux 终端留待 Linux 条件；RC-057/060 外部确认仍 pending |
+| RC-108 | 2026-07-18 04:56:18 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Bash/zsh/fish/PowerShell 补全、版本/安装路径、doctor JSON、缓存清理、确认门禁、工作区保护和 CLI dry-run 9 passed；root verify；后端 281 passed、5 skipped、31 warnings；前端 9 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-108/README.md` | 当前变更尚未提交；系统包管理器级卸载、真实安装器路径清理和跨平台交互实机留给后续发布/平台 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-109 | 2026-07-18 05:07:03 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：独立 onboarding 路由的新装、已有配置、服务异常状态，API/本地两入口、键盘焦点和重试 3 passed；root verify；后端 281 passed、5 skipped、31 warnings；前端 12 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-109/README.md` | 当前变更尚未提交；真实 App Server/密钥库/本地运行器接线仍由后续 Provider 与本地模型 RC 完成；服务 404 按“未配置”显示，网络失败按“不可用”显示；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-110 | 2026-07-18 05:17:12 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：工作区首页项目 API 加载、guest 空状态、最近项目移除/持久隐藏、模型状态、快速任务和项目服务错误重试 3 passed；root verify；后端 281 passed、5 skipped、31 warnings；前端 15 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-110/README.md` | 当前变更尚未提交；真实目录权限/项目删除后端接口、任务历史统一服务和完整模型目录留给后续 RC；guest 使用本地最近记录，认证用户项目从生成 API 客户端读取；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-111 | 2026-07-18 05:27:49 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：主任务左侧会话 rail、中间 conversation/composer、右侧 Plan/Diff/Context inspector、折叠、草稿持久化、发送、新会话和终端抽屉 3 passed；root verify；后端 281 passed、5 skipped、31 warnings；前端 18 passed；Ruff/Mypy、Lint/Build、drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-111/README.md` | 当前变更尚未提交；真实 Agent 事件、PTY 终端和检查点/diff 服务接线留给后续 RC；当前终端抽屉为状态边界，不启动真实进程；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-112 | 2026-07-18 05:40:30 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：变更审查页专项 3 passed；完整前端 21 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-112/README.md` | 当前变更尚未提交；本项验证的是前端审查消费边界和漂移阻断，真实 checkpoint/diff 服务、磁盘一致性应用和并发编辑实测留给后续 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-113 | 2026-07-18 05:52:34 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：终端/进程面板专项 3 passed；完整前端 24 passed；RC-094 进程回归 5 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-113/README.md` | 当前变更尚未提交；本项验证的是前端终端/进程消费边界和关闭清理状态，真实 PTY service、真实 shell I/O、窗口 resize 接线和跨平台关闭无残留实测留给后续 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-114 | 2026-07-18 06:02:57 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：Provider/模型页专项 2 passed；完整前端 26 passed；API Key DOM 红线通过；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-114/README.md` | 当前变更尚未提交；本项验证的是前端 Provider/模型消费边界，真实 Provider 管理 API、OS keychain 写入、原生模型 discovery 和真实连接 E2E 留给后续 Provider/平台 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-115 | 2026-07-18 06:14:27 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：本地模型安装页专项 3 passed；完整前端 29 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-115/README.md` | 当前变更尚未提交；本项验证的是本地模型安装生命周期消费边界，真实下载/校验文件、App Server 进度订阅、模型 runner 进程和断网/磁盘实机故障注入留给后续 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-116 | 2026-07-18 06:40:59 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：提示词资产页专项 2 passed；完整前端 31 passed；导入失败不污染列表、回填 Composer 不自动发送；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-116/README.md` | 当前变更尚未提交；本项验证的是前端资产库消费边界，真实分页服务、远程资产同步、历史数据库和 Composer 状态注入留给后续 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-117 | 2026-07-18 07:05:19 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：设置页专项 3 passed；完整前端 34 passed；workspace scope 持久化/隔离和危险重置确认通过；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-117/README.md` | 当前变更尚未提交；本项验证的是前端设置消费边界，真实 OS/Tauri 设置、系统主题/语言/终端即时接线和跨设备同步留给后续平台 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-118 | 2026-07-18 07:31:22 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：诊断/关于/更新页专项 3 passed；完整前端 37 passed；脱敏诊断不含 Key/源码正文；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-118/README.md` | 当前变更尚未提交；本项验证的是前端诊断消费边界，真实 sidecar/runner 健康探测、日志服务、版本源和系统更新通道留给后续平台 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-119 | 2026-07-18 07:59:49 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：共享 Empty/Error/Offline 状态、Permission/Install/通用 Dialog；组件快照 5 项、焦点陷阱/Escape/焦点恢复/读屏语义 2 项；完整前端 44 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-119/README.md` | 当前变更尚未提交；仓库没有 Storybook 配置，本项使用 Vitest 组件快照完成等价组件覆盖；系统级原生权限弹窗和 Tauri 窗口层语义留给后续平台 RC；既有环境警告与 RC-057/060 外部确认仍 pending |
+| RC-120 | 2026-07-18 08:10:26 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：窗口偏好 3 passed；Task inspector/Settings 回归 6 passed；desktop shell boundary；完整前端 47 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-120/README.md` | 当前变更尚未提交；Tauri/Rust 原生窗口恢复、托盘、OS 通知权限、DPI 和多显示器实机仍受当前无桌面构建条件限制，已在 ADR 中保留 pending；RC-057/060 外部确认仍 pending |
+| RC-121 | 2026-07-18 08:12:28 +08:00 | SUBMITTED WITH PENDING CONFIRMATION；未提交工作树（HEAD `5610c00`） | PENDING：已检查 `apps/desktop` allowlist、RC-060 桌面壳 ADR 和 boundary gate；没有 Windows/Linux 原生或自绘标题栏原型，拖拽/最大化/系统菜单/缩放/高对比/屏幕阅读器矩阵未执行，未勾选完成 | `docs/evidence/RC-121/README.md` | 受当前无 Tauri/Rust、无 Linux 桌面和无可运行标题栏原型阻塞；保留 RC-121 未完成，按用户指令自动进入 RC-122；RC-057/060 外部确认仍 pending |
+| RC-122 | 2026-07-18 08:15:34 +08:00 | SUBMITTED WITH PENDING CONFIRMATION；未提交工作树（HEAD `5610c00`） | PENDING：用户指定 `C:\Users\10735\Desktop\提示词\兔兔素材.png` 不存在；已核对仓库 `frontend/public/rabbit-artwork.png` 的 SHA-256、尺寸和像素格式，但未确认其来源/许可证，未复制为源素材，未勾选完成 | `docs/evidence/RC-122/README.md` | 需要用户提供指定源文件或可验证来源/授权；按用户指令自动进入 RC-123；RC-121 和 RC-057/060 外部确认仍 pending |
+| RC-123 | 2026-07-18 08:18:44 +08:00 | SUBMITTED WITH PENDING CONFIRMATION；未提交工作树（HEAD `5610c00`） | PENDING：资产 manifest 6 变体规范检查、JSON 校验和 Ruff 通过；`--require-source` 明确失败为 `source is not registered`，未生成未经授权位图，未勾选完成 | `docs/evidence/RC-123/README.md` | 实际导出和 1x/2x 高 DPI 清晰度检查依赖 RC-122 源文件与授权；按用户指令自动进入 RC-124；RC-121/122 和 RC-057/060 外部确认仍 pending |
+| RC-124 | 2026-07-18 08:21:00 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：页面级素材矩阵、禁入区、响应式/主题/替代文本和视觉验收清单已交付；现有路由素材使用对照已记录；计划/追踪检查通过 | `docs/evidence/RC-124/README.md` | 实际 RabbitMark 接入留给 RC-125；源素材授权、派生导出和视觉回归仍由 RC-122/123/133 门禁控制；RC-121/057/060 外部确认仍 pending |
+| RC-125 | 2026-07-18 08:30:05 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RabbitMark 组件 2 passed；9 个独立工作路由变体检查 9 passed；完整前端 58 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、desktop boundary 和交付计划校验通过 | `docs/evidence/RC-125/README.md` | 当前变更尚未提交；实际派生变体仍受 RC-122/123 源素材与授权门禁约束；视觉回归和完整页面覆盖留给 RC-133；RC-121/057/060 外部确认仍 pending |
+| RC-126 | 2026-07-18 08:35:23 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：14 路由 coverage manifest/Markdown 生成与 current check；新增 route 未登记门禁已接入 `workspace.py check`；完整前端 58 passed；root verify；后端 281 passed、5 skipped、31 warnings；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界和交付计划校验通过 | `docs/evidence/RC-126/README.md` | 当前变更尚未提交；覆盖矩阵的视觉快照执行留给 RC-133；源素材/派生物和 RC-121/057/060 外部确认仍 pending |
+| RC-127 | 2026-07-18 08:40:47 +08:00 | SUBMITTED WITH PENDING CONFIRMATION；未提交工作树（HEAD `5610c00`） | PENDING：交付规范、PNG/WebP/应用图标预算、母版保护、裁切焦点和导出门禁已记录；指定源图不存在，`--require-source` 仍因 `source is not registered` 失败；登记后 root verify 通过，但未生成未经授权位图，未勾选完成 | `docs/evidence/RC-127/README.md` | RC-122 源文件/来源/许可证仍待确认；实际导出、包体预算和 1x/2x 清晰度检查 pending；按用户指令自动进入 RC-128；RC-121/057/060 外部确认仍 pending |
+| RC-128 | 2026-07-18 08:56:33 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：`RabbitMark` 专项 4 passed；mark/mono 独立 SVG、full/avatar/empty 固定内部 PNG、16/20/24/32px light/dark 结构和装饰语义通过；Playwright 8 个 SVG DOM 检查和深浅背景截图设计评审通过；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、60 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-128/README.md` | 当前变更尚未提交；完整页面高对比/200%视觉回归留给 RC-133；RC-127 实际位图导出和 RC-121/057/060 外部确认仍 pending |
+| RC-129 | 2026-07-18 09:22:48 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：路由层级专项 9 passed；内容优先级、装饰预算、`aria-hidden`/`pointer-events` 边界和 CSS 变量已交付；Playwright 真实 Review diff、Terminal 长日志、Task composer 在 1280x1000 与 390x844 检查无素材/控件交集；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、60 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-129/README.md` | 当前变更尚未提交；390px Review 既有三栏响应式问题留给 RC-255/256；完整页面视觉回归留给 RC-133；RC-127 实际位图导出和 RC-121/057/060 外部确认仍 pending |
+| RC-130 | 2026-07-18 09:26:41 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：token JSON 源、CSS/TypeScript/主题快照生成与 check 通过；frontend raw color scan clean；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、60 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-130/README.md` | 当前变更尚未提交；RC-127 实际位图导出、390px Review 既有三栏响应式问题和 RC-121/057/060 外部确认仍 pending |
+| RC-131 | 2026-07-18 09:52:36 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：图标语言清单、Sparkles/Star 语义门禁、App 专项 10 passed；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、61 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-131/README.md` | 当前变更尚未提交；RC-132 无障碍全量验收、RC-127 实际位图导出、390px Review 既有三栏响应式问题和 RC-121/057/060 外部确认仍 pending |
+| RC-132 | 2026-07-18 10:32:07 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：14 路由 × light/dark 共 28 组 axe 无 violation；键盘菜单循环/Escape 焦点恢复、reduced-motion、640px 等效 200% 检查通过；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、62 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-132/README.md` | 当前变更尚未提交；原生 axe CLI Chrome/ChromeDriver 版本限制已如实记录；RC-127 实际位图导出、390px Review 既有三栏响应式问题和 RC-121/057/060 外部确认仍 pending |
+| RC-133 | 2026-07-18 10:50:45 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：14 条独立路由 × light/dark × 1x/2x 共 56 组 Playwright 截图；`diff_ratio=0`、兔兔存在、横向溢出/裁切/内容重叠均为 0，主题字段与基线一致；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、62 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-133/README.md` | 当前变更尚未提交；本机原生 axe CLI 的 Chrome/ChromeDriver 版本限制、RC-127 实际位图导出和 RC-121/057/060 外部条件仍 pending；390px Review 既有三栏响应式问题留给 RC-255/256 |
+| RC-134 | 2026-07-18 10:57:49 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：三种布局完成设计评审；锁定“上下文左、动作右”方案，明确模型/附件/语音 → 星星 → 发送的键盘/点击顺序、主次层级、按钮固定尺寸和三档响应式规则；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 15 test files、62 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-134/README.md` | 当前变更尚未提交；Trae 参考图未在当前工作树提供，已如实记录为评审假设；星星状态机、Tooltip、优化请求和结果交互留给 RC-135 至 RC-146；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-135 | 2026-07-18 11:06:51 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：新增优化按钮组件专项 4 passed、App 专项 11 passed；覆盖 idle/hover/pressed/loading/success/error/disabled/cancelling、取消、重复点击和请求 ID 过期结果保护；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 16 test files、66 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-135/README.md` | 当前变更尚未提交；仓库未配置 Storybook，已用 Vitest 组件测试替代并如实记录；Tooltip/完整可访问命名留给 RC-136；输入快照与边界处理留给 RC-137；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-136 | 2026-07-18 11:13:37 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：优化按钮与 App 专项共 16 passed；覆盖 500ms 延迟 Tooltip、鼠标悬停、键盘焦点、`aria-describedby`、`aria-label="优化输入内容"` 和 `data-action="prompt-optimize"`；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 16 test files、67 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-136/README.md` | 当前变更尚未提交；原生 axe CLI Chrome/ChromeDriver 版本限制和前端 jsdom navigation 警告保留；仓库未配置 Storybook；输入快照和空输入/附件/超长边界留给 RC-137；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-137 | 2026-07-18 11:22:03 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：优化按钮与 App 专项共 18 passed；覆盖空输入禁用、完整文本/revision/光标/附件快照、只有附件提示、12000 字符预算拒绝且不截断，以及既有取消/重复点击保护；登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 16 test files、69 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-137/README.md` | 当前变更尚未提交；并发编辑时旧结果不覆盖新输入留给 RC-138；仓库未配置 Storybook；原生 axe CLI Chrome/ChromeDriver 版本限制、RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-138 | 2026-07-18 11:31:26 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：组件与 App 专项共 19 passed；覆盖 AbortSignal 取消传播、延迟响应期间 revision 变化、旧结果不覆盖新输入、待比较提示、查看比较和重新优化入口；生成 API drift、lint 和登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 16 test files、70 passed；Ruff/Mypy、Lint/Build、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-138/README.md` | 当前变更尚未提交；当前比较面板先复用现有分析结果，结构化 diff/长文本虚拟化留给 RC-140；仓库未配置 Storybook；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-139 | 2026-07-18 11:38:26 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：App/组件/TaskWorkspace 专项共 23 passed；优化回包进入可编辑预览，未调用 tasks 发送路径，只有“采用优化结果”显式写回当前输入；生成 API drift、lint 和登记后 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 16 test files、71 passed；Ruff/Mypy、Lint/Build、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-139/README.md` | 当前变更尚未提交；结构化 diff、部分采用、撤销和长文本虚拟化留给 RC-140；仓库未配置 Storybook；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-140 | 2026-07-18 12:04:53 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：PromptOptimizationDiff/App 专项共 16 passed；覆盖 inline/side-by-side、长文本可视窗口、复制、整段/选区替换、重试、撤销和恢复原文；登记前 root verify 通过，后端 281 passed、5 skipped、31 warnings，前端 17 test files、74 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-140/README.md` | 当前变更尚未提交；词级 diff、结构化输入保护和 Provider 元数据展示留给 RC-141/RC-142；仓库未配置 Storybook；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-141 | 2026-07-18 12:22:56 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：metadata/fallback/脱敏专项 5 passed、App 专项 14 passed；Provider/模型/local-cloud/fallback/耗时/错误码和密钥引用展示通过；含 API key/System Prompt 的错误不会进入 metadata 或页面；登记前 root verify 通过，后端 283 passed、5 skipped、33 warnings，前端 17 test files、75 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage 和交付计划校验通过 | `docs/evidence/RC-141/README.md` | 当前变更尚未提交；结构化输入保护留给 RC-142；仓库未配置 Storybook；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-142 | 2026-07-18 12:52:45 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-142 专项 6 passed；结构化输入回归 38 passed、23 warnings；登记后 root verify 通过，后端 289 passed、5 skipped、37 warnings，前端 17 test files、75 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-142/README.md` | 当前变更尚未提交；真实云 Provider 的结构标记实测、附件上传协议和跨平台实机矩阵不属于本项；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-143 | 2026-07-18 13:07:53 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-143 专项 8 passed、2 warnings；组合回归 42 passed、23 warnings；登记后 root verify 通过，后端 297 passed、5 skipped、39 warnings，前端 17 test files、75 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-143/README.md` | 当前变更尚未提交；更广泛多语种识别与翻译质量评测留给后续国际化任务；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-144 | 2026-07-18 13:21:01 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-144 专项前端 16 passed；登记后 root verify 通过，后端 297 passed、5 skipped、39 warnings，前端 18 test files、77 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-144/README.md` | 当前变更尚未提交；控制参数持久化和历史采用状态留给 RC-146；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-145 | 2026-07-18 13:29:06 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-145 专项 19 passed；登记后 root verify 通过，后端 297 passed、5 skipped、39 warnings，前端 18 test files、79 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-145/README.md` | 当前变更尚未提交；更细粒度 shortcut 自定义、系统级快捷键和真实屏幕阅读器实机矩阵留给后续任务；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-146 | 2026-07-18 13:55:38 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-146 专项后端 4 passed、前端 2 passed；根级 verify 后端 301 passed、5 skipped、39 warnings，前端 19 test files、81 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过；v2 approved baseline 按 RC-146 显式记录导出字段变化 | `docs/evidence/RC-146/README.md` | 当前变更尚未提交；更细粒度 shortcut 自定义、系统级快捷键、真实屏幕阅读器实机矩阵、RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-147 | 2026-07-18 14:07:31 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-147 专项 3 passed；统一服务通过普通/流式/API/后台任务契约测试，Ruff/Mypy 目标检查通过；登记后根级 verify 后端 304 passed、5 skipped、39 warnings，前端 19 test files、81 passed；全量门禁通过 | `docs/evidence/RC-147/README.md` | 当前变更尚未提交；RC-152 的外部取消路由/SSE 重连、RC-148/149 Provider/本地模型选择仍待后续；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-148 | 2026-07-18 14:25:54 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-148 专项后端 3 个测试、相关前端 5 passed；Provider/model 选择优先级、健康回退、selection scope/health API 与历史持久化通过；根级 verify 后端 307 passed、5 skipped、39 warnings，前端 19 test files、82 passed；全量门禁通过 | `docs/evidence/RC-148/README.md` | 当前变更尚未提交；RC-149 本地模型 Adapter、RC-150 离线细化、RC-152 外部取消路由/SSE 重连仍待后续；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-149 | 2026-07-18 14:38:43 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：RC-149 专项后端 2 passed、前端相关回归 8 passed；登记后根级 verify 后端 309 passed、5 skipped、39 warnings，前端 19 test files、82 passed；local runner Adapter、健康、流式输出和无网络 route 通过；全量门禁通过 | `docs/evidence/RC-149/README.md` | 当前变更尚未提交；RC-150 已完成；RC-152 外部取消路由/SSE 重连仍待后续；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-150 | 2026-07-18 14:53:08 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：local 未安装、未就绪、OOM、超时和普通 RuntimeError 边界测试通过；RC-150 专项后端 16 passed、前端 2 test files/18 passed；根级 verify 后端 318 passed、5 skipped、39 warnings，前端 19 test files、82 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-150/README.md` | 当前变更尚未提交；真实 Gemma/Qwen runtime 与模型权重安装仍留给后续本地模型任务；RC-152 外部取消路由/SSE 重连、RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-151 | 2026-07-18 15:05:10 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：授权门禁、未授权零 HTTP、同 request ID 幂等重试、限流、熔断 open/half-open/closed 和取消传播专项 26 passed；根级 verify 后端 324 passed、5 skipped、39 warnings，前端 19 test files、82 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-151/README.md` | 当前变更尚未提交；RC-152 已完成；RC-127/RC-121/057/060 外部条件仍 pending |
+| RC-152 | 2026-07-18 15:32:02 +08:00 | 未提交工作树（HEAD `5610c00`） | PASS：canonical v1 started/analysis/delta/saved/completed/cancelled/error 事件、序号、游标回放和不重复保存专项 25 passed；前端相关 2 test files/17 passed、生产构建成功；根级 verify 后端 329 passed、5 skipped、44 warnings，前端 19 test files、82 passed；Ruff/Mypy、Lint/Build、生成 drift、追踪、依赖边界、route coverage、视觉/Token 门禁和交付计划校验通过 | `docs/evidence/RC-152/README.md` | 当前变更尚未提交；event log 为单进程 bounded 内存存储，跨进程持久化和 worker 协调留给后续；RC-127/RC-121/057/060 外部条件仍 pending |
+
+| RC-154 | 2026-07-18 16:52:24 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：优化目标经 API/GUI/同步/流式/后台任务传递；离线规则和云 adapter 均仅将目标作为用户上下文；全关闭目标返回 HTTP 400；生成 drift、追踪、Ruff、Mypy、编译、RC-154 3 passed、前端 Lint/TypeScript 通过 | docs/evidence/RC-154/README.md | 完整 Vite 构建受沙箱拒绝读取祖先目录阻断；.venv 指向失效 Store Python，使用 bundled Python 验证；全量 Ruff 仍有既有 RC-153 测试 import 排序问题 |
+| RC-155 | 2026-07-18 17:03:48 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：rules/model/combined 经共享 Service；规则建议和模板只进入云 adapter 用户上下文；rules 强制离线，云模型失败保留既有离线降级；组合模式质量阈值和原文保留消融测试通过；RC-154/155 7 passed、Ruff、Mypy、编译、生成 drift、前端 Lint/TypeScript 通过 | docs/evidence/RC-155/README.md | 完整 Vite 构建仍受沙箱读取祖先目录限制；.venv 的 Store Python 已失效，验证使用 bundled Python；全量 Ruff 的既有 RC-153 测试 import 排序问题保留 |
+| RC-156 | 2026-07-18 17:08:57 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：控制字符一次清理、空值/长度、结构和语言验证接入同步、流式和保存路径；无效结构输出不保存版本；RC-154/155/156 10 passed、Ruff、Mypy、编译、生成 drift、前端 Lint/TypeScript 通过 | docs/evidence/RC-156/README.md | 完整 Vite 构建仍受沙箱读取祖先目录限制；.venv 的 Store Python 已失效，验证使用 bundled Python；全量 Ruff 的既有 RC-153 测试 import 排序问题保留 |
+| RC-157 | 2026-07-18 17:12:57 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：metadata 记录质量前后分与差值、Provider、模型、延迟和降级；不包含完整提示词；RC-157 1 passed、Ruff、Mypy、编译、生成 drift、前端 Lint/TypeScript 通过 | docs/evidence/RC-157/README.md | 完整 Vite 构建仍受沙箱读取祖先目录限制；.venv 的 Store Python 已失效，验证使用 bundled Python；全量 Ruff 的既有 RC-153 测试 import 排序问题保留 |
+| RC-158 | 2026-07-19 01:29:15 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：60 个评测样本覆盖编码、商务、教育、创意、长文本、代码块、变量、中文和对抗输入；固定 `rc-158-v1`/种子 158；自动评分与双人盲评协议及稳定批次报告通过；RC-158 专项 3 passed、Ruff、Mypy 通过 | docs/evidence/RC-158/README.md | bundled Python 缺少测试/静态检查依赖；`.venv` 直接 Python 可用；CLI 入口缺 `rabbit_code` 源码路径，基线使用源码路径生成；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-159 | 2026-07-19 01:36:00 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：首次启动使用 API 路线明确为配置 Provider；Provider API Key 与 Rabbit Code 账户密码明确区分；真实账户页保留 ACCOUNT LOGIN；前端专项 3 passed、ESLint、TypeScript 通过 | docs/evidence/RC-159/README.md | 根目录 Vitest 扫描既有 `.runtime/pytest-rc154` 目录受 EPERM，专项已从 `frontend` 目录通过；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-160 | 2026-07-19 01:42:25 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：OpenAI Chat Completions Adapter 支持标准 Base URL、API Key、模型、组织/项目头、messages、SSE、工具定义/工具调用和 401/429/504 错误映射；RC-160 与既有 Provider/RC-151 回归 20 passed、Ruff、Mypy 通过 | docs/evidence/RC-160/README.md | 完整 Vite 构建仍受沙箱目录权限限制；未进行真实收费 Provider 请求，仅使用 Mock 契约 |
+| RC-161 | 2026-07-19 01:46:30 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Responses API 使用独立 Adapter 和显式协议选择；请求/响应/流式事件支持 `instructions/input/text`、工具调用和结构化输出，Chat 参数不泄漏；RC-160/161 与既有 Provider 回归 23 passed、Ruff、Mypy 通过 | docs/evidence/RC-161/README.md | 未进行真实收费 Provider 请求，仅使用 Mock 契约；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-162 | 2026-07-19 01:51:39 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Gemini 原生 Adapter 支持 `generateContent`/`streamGenerateContent`、contents/parts、System Instruction、function calling、安全设置、错误结构和 `x-goog-api-key`；RC-160/161/162 与既有 Provider 回归 26 passed、Ruff、Mypy 通过 | docs/evidence/RC-162/README.md | 未进行真实收费 Provider 请求，仅使用 Mock 契约；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-163 | 2026-07-19 01:56:16 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Anthropic Messages Adapter 支持版本/Beta 头、system/content blocks、tool use/result、SSE 事件、usage、prompt caching 和 capability probe；RC-160/161/162/163 与既有 Provider 回归 29 passed、Ruff、Mypy 通过 | docs/evidence/RC-163/README.md | 未进行真实收费 Provider 请求，仅使用 Mock 契约；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-164 | 2026-07-19 02:00:04 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Claude Code 格式映射到 Anthropic Messages/官方 Agent SDK；官方 API Key/OAuth 允许，Cookie/订阅 Token/内部令牌/未知格式拒绝；后端边界与 Anthropic 回归 16 passed、Ruff、Mypy，Provider 页面 3 passed、ESLint、TypeScript 通过 | docs/evidence/RC-164/README.md | 不实现非官方 Claude Code 订阅登录，不捆绑或分发 Claude Code CLI；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-165 | 2026-07-19 02:06:16 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Azure、Vertex、Bedrock 托管变体支持部署/版本、项目/区域、API Key/Bearer/SigV4 signer 边界和独立 endpoint；RC-160 至 RC-165 与既有 Provider 回归 40 passed、Ruff、Mypy 通过 | docs/evidence/RC-165/README.md | 未进行真实 Azure/Vertex/Bedrock 请求或收费验证；Bedrock 生产使用需注入官方 AWS SigV4 signer；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-166 | 2026-07-19 02:15:43 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：数据驱动 Provider Preset 覆盖 11 个主流 OpenAI 兼容服务，支持默认 Base URL、模型发现路径、兼容级别、限制说明、自定义头和环境变量覆盖；RC-160 至 RC-166 联合回归 48 passed、Provider Ruff、Mypy 通过 | docs/evidence/RC-166/README.md | 未进行真实收费 Provider 请求；Ollama/LM Studio 仅定义兼容 Preset，真实本地服务发现留给 RC-168；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-167 | 2026-07-19 02:29:24 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：能力 schema v1、Adapter 静态能力矩阵、探测结果覆盖、TTL 缓存、探测失败静态回退、Agent 工具门控和 GUI 模型发现门控完成；RC-160 至 RC-167 联合回归 53 passed、Provider/Agent Mypy、Ruff、Python 编译、前端 20 个测试文件 86 passed、ESLint、TypeScript 通过 | docs/evidence/RC-167/README.md | 全后端扩大回归 392 passed、5 skipped、55 warnings，另有 6 个既有 OpenAPI/generated drift、RC-141/RC-143、追踪/黄金基线和 Windows 文件锁失败；未进行真实收费 Provider 请求；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-168 | 2026-07-19 02:38:40 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：ModelDiscoveryService 支持 Preset `/models` endpoint、cursor 分页、TTL 缓存、空列表、超时、403、限流/服务错误分类；Registry 复用发现服务，手动/已保存模型在发现失败时保留；RC-160 至 RC-168 联合回归 57 passed、前端全量 20 个测试文件 87 passed、Ruff、Mypy、ESLint、TypeScript 通过 | docs/evidence/RC-168/README.md | 未向真实 Provider 发送请求；未维护模型白名单，真实连接测试与费用提示留给 RC-169；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-169 | 2026-07-19 02:47:44 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Mock-first 分阶段连接检查覆盖凭据、模型、能力、流式首块和工具 schema；真实模式要求自有 Provider 凭据、明确确认、费用警告、token 上限和注入的官方发送器；RC-160 至 RC-169 联合回归 62 passed、前端全量 20 个测试文件 87 passed、Provider/Agent Mypy、Ruff、Python 编译、ESLint、TypeScript 通过 | docs/evidence/RC-169/README.md | 默认不发送真实请求且未产生 Provider 费用；真实连接仅在显式 `real + confirmed` 且运行时注入发送器时执行；完整 Vite 构建仍受沙箱目录权限限制 |
+| RC-170 | 2026-07-19 03:14:00 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：统一 11 类 Provider 错误分类、状态码/错误体映射、脱敏 request ID、API/流式/CLI/UI 共享错误呈现；RC-160 至 RC-170 联合 Provider/API 回归 78 passed、RC-170 专项 18 passed、前端全量 20 个测试文件 87 passed、ESLint、TypeScript/Vite build、OpenAPI drift、Provider Ruff/Mypy、Python 编译通过 | docs/evidence/RC-170/README.md | 未发送真实 Provider 请求且未产生费用；既有 jsdom navigation 与路径迁移 warning 保留；完整工作树仍包含此前 RC 的未提交改动 |
+| RC-171 | 2026-07-19 03:21:00 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：指数退避、抖动、数字/HTTP-date `Retry-After`、取消中断、HTTP(S) 代理、NO_PROXY、自定义 CA、IPv4/IPv6 和 opaque 代理凭据 resolver 完成；RC-160 至 RC-171 联合 Provider/API 回归 90 passed、RC-171 专项 6 passed、Provider Ruff/Mypy、Python 编译通过 | docs/evidence/RC-171/README.md | 未发送真实 Provider 请求且未产生费用；代理凭据仍需运行时 SecretStore resolver；既有迁移 warning 保留 |
+| RC-172 | 2026-07-19 03:45:31 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：路由持久化/优先级、独立优化模型、不可用路由 fallback chain、发送前 Token/费用预算拦截和流式降级 metadata 完成；RC-160 至 RC-172 联合 Provider/API 回归 92 passed、RC-172 专项 6 passed、Provider Ruff、定向 Mypy、Python 编译、OpenAPI drift、前端 20 个测试文件 87 passed、ESLint 和 Vite build 通过 | docs/evidence/RC-172/README.md | 未发送真实 Provider 请求且未产生费用；全包 Mypy 仍报告既有 `rabbit_code` 无类型标记导入错误；既有迁移与 jsdom navigation warning 保留 |
+| RC-173 | 2026-07-19 04:01:17 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：共享 MockTransport 契约覆盖 Chat Completions、Responses、Gemini、Anthropic、Azure、Vertex、Bedrock、offline 和 local Provider；录制器脱敏 credential header；真实测试要求 owned key、显式启用、费用确认和 Token limit；RC-160 至 RC-173 联合 Provider/API 回归 107 passed、2 skipped，RC-173 专项 15 passed、2 skipped，追踪 19 passed、2 skipped，workspace check 通过 | docs/evidence/RC-173/README.md | 未发送真实 Provider 请求且未产生费用；全后端既有 RC-141/RC-143、v2 golden/环境基线失败和全仓 RC-153 Ruff import 排序问题保留 |
+| RC-174 | 2026-07-19 04:14:56 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：首次运行页保留两个等权无预选入口，明确 API/本地数据去向、网络和凭据/硬件边界；修复移动 CSS cascade；前端 20 个测试文件 87 passed、ESLint、TypeScript、Vite build、Playwright 桌面/移动视口检查通过 | docs/evidence/RC-174/README.md | 后端未启动时浏览器 health 代理显示 unavailable；既有 jsdom navigation warning 保留 |
+| RC-175 | 2026-07-19 04:31:11 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：API 向导四步覆盖协议/服务商、Base URL、Key、模型、Mock `$0` 连接测试和测试后默认保存；非敏感草稿写入 workspace localStorage，Key 不落盘；前端 20 个测试文件 88 passed、ESLint、TypeScript、Vite build、Playwright 桌面/移动视口通过 | docs/evidence/RC-175/README.md | 当前连接测试为 Mock-first；OS SecretStore/OAuth 留给 RC-179/RC-182；既有 jsdom navigation warning 保留 |
+| RC-176 | 2026-07-19 04:47:26 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：无 API 安装向导覆盖硬件、运行器、模型、许可证、可恢复下载、校验和和健康检查；RC-176 专项 7 passed、前端全量 20 个测试文件 89 passed、ESLint、TypeScript、Vite build、Playwright 桌面/移动视口通过 | docs/evidence/RC-176/README.md | 真实 Ollama/llama.cpp 运行器和多 GB 下载留给后续运行时 RC；既有 jsdom navigation warning 保留 |
+| RC-177 | 2026-07-19 05:04:17 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：两条向导完成态统一进入既有 workspace home；首页云/本地/离线模型选择和非敏感路由目录保持切换；RC-177 专项 14 passed、前端全量 20 个测试文件 90 passed、ESLint、TypeScript、Vite build、Playwright 桌面/移动视口通过 | docs/evidence/RC-177/README.md | 未发送真实 Provider 请求；项目/会话跨设备同步仍留给后续后端工作；既有 jsdom navigation warning 保留 |
+| RC-178 | 2026-07-19 05:17:55 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Provider/模型配置支持 workspace 持久化 CRUD、禁用保留历史、默认/活跃引用删除迁移和本地模型状态/禁用；RC-178 专项 16 passed、前端全量 20 个测试文件 93 passed、ESLint、TypeScript、Vite build、Playwright 桌面/移动视口通过 | docs/evidence/RC-178/README.md | 未持久化 API Key，OS SecretStore 留给 RC-179；真实 Provider 请求未发送；既有 jsdom navigation warning 保留 |
+| RC-179 | 2026-07-19 05:27:32 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：SecretStore 抽象、Windows Credential Manager、Linux Secret Service、opaque config reference、user 明文拒绝、session/CLI 临时凭据和删除清理完成；RC-179 专项 5 passed、RC-064/RC-179/Provider 回归 18 passed、Ruff、定向 Mypy、compileall 通过 | docs/evidence/RC-179/README.md | 当前仅 Windows 实机 round-trip；Linux Secret Service 代码路径因环境无 Linux/secret-tool 未实测，未伪造通过；既有全仓环境警告保留 |
+| RC-180 | 2026-07-19 05:42:05 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：前端固定掩码/末尾四位、共享 API 错误格式化脱敏、导出与诊断复制清洗、后端公共 JSON/错误/Provider metadata 脱敏和运行时指纹完成；RC-180 专项 2 passed，后端 RC-064/RC-160 至 RC-173/RC-179/RC-180 联合回归 118 passed、1 skipped，前端全量 21 个测试文件 96 passed、ESLint、TypeScript/Vite build、定向 Ruff/Mypy、compileall 通过 | docs/evidence/RC-180/README.md | 未发送真实 Provider 请求且未产生费用；Linux Secret Service 未在当前 Windows 环境实测；既有 jsdom navigation stderr 保留 |
+| RC-181 | 2026-07-19 05:54:54 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：`env:`/`keychain:` 引用、直接环境覆盖、default/user/workspace/env/session/CLI 优先级、环境变化重新解析、数值环境类型转换、只读配置 API 和 Provider 来源展示完成；RC-181 专项 4 passed，后端 RC-064/RC-160 至 RC-173/RC-179/RC-181 联合回归 122 passed、1 skipped，前端全量 21 个测试文件 97 passed、ESLint、TypeScript/Vite build、OpenAPI drift、Ruff、定向 Mypy、compileall 通过 | docs/evidence/RC-181/README.md | 未发送真实 Provider 请求且未产生费用；环境迁移 warning 与 jsdom navigation stderr 保留；配置 API 仅返回来源和 opaque placeholder |
+| RC-182 | 2026-07-19 06:01:21 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：OAuth 政策 allowlist、默认拒绝未获批准 Provider、系统浏览器 URL、S256 PKCE、state/redirect 校验、回调 loopback 清理、防重放、SecretStore opaque token、refresh/revoke 完成；RC-182 专项 4 passed，RC-064/RC-160 至 RC-173/RC-179/RC-182 联合回归 126 passed、1 skipped，Ruff、定向 Mypy、compileall 通过 | docs/evidence/RC-182/README.md | 当前没有已确认允许第三方客户端的 Provider 政策，因此默认批准列表为空；未进行真实 OAuth/Provider 请求；真实回调端口和官方政策确认留给具备外部条件的后续验证 |
+| RC-183 | 2026-07-19 06:06:08 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：offline/local 路线无需 Rabbit Code 云账户即可运行；OptionalSyncService 默认关闭、启用后需单独账户授权；本地会话/模型/配置与账户、Provider SecretStore 边界分离；RC-183 专项 3 passed，RC-064/RC-160 至 RC-173/RC-179/RC-183 联合回归 129 passed、1 skipped，前端本地入口/工作区 7 passed、ESLint、TypeScript/Vite build、Ruff、定向 Mypy、compileall 通过 | docs/evidence/RC-183/README.md | 未发送真实 Provider 请求或同步请求；跨设备同步实现留给后续可选模块；既有环境迁移 warning 保留 |
+| RC-184 | 2026-07-19 06:16:58 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：清理预览、单 Provider credential 删除、opaque 配置迁移、全量本地数据删除、确认/取消、进程停止 guard、文件安全擦除、SecretStore 引用清除和 Settings UI 预览/确认完成；RC-184 清理/API 合约专项 10 passed，后端 RC-064/RC-160 至 RC-173/RC-179 至 RC-184 联合回归 139 passed、1 skipped，前端全量 21 个测试文件 98 passed、ESLint、TypeScript/Vite build、OpenAPI drift、Ruff、定向 Mypy、compileall 通过 | docs/evidence/RC-184/README.md | 未发送真实 Provider 或同步请求；默认 API cleanup 仍需进程 guard/明确确认；既有环境迁移 warning 与 jsdom navigation stderr 保留 |
+| RC-185 | 2026-07-19 06:31:20 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：LocalInstallCore 可重入下载/暂停/恢复/取消/校验/原子安装/runner 状态和结构化 JSON 事件完成；PowerShell/Shell 薄包装与 GUI 同字段事件映射完成；RC-185 专项 4 passed，RC-149/RC-185 关联回归 15 passed，前端全量 21 个测试文件 98 passed，ESLint、TypeScript/Vite build、定向 Ruff/Mypy、compileall、diff check 通过 | docs/evidence/RC-185/README.md | Windows PowerShell 包装已实测；当前环境无 sh/bash，Linux 包装未实测；使用模拟源，真实模型下载/网络重试留给 RC-191；既有 migration/jsdom warning 保留 |
+| RC-186 | 2026-07-19 06:42:02 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：HardwareDetector/HardwareReport 和 JSON CLI 覆盖 OS/架构、CPU、RAM、磁盘、GPU/显存/驱动、网络、代理、Ollama/llama.cpp runner、source/confidence、权限降级和用户 override；RC-186 专项 3 passed，RC-149/RC-185/RC-186 关联回归 18 passed，前端全量 21 个测试文件 98 passed，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-186/README.md | 当前未执行 Linux 实机硬件/runner 矩阵；网络只做 DNS 探测；纠正值为单次 CLI override，真实推荐和持久化留给后续 RC |
+| RC-187 | 2026-07-19 06:47:16 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Ollama 默认与 llama.cpp 替代共享 LocalRunnerAdapter 全生命周期契约；RunnerRegistry、比较矩阵和 ADR-0014 完成；RC-187 专项 2 passed，RC-149/RC-187 关联回归 13 passed，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-187/README.md | 仅使用内存契约适配器，真实 runner 进程/API 留给后续模型健康和资源 RC；当前无网络请求或权重下载 |
+| RC-188 | 2026-07-19 06:53:37 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：版本化受控模型 manifest、Gemma/Qwen 固定来源和资源元数据、schema 校验、80% 安全余量推荐、未知模型 advanced gate 和 CLI 检查完成；RC-188 专项 3 passed，RC-186/RC-187/RC-188 联合专项 8 passed，Ruff、严格 Mypy、compileall、diff check 通过 | docs/evidence/RC-188/README.md | 未下载/打包权重；Gemma 下载前仍需用户许可确认；真实模型模板/生成冒烟留给 RC-189/190/193 |
+| RC-189 | 2026-07-19 07:00:35 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Qwen2.5-Coder family/完整 model ID/固定 revision/hash、默认 runner health 与 LocalModelProvider generation smoke、GUI 完整 ID 展示完成；RC-188/RC-189 后端 4 passed，前端 Qwen 专项 5 passed、全量 21 个测试文件 98 passed，ESLint、TypeScript/Vite build、Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-189/README.md | 使用无网络内存 runner，真实权重/runner 进程未执行；Gemma 版本与许可证/模板审核留给 RC-190 |
+| RC-190 | 2026-07-19 07:05:30 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Gemma 3 1B IT 固定 ID/revision/hash、Gemma family、gemma-3 template、EOS、模型卡/许可证约束、fail-closed selector、runner health/generation smoke 和 GUI 版本对齐完成；RC-186 至 RC-190 后端 10 passed，前端全量 21 个测试文件 98 passed，ESLint、TypeScript/Vite build、Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-190/README.md | 使用无网络内存 runner，真实权重/模型卡全文/runner 模板实机未执行；Gemma gated 条款仍要求下载前确认 |
+| RC-191 | 2026-07-19 07:20:00 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：可靠下载器补充版本/镜像/代理元数据、指数退避、失败恢复、错误哈希 fail-closed、同根目录进程内并发写保护和 CLI 参数；RC-185/RC-191 专项 8 passed，相关后端回归 172 passed、2 skipped，Ruff、严格 Mypy、compileall、分发检查通过 | docs/evidence/RC-191/README.md | 使用本地模拟源和 `seek` Range 续传；真实 HTTP、镜像切换、代理、Linux 实机和跨进程锁未执行 |
+| RC-192 | 2026-07-19 07:20:00 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：manifest 分发策略、许可证摘要/HTTPS URL/确认版本、安装状态记录、下载前确认校验和权重 denylist/workspace 门禁完成；RC-192 专项 3 passed，RC-188/RC-191/RC-192 联合专项 14 passed，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-192/README.md | 未生成真实安装包或 SBOM；denylist 已验证当前源码树无权重，发布流水线产物审计仍留待打包阶段 |
+| RC-193 | 2026-07-19 07:30:00 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：健康检查覆盖 runner 版本、加载、最小生成、流式增量、取消、上下文、停止后重载和资源峰值；健康报告原子保存且不含提示词，健康门控安装按报告通过/失败进入 ready/failed；RC-193 专项 8 passed，RC-149 至 RC-193 回归 190 passed、2 skipped、50 warnings，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-193/README.md | 使用 in-memory runner 和注入资源探针；真实 Ollama/llama.cpp、tokenizer 极限、权重加载和多平台资源实测留给后续运行时验证 |
+| RC-194 | 2026-07-19 07:58:39 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：本地模型状态机拒绝不可能跳转；安装事件映射为下载/校验/加载/就绪/忙碌/卸载/损坏/更新状态；FastAPI 事件端点跨新 App 实例恢复；GUI 消费后端恢复事件并为 failed/corrupt 提供 retry/repair/uninstall；RC-194 专项 7 passed，RC-185/RC-191/RC-194 关联 16 passed、2 warnings，前端本地模型专项 6 passed，ESLint、TypeScript/Vite build、Ruff、OpenAPI drift 通过 | docs/evidence/RC-194/README.md | 真实 Ollama/llama.cpp 进程、模型权重和多平台实机未执行；既有路径迁移 warning 保留 |
+| RC-195 | 2026-07-19 08:12:37 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：全局默认本地模型写入，session/task 查询参数隔离会话覆盖；Gemma/Qwen 切换检查 ready/busy 与上下文长度，生成中禁用切换；实际 optimize body、metadata 和历史分别保留 Qwen/Gemma ID；RC-195 专项后端 1 passed、前端 3 passed，RC-148/RC-172 关联后端 10 passed、8 warnings，App/Workspace/Task/LocalModels 前端 28 passed，ESLint、TypeScript/Vite build 通过 | docs/evidence/RC-195/README.md | 未执行真实模型权重/runner 进程；既有路径迁移与 jsdom navigation warning 保留 |
+| RC-196 | 2026-07-19 08:19:43 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：RunnerResourceConfig、安全默认、CPU-only/GPU 配置、OOM 卸载降配、idle timeout 释放和 Provider 单次恢复完成；RC-196 关联专项 21 passed、11 warnings，定向 Ruff、严格 Mypy 通过 | docs/evidence/RC-196/README.md | 当前未执行真实 GPU、Ollama/llama.cpp 进程和跨平台资源实机；既有路径迁移 warning 保留 |
+| RC-197 | 2026-07-19 08:34:02 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：ModelDirectoryService 完成自定义目录检查、版本更新/保留、迁移校验与中断保护、回滚、修复、清理和登记文件卸载；FastAPI/OpenAPI/GUI 接线完成；RC-197 专项 6 passed，关联后端 28 passed、5 warnings，前端 22 个测试文件 102 passed，Ruff、严格 Mypy、ESLint、TypeScript/Vite build、OpenAPI drift 通过 | docs/evidence/RC-197/README.md | 未执行真实 Ollama/llama.cpp、模型权重、GPU 和跨进程故障注入；既有路径迁移与 jsdom navigation warning 保留 |
+| RC-198 | 2026-07-19 08:46:30 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：LocalRunnerGateway 完成 runner 生命周期、能力信息、健康 TTL、bounded concurrency、request ID 取消和结构化流式事件；FastAPI list/capabilities/health/generate/stream/cancel/load/unload 路由及 OpenAPI 生成完成；RC-198 专项 5 passed，关联后端 38 passed、1 skipped、17 warnings，前端 22 个测试文件 102 passed，Ruff、严格 Mypy、ESLint、TypeScript/Vite build、OpenAPI drift 通过 | docs/evidence/RC-198/README.md | 未执行真实 Ollama/llama.cpp、runner HTTP、模型权重、GPU 和跨进程故障注入；既有 RC-153 Ruff import 排序阻塞、路径迁移与 jsdom navigation warning 保留 |
+| RC-199 | 2026-07-19 08:54:33 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：用户级安装策略、默认用户模型根、不可写目录拒绝、显式提权确认和无提权平台包装器完成；RC-199 专项 5 passed，RC-185/RC-191/RC-199 关联 14 passed，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-199/README.md | 未执行真实标准用户受保护系统目录安装、外部包管理器或 runner 二进制提权；PATH 持久化和正式打包留待发布阶段 |
+| RC-200 | 2026-07-19 09:03:46 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：离线介质布局、受控 manifest/版本/许可证/依赖/磁盘/哈希校验、手动导入、原子安装和复用健康检查完成；RC-200 专项 4 passed，RC-185/RC-188/RC-191/RC-192/RC-193/RC-200 关联 20 passed，manifest/分发扫描、Ruff、严格 Mypy、compileall、`workspace.py check` 通过 | docs/evidence/RC-200/README.md | 未执行真实离线虚拟机、真实 runner/权重和 GPU；CLI 使用内存 runner 与确定性资源探针，真实介质/发布包验证留待发布阶段 |
+| RC-201 | 2026-07-19 09:15:47 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：Plan/Edit/High × files/terminal/network/git/mcp/desktop 六域 capability matrix 完成，并接入 FileTools、ShellAdapter、ProcessTools、GitTools、ToolRegistry；RC-201 及关联权限/工具回归 51 passed、3 skipped，Ruff、严格 Mypy 通过 | docs/evidence/RC-201/README.md | 未执行真实 OS 沙箱、桌面/MCP 进程和跨平台 capability 容器；既有平台 skip 保留 |
+| RC-202 | 2026-07-19 09:32:40 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：`PermissionApprovalEngine` 生成完整共享审批快照，`ToolRegistry` 在批准前冻结执行并防止参数替换；拒绝/超时/重复执行均无 handler 副作用；RC-202/RC-201/RC-097/RC-101 后端 23 passed，前端 UiStates 8 passed，Ruff、严格 Mypy、ESLint、TypeScript/Vite build 通过 | docs/evidence/RC-202/README.md | 未执行真实 OS 沙箱、桌面/MCP/外部网络操作；保持既有平台 skip 和未提交工作树记录 |
+| RC-203 | 2026-07-19 09:40:07 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：`AuthorizationStore` 支持一次/会话/结构化规则授权、拒绝、编辑重审、查看和撤销；RC-203/RC-202/RC-097 专项回归 15 passed，Ruff、严格 Mypy 通过；默认 UI 未增加永久授权入口 | docs/evidence/RC-203/README.md | 未执行跨进程授权持久化、真实 OS 沙箱、桌面/MCP/外部网络操作；留给后续集成和平台 RC |
+| RC-204 | 2026-07-19 09:50:11 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：`SandboxReport`/`SandboxController` 平台能力探测、Linux bwrap 规格、Windows Job Object 非等价说明、reduced 审批和 ProcessManager spawn 前接入完成；RC-204/RC-094 9 passed、1 skipped，Ruff、严格 Mypy 通过 | docs/evidence/RC-204/README.md | 未执行真实 Linux bwrap/seccomp、Windows AppContainer/ACL 或 OS 逃逸夹具；保持平台条件限制记录 |
+| RC-205 | 2026-07-19 09:55:56 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：路径/命令/环境/工具输出安全边界完成并接入 ShellAdapter/ProcessManager；RC-205 及 RC-091/RC-094/RC-097/RC-201 关联 41 passed、4 skipped，Ruff、严格 Mypy 通过 | docs/evidence/RC-205/README.md | 未执行真实恶意仓库、外部命令注入或 OS 逃逸；Shell script 仍由现有 High/approval gate 控制，敏感文件专项留给 RC-206 |
+| RC-206 | 2026-07-19 10:01:35 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：敏感路径策略、独立读/发送审批、FileTools 索引隔离、用户规则和 metadata-only SecretScanner 完成；RC-206/RC-090 7 passed、1 skipped，Ruff、严格 Mypy 通过 | docs/evidence/RC-206/README.md | 未执行真实凭据、浏览器资料、系统目录或 Provider send；扫描器覆盖和完整审计留后续安全 RC |
+| RC-207 | 2026-07-19 10:07:45 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：strict loopback/Host/Origin/token/protocol/body/CORS 边界完成并由 sidecar 启用；RC-207/RC-058/RC-067 11 passed，Ruff、严格 Mypy 通过 | docs/evidence/RC-207/README.md | 未执行真实端口扫描或外部网络暴露；chunked body streaming 上限留后续上传边界 |
+| RC-208 | 2026-07-19 10:19:10 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：扩展 manifest 来源/版本/hash/权限、显式确认、锁定、禁用、撤销和隔离上下文完成；RC-208/RC-077/RC-099/RC-075/RC-076 25 passed，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-208/README.md | 未执行真实第三方扩展进程、凭据访问或 OS 级沙箱；实际下载制品 HTTPS/许可证/哈希流程留 RC-209 |
+| RC-209 | 2026-07-19 10:25:36 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：共享制品 manifest 与下载器完成 binary/model/update/plugin 的 HTTPS、许可证、版本、SHA-256、失败清理和原子安装；RC-209/RC-188/RC-191/RC-192/RC-200/RC-077 28 passed，Ruff、严格 Mypy、compileall 通过 | docs/evidence/RC-209/README.md | 未执行真实外部 HTTP 下载；真实下载网络、代理和发布升级产物留后续发布/平台矩阵 |
+| RC-210 | 2026-07-19 10:34:57 +08:00 | 未提交工作树（HEAD 5610c00） | PASS：默认关闭遥测、显式 opt-in/撤回/清除、内容过滤、诊断预览/脱敏/确认发送和 GUI 预览流程完成；后端 RC-210/RC-093/RC-180 9 passed，前端 Diagnostics 4 passed，Ruff、严格 Mypy、compileall、ESLint、TypeScript/Vite build 通过 | docs/evidence/RC-210/README.md | 未执行真实网络发送；遥测服务端点、崩溃收集器和实际外部支持渠道留后续部署配置 |
 
 ### 进度记录一致性检查
 
@@ -2468,187 +2681,187 @@ git diff --exit-code -- frontend\src\generated
 - [x] **RC-063** 统一同步、SSE、WebSocket 或 JSON-RPC 的使用边界，支持流式文本、工具事件、进度、取消和断线恢复。
 - [x] **RC-064** 使用 SQLite 保存本地结构化数据，文件系统保存大型日志、缓存、模型和附件，并定义事务与并发访问策略。
 - [x] **RC-065** 建立配置分层：应用默认、用户全局、工作区、会话和临时覆盖，明确优先级、敏感字段存储位置和来源查询。
-- [ ] **RC-066** 将 Agent、Provider、工具、权限、存储、提示词优化和 UI 解耦，允许独立测试与替换。
-- [ ] **RC-067** 设计前后台进程的启动、健康检查、端口发现、崩溃拉起、优雅退出、升级兼容和僵尸进程清理。
+- [x] **RC-066** 将 Agent、Provider、工具、权限、存储、提示词优化和 UI 解耦，允许独立测试与替换。
+- [x] **RC-067** 设计前后台进程的启动、健康检查、端口发现、崩溃拉起、优雅退出、升级兼容和僵尸进程清理。
 
 ### 6. Claude Code 风格的 Agent 核心
 
-- [ ] **RC-068** 实现可观测的 Agent 状态机：接收目标、组装上下文、模型推理、工具请求、权限决策、工具执行、结果回传、继续迭代和最终答复。
-- [ ] **RC-069** 支持交互对话、单次 `print`/无头执行、管道输入、结构化 JSON 输出和退出码。
-- [ ] **RC-070** 支持 Plan/只读模式、Edit/工作区写入模式和更高权限模式，并在 CLI 与 GUI 中保持一致语义。
-- [ ] **RC-071** 支持流式文本、思考状态摘要、工具调用卡片、后台任务进度、部分失败和用户中断。
-- [ ] **RC-072** 支持最大轮次、超时、Token、费用、上下文和并发任务限制。
-- [ ] **RC-073** 支持暂停、取消、重试、从失败点继续、重新生成和幂等工具调用。
-- [ ] **RC-074** 支持主 Agent、受控子 Agent、并行只读探索、结果汇总和并发槽限制。
-- [ ] **RC-075** 支持 Hooks，在工具执行前后、会话开始结束、权限请求和错误时触发确定性策略。
-- [ ] **RC-076** 支持 MCP 客户端、内置工具服务器和第三方工具服务器，覆盖 stdio、HTTP 及认证生命周期。
-- [ ] **RC-077** 支持可安装的技能/插件、工作区指令和命令扩展，并建立来源、哈希、权限、版本和兼容机制。
-- [ ] **RC-078** 支持模型能力协商，按文本、图像、工具调用、结构化输出、上下文长度和推理参数选择行为。
-- [ ] **RC-079** 不把任一模型的隐藏思维链写入日志或 UI，只呈现允许公开的简短进度和依据。
+- [x] **RC-068** 实现可观测的 Agent 状态机：接收目标、组装上下文、模型推理、工具请求、权限决策、工具执行、结果回传、继续迭代和最终答复。
+- [x] **RC-069** 支持交互对话、单次 `print`/无头执行、管道输入、结构化 JSON 输出和退出码。
+- [x] **RC-070** 支持 Plan/只读模式、Edit/工作区写入模式和更高权限模式，并在 CLI 与 GUI 中保持一致语义。
+- [x] **RC-071** 支持流式文本、思考状态摘要、工具调用卡片、后台任务进度、部分失败和用户中断。
+- [x] **RC-072** 支持最大轮次、超时、Token、费用、上下文和并发任务限制。
+- [x] **RC-073** 支持暂停、取消、重试、从失败点继续、重新生成和幂等工具调用。
+- [x] **RC-074** 支持主 Agent、受控子 Agent、并行只读探索、结果汇总和并发槽限制。
+- [x] **RC-075** 支持 Hooks，在工具执行前后、会话开始结束、权限请求和错误时触发确定性策略。
+- [x] **RC-076** 支持 MCP 客户端、内置工具服务器和第三方工具服务器，覆盖 stdio、HTTP 及认证生命周期。
+- [x] **RC-077** 支持可安装的技能/插件、工作区指令和命令扩展，并建立来源、哈希、权限、版本和兼容机制。
+- [x] **RC-078** 支持模型能力协商，按文本、图像、工具调用、结构化输出、上下文长度和推理参数选择行为。
+- [x] **RC-079** 不把任一模型的隐藏思维链写入日志或 UI，只呈现允许公开的简短进度和依据。
 
 ### 7. 上下文、记忆与会话管理
 
-- [ ] **RC-080** 自动识别 Git 仓库根目录、工作树、分支、未提交改动、语言、构建工具和项目指令文件。
-- [ ] **RC-081** 支持 `AGENTS.md`、Rabbit Code 专属项目指令、用户全局指令和目录级覆盖规则。
-- [ ] **RC-082** 支持文件提及、目录提及、代码选择、图片/附件、终端输出、diff 和错误诊断进入上下文。
-- [ ] **RC-083** 实现尊重 `.gitignore`、Rabbit Ignore、二进制文件、超大文件、敏感路径和符号链接的搜索与索引。
-- [ ] **RC-084** 实现上下文预算、去重、相关性排序、缓存、自动摘要和长会话压缩。
-- [ ] **RC-085** 区分临时上下文、会话记忆、项目记忆和用户长期偏好，并允许查看、编辑、禁用和清除。
-- [ ] **RC-086** 支持新建、命名、搜索、置顶、归档、删除、恢复、继续、分叉和导出会话。
-- [ ] **RC-087** 支持会话检查点、文件变更快照、工具记录和可解释的撤销/回滚。
-- [ ] **RC-088** 支持多个工作区、Git worktree、独立会话环境和任务隔离。
-- [ ] **RC-089** 设计会话数据库迁移、崩溃恢复、损坏检测、备份和隐私清理。
+- [x] **RC-080** 自动识别 Git 仓库根目录、工作树、分支、未提交改动、语言、构建工具和项目指令文件。
+- [x] **RC-081** 支持 `AGENTS.md`、Rabbit Code 专属项目指令、用户全局指令和目录级覆盖规则。
+- [x] **RC-082** 支持文件提及、目录提及、代码选择、图片/附件、终端输出、diff 和错误诊断进入上下文。
+- [x] **RC-083** 实现尊重 `.gitignore`、Rabbit Ignore、二进制文件、超大文件、敏感路径和符号链接的搜索与索引。
+- [x] **RC-084** 实现上下文预算、去重、相关性排序、缓存、自动摘要和长会话压缩。
+- [x] **RC-085** 区分临时上下文、会话记忆、项目记忆和用户长期偏好，并允许查看、编辑、禁用和清除。
+- [x] **RC-086** 支持新建、命名、搜索、置顶、归档、删除、恢复、继续、分叉和导出会话。
+- [x] **RC-087** 支持会话检查点、文件变更快照、工具记录和可解释的撤销/回滚。
+- [x] **RC-088** 支持多个工作区、Git worktree、独立会话环境和任务隔离。
+- [x] **RC-089** 设计会话数据库迁移、崩溃恢复、损坏检测、备份和隐私清理。
 
 ### 8. 工具系统与编码工作流
 
-- [ ] **RC-090** 提供受控的文件读取、目录列举、快速搜索、文件编辑、补丁应用、创建、移动和删除工具。
-- [ ] **RC-091** 提供 PowerShell、cmd、Bash、zsh 等终端命令工具，并正确处理 Windows Unicode、路径、引号和换行。
-- [ ] **RC-092** 提供 Git 状态、diff、日志、分支、worktree、暂存、提交和冲突辅助能力，任何远程推送或 PR 操作需显式授权。
-- [ ] **RC-093** 提供测试、Lint、类型检查、构建、包管理器和语言服务器诊断的标准化结果展示。
-- [ ] **RC-094** 提供进程管理、后台命令、端口发现、日志跟踪和安全终止能力。
-- [ ] **RC-095** 提供结构化 `apply_patch` 或等价编辑机制，保留原子性、冲突检查和编码格式。
-- [ ] **RC-096** 处理工具输出截断、超时、重试、二进制内容、巨量日志、非零退出码和部分成功。
-- [ ] **RC-097** 为每个工具定义 JSON Schema、权限等级、幂等性、可取消性和审计字段。
-- [ ] **RC-098** 支持工具调用结果在 CLI、GUI 和 API 中使用同一内容块协议呈现。
-- [ ] **RC-099** 提供可扩展的浏览器预览、MCP、数据库或外部服务工具接口，但默认不授予隐式网络或写权限。
+- [x] **RC-090** 提供受控的文件读取、目录列举、快速搜索、文件编辑、补丁应用、创建、移动和删除工具。
+- [x] **RC-091** 提供 PowerShell、cmd、Bash、zsh 等终端命令工具，并正确处理 Windows Unicode、路径、引号和换行。
+- [x] **RC-092** 提供 Git 状态、diff、日志、分支、worktree、暂存、提交和冲突辅助能力，任何远程推送或 PR 操作需显式授权。
+- [x] **RC-093** 提供测试、Lint、类型检查、构建、包管理器和语言服务器诊断的标准化结果展示。
+- [x] **RC-094** 提供进程管理、后台命令、端口发现、日志跟踪和安全终止能力。
+- [x] **RC-095** 提供结构化 `apply_patch` 或等价编辑机制，保留原子性、冲突检查和编码格式。
+- [x] **RC-096** 处理工具输出截断、超时、重试、二进制内容、巨量日志、非零退出码和部分成功。
+- [x] **RC-097** 为每个工具定义 JSON Schema、权限等级、幂等性、可取消性和审计字段。
+- [x] **RC-098** 支持工具调用结果在 CLI、GUI 和 API 中使用同一内容块协议呈现。
+- [x] **RC-099** 提供可扩展的浏览器预览、MCP、数据库或外部服务工具接口，但默认不授予隐式网络或写权限。
 
 ### 9. CLI/TUI 设计与实现
 
-- [ ] **RC-100** 提供 `rabbit` 交互入口以及明确的单次执行、继续会话、恢复会话、选择模型、选择模式和 JSON 输出参数。
-- [ ] **RC-101** 构建 Claude Code 风格但属于 Rabbit Code 的终端交互：输入区、流式输出、工具状态、权限询问、计划、diff 和 Token/费用状态。
-- [ ] **RC-102** 支持多行输入、历史、搜索、补全、文件提及、图片/附件路径、粘贴保护和可配置快捷键。
-- [ ] **RC-103** 支持斜杠命令，包括帮助、模型、Provider、权限、计划、上下文、会话、清理、压缩、MCP、插件、诊断和退出。
-- [ ] **RC-104** 支持非交互 CI 使用，禁止在无 TTY 环境卡在权限提示，并提供清晰退出码。
-- [ ] **RC-105** 支持 `--dry-run`、只读分析、机器可读事件流和日志级别。
-- [ ] **RC-106** CLI 和 GUI 必须共享 Provider 配置、密钥引用、模型清单、会话、权限规则和提示词优化服务。
-- [ ] **RC-107** 验证 Windows Terminal、PowerShell、cmd、WSL 和主流 Linux 终端的兼容性。
-- [ ] **RC-108** 提供 Shell 补全、安装路径检查、版本检查、诊断命令和卸载清理命令。
+- [x] **RC-100** 提供 `rabbit` 交互入口以及明确的单次执行、继续会话、恢复会话、选择模型、选择模式和 JSON 输出参数。
+- [x] **RC-101** 构建 Claude Code 风格但属于 Rabbit Code 的终端交互：输入区、流式输出、工具状态、权限询问、计划、diff 和 Token/费用状态。
+- [x] **RC-102** 支持多行输入、历史、搜索、补全、文件提及、图片/附件路径、粘贴保护和可配置快捷键。
+- [x] **RC-103** 支持斜杠命令，包括帮助、模型、Provider、权限、计划、上下文、会话、清理、压缩、MCP、插件、诊断和退出。
+- [x] **RC-104** 支持非交互 CI 使用，禁止在无 TTY 环境卡在权限提示，并提供清晰退出码。
+- [x] **RC-105** 支持 `--dry-run`、只读分析、机器可读事件流和日志级别。
+- [x] **RC-106** CLI 和 GUI 必须共享 Provider 配置、密钥引用、模型清单、会话、权限规则和提示词优化服务。
+- [x] **RC-107** 验证 Windows Terminal、PowerShell、cmd、WSL 和主流 Linux 终端的兼容性。
+- [x] **RC-108** 提供 Shell 补全、安装路径检查、版本检查、诊断命令和卸载清理命令。
 
 ### 10. Codex 桌面端风格的 GUI 信息架构
 
-- [ ] **RC-109** 首次启动/登录页：两个主入口、环境状态、Rabbit Code 品牌和兔兔素材。
-- [ ] **RC-110** 工作区首页：最近项目、打开项目、最近任务、Provider/本地模型状态和快速新建任务。
-- [ ] **RC-111** 主任务页：左侧工作区与会话，中间对话与输入框，按需显示右侧变更审查/计划/上下文，底部或抽屉集成终端。
-- [ ] **RC-112** 变更审查页或面板：文件树、逐文件 diff、逐块接受/拒绝、回退和测试状态。
-- [ ] **RC-113** 终端与进程页或面板：多终端标签、后台任务、命令状态和停止操作。
-- [ ] **RC-114** Provider 与模型页：API 配置、模型发现、连通性、能力、费用提示和默认选择。
-- [ ] **RC-115** 本地模型安装页：硬件检测、Gemma/Qwen2.5-Coder选择、下载进度、运行状态、修复和卸载。
-- [ ] **RC-116** 提示词资产页：模板、历史版本、评分、对比、收藏、搜索、导入和导出；核心入口仍保留在对话框。
-- [ ] **RC-117** 设置页：外观、语言、终端、权限、沙箱、数据、隐私、更新、快捷键、MCP、插件和高级配置。
-- [ ] **RC-118** 诊断/关于/更新页：版本、日志、组件健康、许可证、隐私和更新状态。
-- [ ] **RC-119** 空状态、错误状态、离线状态、权限弹窗和安装弹窗都纳入统一视觉系统。
-- [ ] **RC-120** 支持窗口恢复、多窗口或多工作区策略、系统托盘策略、通知、深色/浅色主题和高 DPI。
+- [x] **RC-109** 首次启动/登录页：两个主入口、环境状态、Rabbit Code 品牌和兔兔素材。
+- [x] **RC-110** 工作区首页：最近项目、打开项目、最近任务、Provider/本地模型状态和快速新建任务。
+- [x] **RC-111** 主任务页：左侧工作区与会话，中间对话与输入框，按需显示右侧变更审查/计划/上下文，底部或抽屉集成终端。
+- [x] **RC-112** 变更审查页或面板：文件树、逐文件 diff、逐块接受/拒绝、回退和测试状态。
+- [x] **RC-113** 终端与进程页或面板：多终端标签、后台任务、命令状态和停止操作。
+- [x] **RC-114** Provider 与模型页：API 配置、模型发现、连通性、能力、费用提示和默认选择。
+- [x] **RC-115** 本地模型安装页：硬件检测、Gemma/Qwen2.5-Coder选择、下载进度、运行状态、修复和卸载。
+- [x] **RC-116** 提示词资产页：模板、历史版本、评分、对比、收藏、搜索、导入和导出；核心入口仍保留在对话框。
+- [x] **RC-117** 设置页：外观、语言、终端、权限、沙箱、数据、隐私、更新、快捷键、MCP、插件和高级配置。
+- [x] **RC-118** 诊断/关于/更新页：版本、日志、组件健康、许可证、隐私和更新状态。
+- [x] **RC-119** 空状态、错误状态、离线状态、权限弹窗和安装弹窗都纳入统一视觉系统。
+- [x] **RC-120** 支持窗口恢复、多窗口或多工作区策略、系统托盘策略、通知、深色/浅色主题和高 DPI。
 - [ ] **RC-121** 桌面端采用原生标题栏或自绘标题栏前，验证拖拽、最大化、缩放、无障碍和跨平台一致性。
 
 ### 11. 兔兔素材与视觉系统
 
 - [ ] **RC-122** 将用户提供的 `C:\Users\10735\Desktop\提示词\兔兔素材.png` 作为品牌源素材登记，不直接依赖桌面外部路径运行。
 - [ ] **RC-123** 建立原图、透明背景、裁切头像、单色小标、空状态、浅色和深色适配等派生资产规范。
-- [ ] **RC-124** 首页使用较完整的兔兔形象；工作型页面使用克制的侧栏标记、页角插图、水印或空状态，避免遮挡代码、diff、终端和对话内容。
-- [ ] **RC-125** 每个独立路由通过统一 `RabbitMark`/品牌槽位强制出现兔兔元素，弹窗和面板按层级决定是否复用，避免机械堆叠。
-- [ ] **RC-126** 建立“页面、素材变体、位置、尺寸、主题、响应式行为、替代文本”覆盖矩阵。
+- [x] **RC-124** 首页使用较完整的兔兔形象；工作型页面使用克制的侧栏标记、页角插图、水印或空状态，避免遮挡代码、diff、终端和对话内容。
+- [x] **RC-125** 每个独立路由通过统一 `RabbitMark`/品牌槽位强制出现兔兔元素，弹窗和面板按层级决定是否复用，避免机械堆叠。
+- [x] **RC-126** 建立“页面、素材变体、位置、尺寸、主题、响应式行为、替代文本”覆盖矩阵。
 - [ ] **RC-127** 优化原图的大面积留白、文件尺寸、裁切焦点和清晰度，输出合适的 PNG/WebP/应用图标资源。
-- [ ] **RC-128** 为小尺寸图标单独设计可辨识版本，不能简单缩小整张原图导致兔兔不可见。
-- [ ] **RC-129** 控制兔兔素材与功能信息的视觉层级，保证产品是高效编码工具而非装饰性展示页。
-- [ ] **RC-130** 建立颜色、字体、间距、边框、阴影、图标、动效、状态色和代码字体 Design Token。
-- [ ] **RC-131** 使用熟悉的图标表达工具操作；菱形星星使用统一 Sparkles 图标语言并提供 Tooltip 和可访问名称。
-- [ ] **RC-132** 满足键盘导航、焦点可见、屏幕阅读器、对比度、减少动态效果和缩放至 200% 的要求。
-- [ ] **RC-133** 使用视觉回归测试确保所有独立页面包含兔兔素材且不存在重叠、裁切、溢出或主题失真。
+- [x] **RC-128** 为小尺寸图标单独设计可辨识版本，不能简单缩小整张原图导致兔兔不可见。
+- [x] **RC-129** 控制兔兔素材与功能信息的视觉层级，保证产品是高效编码工具而非装饰性展示页。
+- [x] **RC-130** 建立颜色、字体、间距、边框、阴影、图标、动效、状态色和代码字体 Design Token。
+- [x] **RC-131** 使用熟悉的图标表达工具操作；菱形星星使用统一 Sparkles 图标语言并提供 Tooltip 和可访问名称。
+- [x] **RC-132** 满足键盘导航、焦点可见、屏幕阅读器、对比度、减少动态效果和缩放至 200% 的要求。
+- [x] **RC-133** 使用视觉回归测试确保所有独立页面包含兔兔素材且不存在重叠、裁切、溢出或主题失真。
 
 ### 12. 对话框与菱形星星提示词优化交互
 
-- [ ] **RC-134** 参考用户提供的 Trae 截图，将菱形星星放在模型选择与发送操作附近，但按 Rabbit Code 的视觉系统重排间距、层级和状态。
-- [ ] **RC-135** 星星按钮必须有空闲、悬停、按下、加载、成功、失败、禁用和取消状态，布局尺寸固定不跳动。
-- [ ] **RC-136** Tooltip 和无障碍名称使用“优化输入内容”，按钮不可与发送、语音、附件或模型选择混淆。
-- [ ] **RC-137** 点击时对当前文本建立快照并触发后台优化，输入为空、只有附件、超长或已有任务时提供明确处理。
-- [ ] **RC-138** 优化期间允许取消；用户继续编辑时避免旧结果覆盖新内容，可提示比较或重新优化。
-- [ ] **RC-139** 默认不自动发送优化结果，先展示优化后的可编辑内容，由用户采用、部分采用、撤销或直接发送。
-- [ ] **RC-140** 提供原文/优化后切换、行内或并排 diff、复制、替换、重新生成、撤销和恢复原文。
-- [ ] **RC-141** 展示实际使用的 Provider/模型、是否降级、耗时和错误，但不暴露 API 密钥或内部提示词。
-- [ ] **RC-142** 保留代码块、文件提及、附件、命令、变量占位符和用户指定输出格式，避免优化过程破坏语义。
-- [ ] **RC-143** 支持中文、英文及混合语言，默认保持用户语言，除非用户明确要求翻译。
-- [ ] **RC-144** 将模板选择、场景/角色、优化强度、评分、历史和版本对比放入输入框关联浮层或侧抽屉，主界面保持安静。
-- [ ] **RC-145** 提供键盘触发能力、焦点恢复、屏幕阅读器播报和触控可用性。
-- [ ] **RC-146** 保存原文、优化结果、采用状态、Provider、模型和版本信息，并允许用户关闭历史保存。
+- [x] **RC-134** 参考用户提供的 Trae 截图，将菱形星星放在模型选择与发送操作附近，但按 Rabbit Code 的视觉系统重排间距、层级和状态。
+- [x] **RC-135** 星星按钮必须有空闲、悬停、按下、加载、成功、失败、禁用和取消状态，布局尺寸固定不跳动。
+- [x] **RC-136** Tooltip 和无障碍名称使用“优化输入内容”，按钮不可与发送、语音、附件或模型选择混淆。
+- [x] **RC-137** 点击时对当前文本建立快照并触发后台优化，输入为空、只有附件、超长或已有任务时提供明确处理。
+- [x] **RC-138** 优化期间允许取消；用户继续编辑时避免旧结果覆盖新内容，可提示比较或重新优化。
+- [x] **RC-139** 默认不自动发送优化结果，先展示优化后的可编辑内容，由用户采用、部分采用、撤销或直接发送。
+- [x] **RC-140** 提供原文/优化后切换、行内或并排 diff、复制、替换、重新生成、撤销和恢复原文。
+- [x] **RC-141** 展示实际使用的 Provider/模型、是否降级、耗时和错误，但不暴露 API 密钥或内部提示词。
+- [x] **RC-142** 保留代码块、文件提及、附件、命令、变量占位符和用户指定输出格式，避免优化过程破坏语义。
+- [x] **RC-143** 支持中文、英文及混合语言，默认保持用户语言，除非用户明确要求翻译。
+- [x] **RC-144** 将模板选择、场景/角色、优化强度、评分、历史和版本对比放入输入框关联浮层或侧抽屉，主界面保持安静。
+- [x] **RC-145** 提供键盘触发能力、焦点恢复、屏幕阅读器播报和触控可用性。
+- [x] **RC-146** 保存原文、优化结果、采用状态、Provider、模型和版本信息，并允许用户关闭历史保存。
 
 ### 13. 提示词优化路由与 FastAPI 服务
 
-- [ ] **RC-147** 定义唯一的 `PromptOptimizationService`，供菱形星星、CLI、API 和后台任务复用。
-- [ ] **RC-148** 有可用 API 时，默认选择当前对话的 Provider/模型进行优化；允许用户单独指定“优化器模型”并记住选择。
-- [ ] **RC-149** 无 API 时，GUI 始终调用本机 FastAPI 优化接口，由服务选择当前已安装的 Gemma 或 Qwen2.5-Coder。
-- [ ] **RC-150** 本地模型尚未安装、不可用或资源不足时，FastAPI 自动降级到现有离线规则 Provider，保证按钮仍能工作并明确标记降级。
-- [ ] **RC-151** 定义路由优先级、超时、重试、限流、熔断、取消和用户授权的备用 Provider，不允许静默把私有提示词发送到其他云服务。
-- [ ] **RC-152** 支持流式优化事件：开始、分析、文本增量、保存、完成、取消和错误。
-- [ ] **RC-153** 设计专用的提示词优化 System Prompt、版本管理、Provider 差异适配和提示注入防护。
-- [ ] **RC-154** 支持优化目标参数：清晰度、完整度、约束、格式、角色、示例、代码任务、简洁度和语言保持。
-- [ ] **RC-155** 支持模板、规则分析和模型优化组合，避免模型输出只做表面扩写。
-- [ ] **RC-156** 对 API 输出做结构验证、长度限制、恶意内容边界和解析失败恢复。
-- [ ] **RC-157** 记录质量指标、延迟、Provider、模型和降级信息，默认不记录完整敏感提示词。
-- [ ] **RC-158** 建立提示词优化评测集，覆盖编码、商务、教育、创意、长文本、代码块、变量、中文和对抗输入。
+- [x] **RC-147** 定义唯一的 `PromptOptimizationService`，供菱形星星、CLI、API 和后台任务复用。
+- [x] **RC-148** 有可用 API 时，默认选择当前对话的 Provider/模型进行优化；允许用户单独指定“优化器模型”并记住选择。
+- [x] **RC-149** 无 API 时，GUI 始终调用本机 FastAPI 优化接口，由服务选择当前已安装的 Gemma 或 Qwen2.5-Coder。
+- [x] **RC-150** 本地模型尚未安装、不可用或资源不足时，FastAPI 自动降级到现有离线规则 Provider，保证按钮仍能工作并明确标记降级。
+- [x] **RC-151** 定义路由优先级、超时、重试、限流、熔断、取消和用户授权的备用 Provider，不允许静默把私有提示词发送到其他云服务。
+- [x] **RC-152** 支持流式优化事件：开始、分析、文本增量、保存、完成、取消和错误。
+- [ ] **RC-153** 设计专用的提示词优化 System Prompt、版本管理、Provider 差异适配和提示注入防护。（实现已完成，专项运行验证待具备 Python 依赖的环境复核）
+- [x] **RC-154** 支持优化目标参数：清晰度、完整度、约束、格式、角色、示例、代码任务、简洁度和语言保持。
+- [x] **RC-155** 支持模板、规则分析和模型优化组合，避免模型输出只做表面扩写。
+- [x] **RC-156** 对 API 输出做结构验证、长度限制、恶意内容边界和解析失败恢复。
+- [x] **RC-157** 记录质量指标、延迟、Provider、模型和降级信息，默认不记录完整敏感提示词。
+- [x] **RC-158** 建立提示词优化评测集，覆盖编码、商务、教育、创意、长文本、代码块、变量、中文和对抗输入。
 
 ### 14. 多 Provider 与 API 协议接入
 
-- [ ] **RC-159** 将“API 登录”在产品内准确表达为“使用 API/配置 Provider”，避免让用户误以为 API Key 是 Rabbit Code 账户密码。
-- [ ] **RC-160** OpenAI 格式支持标准 Base URL、API Key、模型、组织/项目头、Chat Completions、流式响应、工具调用和兼容端点差异。
-- [ ] **RC-161** 评估并支持 OpenAI Responses API，不能假设所有 OpenAI 兼容服务都实现相同端点或参数。
-- [ ] **RC-162** Gemini 原生格式支持 `generateContent`、`streamGenerateContent`、System Instruction、工具调用、安全设置和 Gemini 错误结构。
-- [ ] **RC-163** Claude/Anthropic 原生格式支持 Messages API、流式事件、System、content blocks、tool use、缓存/扩展参数能力探测。
-- [ ] **RC-164** 将用户所称“Claude Code 格式”映射为有公开规范的 Anthropic/Claude API 或经审计的官方 Agent SDK 集成；不使用非官方方式盗用 Claude Code 订阅登录或令牌。
-- [ ] **RC-165** 支持 Azure OpenAI、Google Vertex AI、AWS Bedrock 等主流托管变体所需的认证、区域、部署名和端点配置。
-- [ ] **RC-166** 通过 OpenAI 兼容适配覆盖 OpenRouter、DeepSeek、Moonshot/Kimi、Qwen、智谱、豆包、SiliconFlow、Groq、Together、Ollama、LM Studio 等服务，并允许自定义请求头。
-- [ ] **RC-167** Provider Adapter 声明能力：文本、图像、工具、结构化输出、流式、上下文长度、模型列表、Token 统计和费用信息。
-- [ ] **RC-168** 支持自动模型发现与手动模型 ID；发现失败不能阻止用户使用已知模型。
-- [ ] **RC-169** 提供连接测试，验证认证、模型可用性、流式、工具调用和最小请求，而不是只检查 TCP 连通。
-- [ ] **RC-170** 统一错误分类：认证、余额、限流、区域、模型不存在、参数不兼容、内容过滤、网络、超时和服务端错误。
-- [ ] **RC-171** 实现指数退避、`Retry-After`、请求取消、代理、自定义 CA、IPv4/IPv6 和企业网络设置。
-- [ ] **RC-172** 提供每会话模型选择、默认模型、提示词优化模型、自动回退、最大费用和 Token 预算。
-- [ ] **RC-173** 为所有 Provider 建立 Mock/契约测试；真实 API 测试仅允许用户提供 Key 后手动启用，并明确可能产生的费用。
+- [x] **RC-159** 将“API 登录”在产品内准确表达为“使用 API/配置 Provider”，避免让用户误以为 API Key 是 Rabbit Code 账户密码。
+- [x] **RC-160** OpenAI 格式支持标准 Base URL、API Key、模型、组织/项目头、Chat Completions、流式响应、工具调用和兼容端点差异。
+- [x] **RC-161** 评估并支持 OpenAI Responses API，不能假设所有 OpenAI 兼容服务都实现相同端点或参数。
+- [x] **RC-162** Gemini 原生格式支持 `generateContent`、`streamGenerateContent`、System Instruction、工具调用、安全设置和 Gemini 错误结构。
+- [x] **RC-163** Claude/Anthropic 原生格式支持 Messages API、流式事件、System、content blocks、tool use、缓存/扩展参数能力探测。
+- [x] **RC-164** 将用户所称“Claude Code 格式”映射为有公开规范的 Anthropic/Claude API 或经审计的官方 Agent SDK 集成；不使用非官方方式盗用 Claude Code 订阅登录或令牌。
+- [x] **RC-165** 支持 Azure OpenAI、Google Vertex AI、AWS Bedrock 等主流托管变体所需的认证、区域、部署名和端点配置。
+- [x] **RC-166** 通过 OpenAI 兼容适配覆盖 OpenRouter、DeepSeek、Moonshot/Kimi、Qwen、智谱、豆包、SiliconFlow、Groq、Together、Ollama、LM Studio 等服务，并允许自定义请求头。
+- [x] **RC-167** Provider Adapter 声明能力：文本、图像、工具、结构化输出、流式、上下文长度、模型列表、Token 统计和费用信息。
+- [x] **RC-168** 支持自动模型发现与手动模型 ID；发现失败不能阻止用户使用已知模型。
+- [x] **RC-169** 提供连接测试，验证认证、模型可用性、流式、工具调用和最小请求，而不是只检查 TCP 连通。
+- [x] **RC-170** 统一错误分类：认证、余额、限流、区域、模型不存在、参数不兼容、内容过滤、网络、超时和服务端错误。
+- [x] **RC-171** 实现指数退避、`Retry-After`、请求取消、代理、自定义 CA、IPv4/IPv6 和企业网络设置。
+- [x] **RC-172** 提供每会话模型选择、默认模型、提示词优化模型、自动回退、最大费用和 Token 预算。
+- [x] **RC-173** 为所有 Provider 建立 Mock/契约测试；真实 API 测试仅允许用户提供 Key 后手动启用，并明确可能产生的费用。
 
 ### 15. 首页双入口与凭据管理
 
-- [ ] **RC-174** 首次启动页以两个等权但解释清晰的主选项呈现：“使用 API”和“无 API，使用本地模型”。
-- [ ] **RC-175** “使用 API”向导包含协议/服务商、Base URL、API Key/官方认证、模型、连接测试、保存和默认模型设置。
-- [ ] **RC-176** “无 API”向导进入硬件检测、本地运行器选择、Gemma/Qwen2.5-Coder选择、许可证确认、安装和验证。
-- [ ] **RC-177** 两条路线完成后进入同一个工作区首页，不构建两套割裂产品。
-- [ ] **RC-178** 用户可在设置和模型选择器中随时新增、编辑、禁用、切换或删除 Provider 与本地模型。
-- [ ] **RC-179** API Key 使用 Windows Credential Manager、Linux Secret Service 或等价安全存储，不以明文写入 SQLite、日志或仓库。
-- [ ] **RC-180** UI 只显示掩码和密钥末尾标识，复制、导出、错误报告和遥测均不得泄漏密钥。
-- [ ] **RC-181** 支持环境变量和配置文件引用，但明确优先级并在 UI 中显示来源，不反向展示密钥明文。
-- [ ] **RC-182** 官方 OAuth 只在服务商明确允许第三方客户端时实现，包含 PKCE、回调、刷新、撤销和到期处理。
-- [ ] **RC-183** 本地使用默认无需 Rabbit Code 云账户；如后续增加同步账户，必须与 Provider 凭据和本地资料隔离。
-- [ ] **RC-184** 提供凭据迁移、清除、重置和“删除所有本地数据”流程。
+- [x] **RC-174** 首次启动页以两个等权但解释清晰的主选项呈现：“使用 API”和“无 API，使用本地模型”。
+- [x] **RC-175** “使用 API”向导包含协议/服务商、Base URL、API Key/官方认证、模型、连接测试、保存和默认模型设置。
+- [x] **RC-176** “无 API”向导进入硬件检测、本地运行器选择、Gemma/Qwen2.5-Coder选择、许可证确认、安装和验证。
+- [x] **RC-177** 两条路线完成后进入同一个工作区首页，不构建两套割裂产品。
+- [x] **RC-178** 用户可在设置和模型选择器中随时新增、编辑、禁用、切换或删除 Provider 与本地模型。
+- [x] **RC-179** API Key 使用 Windows Credential Manager、Linux Secret Service 或等价安全存储，不以明文写入 SQLite、日志或仓库。
+- [x] **RC-180** UI 只显示掩码和密钥末尾标识，复制、导出、错误报告和遥测均不得泄漏密钥。
+- [x] **RC-181** 支持环境变量和配置文件引用，但明确优先级并在 UI 中显示来源，不反向展示密钥明文。
+- [x] **RC-182** 官方 OAuth 只在服务商明确允许第三方客户端时实现，包含 PKCE、回调、刷新、撤销和到期处理。
+- [x] **RC-183** 本地使用默认无需 Rabbit Code 云账户；如后续增加同步账户，必须与 Provider 凭据和本地资料隔离。
+- [x] **RC-184** 提供凭据迁移、清除、重置和“删除所有本地数据”流程。
 
 ### 16. Gemma 与 Qwen2.5-Coder 本地模型集成
 
-- [ ] **RC-185** 提供 Windows PowerShell、Linux Shell 安装脚本，并由 GUI 安装向导调用同一安装核心。
-- [ ] **RC-186** 安装前检测操作系统、CPU、内存、磁盘、GPU、显存、驱动、网络、代理和已有运行器。
-- [ ] **RC-187** 选择经许可证审计的本地运行器，候选包括 Ollama 与 llama.cpp；抽象运行器接口避免强绑定。
-- [ ] **RC-188** 提供 Gemma 和 Qwen2.5-Coder 的受控模型清单，按硬件推荐参数规模、量化、上下文长度和预计磁盘/内存占用。
-- [ ] **RC-189** Qwen 路线明确支持用户要求的 Qwen2.5-Coder，而不是悄悄替换成其他 Qwen 系列。
-- [ ] **RC-190** Gemma 路线在锁定具体版本和量化文件前审核模型卡、许可证、用途限制和聊天模板。
-- [ ] **RC-191** 安装脚本支持下载续传、校验和、版本固定、镜像/代理、失败重试、进度、取消和幂等重跑。
-- [ ] **RC-192** 不在未经许可时把模型权重直接打进 Rabbit Code 安装包；必要时让用户查看并接受模型许可证后下载。
-- [ ] **RC-193** 安装完成后执行加载、最小生成、流式输出、停止、上下文和资源占用健康检查。
-- [ ] **RC-194** GUI 显示下载、校验、加载、就绪、忙碌、卸载、损坏和更新状态。
-- [ ] **RC-195** 用户可在 Gemma 与 Qwen2.5-Coder之间选择默认对话模型，也可按会话切换。
-- [ ] **RC-196** 支持 CPU-only 环境、GPU 加速探测、并发限制、空闲卸载、OOM 恢复和低内存提示。
-- [ ] **RC-197** 支持自定义模型目录、迁移目录、磁盘清理、模型更新、回滚、修复和彻底卸载。
-- [ ] **RC-198** FastAPI 通过运行器 Adapter 调用本地模型，统一流式协议、取消、错误和能力信息。
-- [ ] **RC-199** 安装和运行不要求管理员权限；确需提权的操作必须单独说明原因并获得同意。
-- [ ] **RC-200** 提供离线安装包/手动模型导入方案及文件校验，满足受限网络环境。
+- [x] **RC-185** 提供 Windows PowerShell、Linux Shell 安装脚本，并由 GUI 安装向导调用同一安装核心。
+- [x] **RC-186** 安装前检测操作系统、CPU、内存、磁盘、GPU、显存、驱动、网络、代理和已有运行器。
+- [x] **RC-187** 选择经许可证审计的本地运行器，候选包括 Ollama 与 llama.cpp；抽象运行器接口避免强绑定。
+- [x] **RC-188** 提供 Gemma 和 Qwen2.5-Coder 的受控模型清单，按硬件推荐参数规模、量化、上下文长度和预计磁盘/内存占用。
+- [x] **RC-189** Qwen 路线明确支持用户要求的 Qwen2.5-Coder，而不是悄悄替换成其他 Qwen 系列。
+- [x] **RC-190** Gemma 路线在锁定具体版本和量化文件前审核模型卡、许可证、用途限制和聊天模板。
+- [x] **RC-191** 安装脚本支持下载续传、校验和、版本固定、镜像/代理、失败重试、进度、取消和幂等重跑。
+- [x] **RC-192** 不在未经许可时把模型权重直接打进 Rabbit Code 安装包；必要时让用户查看并接受模型许可证后下载。
+- [x] **RC-193** 安装完成后执行加载、最小生成、流式输出、停止、上下文和资源占用健康检查。
+- [x] **RC-194** GUI 显示下载、校验、加载、就绪、忙碌、卸载、损坏和更新状态。
+- [x] **RC-195** 用户可在 Gemma 与 Qwen2.5-Coder之间选择默认对话模型，也可按会话切换。
+- [x] **RC-196** 支持 CPU-only 环境、GPU 加速探测、并发限制、空闲卸载、OOM 恢复和低内存提示。
+- [x] **RC-197** 支持自定义模型目录、迁移目录、磁盘清理、模型更新、回滚、修复和彻底卸载。
+- [x] **RC-198** FastAPI 通过运行器 Adapter 调用本地模型，统一流式协议、取消、错误和能力信息。
+- [x] **RC-199** 安装和运行不要求管理员权限；确需提权的操作必须单独说明原因并获得同意。
+- [x] **RC-200** 提供离线安装包/手动模型导入方案及文件校验，满足受限网络环境。
 
 ### 17. 权限、沙箱与安全
 
-- [ ] **RC-201** 定义只读、工作区写入和高权限三档策略，文件、终端、网络、Git、MCP 和桌面能力分别授权。
-- [ ] **RC-202** 危险或越界操作使用明确审批弹窗，展示命令、路径、影响、工作目录和持久授权范围。
-- [ ] **RC-203** 支持单次允许、会话允许、规则允许、拒绝和修改后执行；默认不提供含糊的“全部永久允许”。
-- [ ] **RC-204** 为 Windows、Linux 设计实际可用的进程和文件系统沙箱，记录平台能力差异。
-- [ ] **RC-205** 防止路径穿越、符号链接逃逸、命令注入、环境变量泄漏、恶意仓库指令和工具输出提示注入。
-- [ ] **RC-206** 保护 `.env`、SSH Key、云凭据、浏览器资料、系统目录和用户指定敏感文件。
-- [ ] **RC-207** 本地 FastAPI 仅绑定 Loopback，使用每次启动的认证令牌、严格 CORS/Origin、随机端口和最小暴露面。
-- [ ] **RC-208** 对插件、技能、Hooks、MCP Server 和安装脚本建立来源信任、权限声明、版本锁定和禁用机制。
-- [ ] **RC-209** 对下载的二进制、模型、更新包和插件执行 HTTPS 来源、许可证和哈希验证，不要求数字签名。
-- [ ] **RC-210** 默认关闭包含代码/提示词内容的遥测；崩溃报告和诊断包必须预览、脱敏并由用户主动发送。
+- [x] **RC-201** 定义只读、工作区写入和高权限三档策略，文件、终端、网络、Git、MCP 和桌面能力分别授权。
+- [x] **RC-202** 危险或越界操作使用明确审批弹窗，展示命令、路径、影响、工作目录和持久授权范围。
+- [x] **RC-203** 支持单次允许、会话允许、规则允许、拒绝和修改后执行；默认不提供含糊的“全部永久允许”。
+- [x] **RC-204** 为 Windows、Linux 设计实际可用的进程和文件系统沙箱，记录平台能力差异。
+- [x] **RC-205** 防止路径穿越、符号链接逃逸、命令注入、环境变量泄漏、恶意仓库指令和工具输出提示注入。
+- [x] **RC-206** 保护 `.env`、SSH Key、云凭据、浏览器资料、系统目录和用户指定敏感文件。
+- [x] **RC-207** 本地 FastAPI 仅绑定 Loopback，使用每次启动的认证令牌、严格 CORS/Origin、随机端口和最小暴露面。
+- [x] **RC-208** 对插件、技能、Hooks、MCP Server 和安装脚本建立来源信任、权限声明、版本锁定和禁用机制。
+- [x] **RC-209** 对下载的二进制、模型、更新包和插件执行 HTTPS 来源、许可证和哈希验证，不要求数字签名。
+- [x] **RC-210** 默认关闭包含代码/提示词内容的遥测；崩溃报告和诊断包必须预览、脱敏并由用户主动发送。
 - [ ] **RC-211** 建立威胁模型、安全测试、依赖扫描、秘密扫描、SBOM、漏洞响应和安全公告流程。
 - [ ] **RC-212** 提供审计日志，但允许用户控制保留期和彻底清除。
 

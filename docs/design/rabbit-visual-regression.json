@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "rc_id": "RC-133",
+  "routes": [
+    { "path": "/", "variant": "full", "screenshot_id": "route-home-rabbit" },
+    { "path": "/login", "variant": "full", "screenshot_id": "route-login-rabbit" },
+    { "path": "/register", "variant": "full", "screenshot_id": "route-register-rabbit" },
+    { "path": "/onboarding", "variant": "full", "screenshot_id": "route-onboarding-rabbit" },
+    { "path": "/workspace", "variant": "full", "screenshot_id": "route-workspace-rabbit" },
+    { "path": "/workspace/home", "variant": "empty", "screenshot_id": "route-workspace-home-rabbit" },
+    { "path": "/workspace/task", "variant": "mark", "screenshot_id": "route-task-rabbit" },
+    { "path": "/workspace/review", "variant": "mark", "screenshot_id": "route-review-rabbit" },
+    { "path": "/workspace/terminal", "variant": "mono", "screenshot_id": "route-terminal-rabbit" },
+    { "path": "/workspace/providers", "variant": "mark", "screenshot_id": "route-providers-rabbit" },
+    { "path": "/workspace/models", "variant": "mark", "screenshot_id": "route-models-rabbit" },
+    { "path": "/workspace/assets", "variant": "mark", "screenshot_id": "route-assets-rabbit" },
+    { "path": "/workspace/settings", "variant": "mark", "screenshot_id": "route-settings-rabbit" },
+    { "path": "/workspace/diagnostics", "variant": "mark", "screenshot_id": "route-diagnostics-rabbit" }
+  ],
+  "baselines": [
+    { "id": "light-1x", "theme": "light", "viewport": [1280, 1000], "device_scale_factor": 1 },
+    { "id": "dark-1x", "theme": "dark", "viewport": [1280, 1000], "device_scale_factor": 1 },
+    { "id": "light-2x", "theme": "light", "viewport": [640, 844], "device_scale_factor": 2 },
+    { "id": "dark-2x", "theme": "dark", "viewport": [640, 844], "device_scale_factor": 2 }
+  ],
+  "thresholds": {
+    "max_diff_ratio": 0.005,
+    "max_horizontal_overflow_px": 0,
+    "max_clipped_elements": 0,
+    "max_rabbit_content_overlaps": 0
+  }
+}

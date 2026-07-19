@@ -11,6 +11,7 @@ from prompt_optimizer.providers.base import ModelProvider, ModelRequest
 from prompt_optimizer.providers.offline import OfflineRuleProvider
 
 from .agent import AgentCore, AgentEvent
+from .public_output import sanitize_public_payload
 
 # RC ID: RC-057. Expose the candidate Agent Core through an isolated prototype App Server.
 
@@ -39,7 +40,9 @@ def create_app(provider: ModelProvider | None = None) -> FastAPI:
 
 
 def _sse(event: AgentEvent) -> str:
-    payload = {"type": event.type.value}
+    payload = sanitize_public_payload(
+        {"type": event.type.value, "seq": event.sequence, "payload": dict(event.payload)}
+    )
     if event.text is not None:
         payload["text"] = event.text
     return f"event: {event.type.value}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"

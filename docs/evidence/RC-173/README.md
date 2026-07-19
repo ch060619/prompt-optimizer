@@ -1,0 +1,43 @@
+# RC-173 Evidence
+
+<!-- RC ID: RC-173. -->
+
+## Delivered
+
+- Added a shared MockTransport contract suite for OpenAI Chat Completions,
+  OpenAI Responses, Gemini, Anthropic Messages, Azure OpenAI, Vertex AI, and
+  Bedrock Converse.
+- Included offline rules and local Runner providers in the shared
+  `ModelProvider` behavior contract.
+- Added a request recorder that redacts credential headers and asserts that
+  mock snapshots contain no configured secret.
+- Added a manual-only real Provider test. It requires an owned API key, an
+  explicit enable flag, an explicit fee confirmation token, and a token limit;
+  the default test path skips it without creating a network client request.
+- Added a CI step that runs the Mock contract suite with real tests disabled.
+  RC-169's connection tester remains the user-facing confirmation and cost
+  warning boundary before a real request.
+
+## Validation
+
+- RC-173 contract and manual-gate tests: 15 passed, 2 skipped.
+- RC-160 through RC-173 Provider/API regression: 107 passed, 2 skipped.
+- Targeted Provider Ruff, Mypy, and full backend Python compilation passed.
+- Traceability regression after index regeneration: 19 passed, 2 skipped.
+- `scripts/workspace.py check` passed, including generated API drift,
+  traceability, dependency boundaries, design tokens, route coverage, visual
+  contract, and delivery plan checks.
+- Frontend validation remained green: 20 test files, 87 tests, ESLint,
+  TypeScript, and Vite build.
+
+## Limits
+
+- No real Provider request was made and no external service charge was
+  incurred.
+- The full backend run was 448 passed, 7 skipped, and 4 failed: the stale
+  reverse-index failure was fixed and the traceability suite passed afterward;
+  the remaining failures are existing RC-141/RC-143 behavior and v2 golden/
+  evaluation-environment baseline issues.
+- Full repository Ruff still reports the pre-existing import-order issue in
+  `backend/tests/test_rc153_system_prompt.py`; the RC-173 scope and all new
+  tests pass Ruff.

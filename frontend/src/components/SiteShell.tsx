@@ -2,11 +2,14 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
 
 import { PRODUCT_NAME } from "../brand";
+import { recordViewport } from "../windowPreferences";
+import { RabbitMark, type RabbitVariant } from "./RabbitMark";
 
 // RC ID: RC-054. Render the Rabbit Code brand while retaining route compatibility.
+// RC ID: RC-129. Keep route Rabbit artwork below the content hierarchy and decorative-only.
 
 const productLinks = [
   ["Prompt workspace", "/workspace"],
@@ -20,7 +23,7 @@ const companyLinks = [
   ["Contact", "/contact"]
 ] as const;
 
-export function SiteShell({ children, authenticated = false, isWorkspace = false, showSharedRabbit = false, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; showSharedRabbit?: boolean; onSignOut?: () => void }) {
+export function SiteShell({ children, authenticated = false, isWorkspace = false, showSharedRabbit = false, rabbitVariant, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; showSharedRabbit?: boolean; rabbitVariant?: RabbitVariant; onSignOut?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLElement>(null);
@@ -91,11 +94,23 @@ export function SiteShell({ children, authenticated = false, isWorkspace = false
     };
   }, []);
 
+  useEffect(() => {
+    const saveViewport = () => { recordViewport(); };
+    saveViewport();
+    window.addEventListener("resize", saveViewport);
+    window.addEventListener("beforeunload", saveViewport);
+    return () => {
+      window.removeEventListener("resize", saveViewport);
+      window.removeEventListener("beforeunload", saveViewport);
+    };
+  }, []);
+
   return (
     <div className="site-frame" ref={frameRef}>
       <SiteHeader authenticated={authenticated} isWorkspace={isWorkspace} menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} onSignOut={onSignOut} />
       <div className="site-content">
         {showSharedRabbit ? <SharedRabbit /> : null}
+        {rabbitVariant ? <div aria-hidden="true" data-rabbit-layer="decorative" data-rabbit-route={window.location.pathname} className={`route-rabbit-slot route-rabbit-slot-${rabbitVariant}`}><RabbitMark variant={rabbitVariant} decorative /></div> : null}
         {children}
       </div>
       {menuOpen ? <SiteMenu menuRef={menuRef} onClose={() => setMenuOpen(false)} /> : null}
@@ -114,6 +129,7 @@ function SiteHeader({ authenticated, isWorkspace, menuOpen, menuButtonRef, onMen
           aria-expanded={menuOpen}
           aria-controls="site-navigation"
           aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+          title={menuOpen ? "Close navigation" : "Open navigation"}
           onClick={onMenuToggle}
         >
           {menuOpen ? <X size={23} strokeWidth={1.5} /> : <Menu size={23} strokeWidth={1.5} />}
@@ -141,7 +157,7 @@ function SiteHeader({ authenticated, isWorkspace, menuOpen, menuButtonRef, onMen
 
 function SiteMenu({ menuRef, onClose }: { menuRef: RefObject<HTMLElement>; onClose: () => void }) {
   return (
-    <aside id="site-navigation" ref={menuRef} className="site-menu" role="dialog" aria-modal="true" aria-label="Full-screen navigation" tabIndex={-1}>
+    <aside id="site-navigation" ref={menuRef} className="site-menu" role="dialog" aria-modal="true" aria-label="Full-screen navigation" tabIndex={-1} onKeyDown={(event) => trapMenuFocus(event, menuRef)}>
       <div className="site-menu-inner">
         <div className="site-menu-group">
           <span className="eyebrow">PRODUCTS</span>
@@ -176,9 +192,36 @@ function SiteMenu({ menuRef, onClose }: { menuRef: RefObject<HTMLElement>; onClo
 function SharedRabbit() {
   return (
     <div className="shared-rabbit-mark">
-      <img src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="eager" decoding="async" />
+      <RabbitMark variant="mark" alt="PromptLayer 风格复古版画兔兔插画" loading="eager" />
     </div>
   );
+}
+
+function trapMenuFocus(event: ReactKeyboardEvent<HTMLElement>, menuRef: RefObject<HTMLElement>) {
+  if (event.key !== "Tab") {
+    return;
+  }
+  const menu = menuRef.current;
+  if (!menu) {
+    return;
+  }
+  const focusable = Array.from(menu.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )).filter((element) => element.getAttribute("aria-hidden") !== "true");
+  if (focusable.length === 0) {
+    event.preventDefault();
+    menu.focus();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function ServiceStatus() {

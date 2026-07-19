@@ -1,4 +1,4 @@
-// RC ID: RC-062. API DTOs are generated from the versioned OpenAPI contract.
+// RC IDs: RC-062, RC-154. API DTOs are generated from the versioned OpenAPI contract.
 export type {
   AnalyzeRequest,
   AuthRequest,
@@ -7,6 +7,7 @@ export type {
   EvaluateTaskRequest,
   ExportRequest,
   HTTPValidationError,
+  OptimizationTargets,
   OptimizationSuggestion,
   OptimizeMetadata,
   OptimizeRequest,

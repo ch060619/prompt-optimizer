@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "source": {
+    "status": "pending",
+    "path": "C:\\Users\\10735\\Desktop\\提示词\\兔兔素材.png",
+    "sha256": null,
+    "license": null
+  },
+  "policy": {
+    "color_space": "sRGB",
+    "format": "PNG",
+    "requires_alpha_for": ["full", "avatar", "mark", "empty", "mono"],
+    "naming": "rabbit-{variant}-{theme}-{size}.png",
+    "source_path_may_be_runtime_dependency": false
+  },
+  "variants": [
+    { "id": "full", "themes": ["light", "dark"], "size_1x": [643, 684], "size_2x": [1286, 1368], "min_display_px": 180, "safe_zone": "8% inset" },
+    { "id": "avatar", "themes": ["light", "dark"], "size_1x": [256, 256], "size_2x": [512, 512], "min_display_px": 32, "safe_zone": "主体72%-88%" },
+    { "id": "mark", "themes": ["light", "dark"], "size_1x": [64, 64], "size_2x": [128, 128], "min_display_px": 16, "safe_zone": "主体68%-88%" },
+    { "id": "empty", "themes": ["light", "dark"], "size_1x": [480, 320], "size_2x": [960, 640], "min_display_px": 160, "safe_zone": "10%-90%" },
+    { "id": "mono", "themes": ["light", "dark"], "size_1x": [64, 64], "size_2x": [128, 128], "min_display_px": 16, "safe_zone": "轮廓8% inset" },
+    { "id": "app-icon", "themes": ["light", "dark"], "sizes": [32, 64, 128, 256, 512], "min_display_px": 16, "safe_zone": "8% inset" }
+  ]
+}

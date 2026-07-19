@@ -4,12 +4,12 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+from prompt_optimizer.contracts import Storage
 from prompt_optimizer.core.models import TaskKind, TaskRecord
-from prompt_optimizer.storage.service import StorageService
 
 
 class TaskService:
-    def __init__(self, storage: StorageService) -> None:
+    def __init__(self, storage: Storage) -> None:
         self.storage = storage
 
     def create(

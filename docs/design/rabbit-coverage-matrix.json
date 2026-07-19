@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "routes": [
+    { "path": "/", "variant": "full", "position": "hero artwork", "desktop": "643x684", "responsive": "320px high", "themes": "light/dark", "alt": "Rabbit Code 兔兔品牌插画", "snapshot": "route-home-rabbit" },
+    { "path": "/login", "variant": "full", "position": "auth artwork", "desktop": "643x684", "responsive": "220px high", "themes": "light/dark", "alt": "Rabbit Code 兔兔品牌插画", "snapshot": "route-login-rabbit" },
+    { "path": "/register", "variant": "full", "position": "auth artwork", "desktop": "643x684", "responsive": "220px high", "themes": "light/dark", "alt": "Rabbit Code 兔兔品牌插画", "snapshot": "route-register-rabbit" },
+    { "path": "/onboarding", "variant": "full", "position": "hero artwork", "desktop": "643x684", "responsive": "220px high", "themes": "light/dark", "alt": "Rabbit Code 兔兔品牌插画", "snapshot": "route-onboarding-rabbit" },
+    { "path": "/workspace", "variant": "full", "position": "sidebar brand", "desktop": "102x108", "responsive": "32px mark", "themes": "light/dark", "alt": "Rabbit Code 兔兔品牌插画", "snapshot": "route-workspace-rabbit" },
+    { "path": "/workspace/home", "variant": "empty", "position": "empty-state slot", "desktop": "192x128", "responsive": "content width", "themes": "light/dark", "alt": "暂无项目的兔兔插画", "snapshot": "route-workspace-home-rabbit" },
+    { "path": "/workspace/task", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark", "alt": "Rabbit Code 品牌标记", "snapshot": "route-task-rabbit" },
+    { "path": "/workspace/review", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark/high-contrast", "alt": "Rabbit Code 品牌标记", "snapshot": "route-review-rabbit" },
+    { "path": "/workspace/terminal", "variant": "mono", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark/high-contrast", "alt": "Rabbit Code 品牌标记", "snapshot": "route-terminal-rabbit" },
+    { "path": "/workspace/providers", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark", "alt": "Rabbit Code 品牌标记", "snapshot": "route-providers-rabbit" },
+    { "path": "/workspace/models", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark", "alt": "Rabbit Code 品牌标记", "snapshot": "route-models-rabbit" },
+    { "path": "/workspace/assets", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark", "alt": "Rabbit Code 品牌标记", "snapshot": "route-assets-rabbit" },
+    { "path": "/workspace/settings", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark", "alt": "Rabbit Code 品牌标记", "snapshot": "route-settings-rabbit" },
+    { "path": "/workspace/diagnostics", "variant": "mark", "position": "corner slot", "desktop": "56x56", "responsive": "32px", "themes": "light/dark", "alt": "Rabbit Code 品牌标记", "snapshot": "route-diagnostics-rabbit" }
+  ]
+}

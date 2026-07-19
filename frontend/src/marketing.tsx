@@ -2,6 +2,7 @@ import { ArrowDownRight, ArrowLeft, ArrowUpRight, ChevronDown, FileText, Search 
 import { useState, type FormEvent } from "react";
 
 import { PRODUCT_NAME } from "./brand";
+import { RabbitMark } from "./components/RabbitMark";
 
 // RC ID: RC-054. Render the Rabbit Code brand across the public shell.
 // RC ID: RC-058. Keep public API examples on the versioned App Server prefix.
@@ -108,14 +109,11 @@ export function HomePage() {
         <a className="paper-preview" href="/prompt-management" aria-label="Open prompt workspace preview">
           <div className="ring-copy ring-copy-top">PROMPT MANAGEMENT · EVALUATION · VERSION CONTROL · </div>
           <div className="artwork-slot">
-            <img
+            <RabbitMark
+              variant="full"
               className="rabbit-artwork"
-              src="/rabbit-artwork.png"
               alt="PromptLayer 风格复古版画兔兔插画"
-              width="643"
-              height="684"
               loading="eager"
-              decoding="async"
             />
           </div>
           <span className="paper-preview-label">OPEN THE PAPER / VIEW THE WORKSPACE <ArrowUpRight size={16} /></span>
@@ -162,7 +160,7 @@ export function AuthPage({ mode, username, password, loading, error, user, onUse
         </div>
         <div className="auth-artwork-wrap">
           <span className="auth-ring-label">PROMPT MANAGEMENT · EVALUATION · VERSION CONTROL ·</span>
-          <img className="auth-rabbit-artwork" src="/rabbit-artwork.png" alt="PromptLayer 风格复古版画兔兔插画" width="643" height="684" loading="eager" decoding="async" />
+          <RabbitMark variant="full" className="auth-rabbit-artwork" alt="Rabbit Code 兔兔品牌插画" loading="eager" />
         </div>
       </section>
       <section className="auth-form-panel">

@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from time import perf_counter
 
+from prompt_optimizer.contracts import PromptOptimizer
 from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.providers.base import (
     ModelRequest,
@@ -14,13 +15,18 @@ from prompt_optimizer.providers.base import (
 
 # RC ID: RC-050. Describe the offline rules backend without presenting it as a model.
 # RC ID: RC-049. Adapt the existing offline stream to the shared Provider events.
+# RC ID: RC-154. Apply requested optimization targets through the offline rule provider.
+# RC ID: RC-155. Provide the rules-only path and model-failure fallback.
 
 
 class OfflineRuleProvider:
     name = "offline"
     display_name = "离线规则"
+    model = None
     is_model = False
     network_access = False
+    execution_location = "local"
+    credential_ref = None
     capabilities = ProviderCapabilities(streaming=True)
     fallback_triggers = (
         "provider_error",
@@ -29,12 +35,17 @@ class OfflineRuleProvider:
         "provider_unavailable",
     )
 
-    def __init__(self, optimizer: Optimizer | None = None) -> None:
+    def __init__(self, optimizer: PromptOptimizer | None = None) -> None:
         self.optimizer = optimizer or Optimizer()
 
     def optimize(self, request: ModelRequest) -> ModelResponse:
         started = perf_counter()
-        analysis = self.optimizer.optimize(request.prompt, request.template)
+        analysis = self.optimizer.optimize(
+            request.prompt,
+            request.template,
+            request.language_profile,
+            request.targets,
+        )
         latency_ms = int((perf_counter() - started) * 1000)
         return ModelResponse(
             analysis=analysis,

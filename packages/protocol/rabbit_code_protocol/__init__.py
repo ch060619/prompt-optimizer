@@ -1,6 +1,12 @@
 from .models import (
     AgentRequest,
     ApprovalRequest,
+    ContentBlock,
+    DiagnosticContentBlock,
+    DiffContentBlock,
+    ErrorContentBlock,
+    FileContentBlock,
+    ImageContentBlock,
     DiffPayload,
     JsonRpcError,
     JsonRpcRequest,
@@ -17,11 +23,18 @@ from .models import (
     TaskStatus,
     TextBlock,
     ToolCallBlock,
+    ProgressContentBlock,
 )
 
 __all__ = [
     "AgentRequest",
     "ApprovalRequest",
+    "ContentBlock",
+    "DiagnosticContentBlock",
+    "DiffContentBlock",
+    "ErrorContentBlock",
+    "FileContentBlock",
+    "ImageContentBlock",
     "DiffPayload",
     "JsonRpcError",
     "JsonRpcRequest",
@@ -38,4 +51,5 @@ __all__ = [
     "TaskStatus",
     "TextBlock",
     "ToolCallBlock",
+    "ProgressContentBlock",
 ]

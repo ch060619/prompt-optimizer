@@ -1,0 +1,449 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`shared UI states > renders the empty variant 1`] = `
+<section
+  aria-labelledby=":r0:"
+  class="ui-state ui-state-empty"
+>
+  <div
+    aria-hidden="true"
+    class="ui-state-icon"
+  >
+    <svg
+      class="lucide lucide-inbox"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <polyline
+        points="22 12 16 12 14 15 10 15 8 12 2 12"
+      />
+      <path
+        d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+      />
+    </svg>
+  </div>
+  <div
+    class="ui-state-copy"
+  >
+    <h2
+      id=":r0:"
+    >
+      NO PROJECTS
+    </h2>
+    <p>
+      Open a directory to start.
+    </p>
+  </div>
+</section>
+`;
+
+exports[`shared UI states > renders the error variant 1`] = `
+<section
+  aria-labelledby=":r1:"
+  class="ui-state ui-state-error"
+>
+  <div
+    aria-hidden="true"
+    class="ui-state-icon"
+  >
+    <svg
+      class="lucide lucide-triangle-alert"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+      />
+      <path
+        d="M12 9v4"
+      />
+      <path
+        d="M12 17h.01"
+      />
+    </svg>
+  </div>
+  <div
+    class="ui-state-copy"
+  >
+    <h2
+      id=":r1:"
+    >
+      PROJECT SERVICE UNAVAILABLE
+    </h2>
+    <p>
+      Try the request again.
+    </p>
+    <div
+      class="ui-state-actions"
+    >
+      <button
+        class="ui-state-action ui-state-action-primary"
+        type="button"
+      >
+        RETRY
+      </button>
+    </div>
+  </div>
+</section>
+`;
+
+exports[`shared UI states > renders the install variant 1`] = `
+<div
+  class="ui-dialog-backdrop"
+>
+  <section
+    aria-describedby=":r6:"
+    aria-labelledby=":r5:"
+    aria-modal="true"
+    class="ui-dialog"
+    role="dialog"
+    tabindex="-1"
+  >
+    <div
+      class="ui-dialog-heading"
+    >
+      <div>
+        <span
+          class="eyebrow"
+        >
+          CONFIRMATION
+        </span>
+        <h2
+          id=":r5:"
+        >
+          Install local model?
+        </h2>
+      </div>
+      <button
+        aria-label="Close dialog"
+        class="ui-dialog-close"
+        title="Close dialog"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x"
+          fill="none"
+          height="17"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="17"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="ui-dialog-body"
+    >
+      <div
+        aria-hidden="true"
+        class="ui-dialog-icon"
+      >
+        <svg
+          class="lucide lucide-download"
+          fill="none"
+          height="19"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="19"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+          />
+          <polyline
+            points="7 10 12 15 17 10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="15"
+            y2="3"
+          />
+        </svg>
+      </div>
+      <div>
+        <p
+          id=":r6:"
+        >
+          The download will be verified before use.
+        </p>
+      </div>
+    </div>
+    <div
+      class="ui-dialog-actions"
+    >
+      <button
+        type="button"
+      >
+        CANCEL
+      </button>
+      <button
+        class="ui-dialog-confirm"
+        type="button"
+      >
+        CONFIRM
+      </button>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`shared UI states > renders the offline variant 1`] = `
+<section
+  aria-labelledby=":r2:"
+  class="ui-state ui-state-offline"
+>
+  <div
+    aria-hidden="true"
+    class="ui-state-icon"
+  >
+    <svg
+      class="lucide lucide-wifi-off"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 20h.01"
+      />
+      <path
+        d="M8.5 16.429a5 5 0 0 1 7 0"
+      />
+      <path
+        d="M5 12.859a10 10 0 0 1 5.17-2.69"
+      />
+      <path
+        d="M19 12.859a10 10 0 0 0-2.007-1.523"
+      />
+      <path
+        d="M2 8.82a15 15 0 0 1 4.177-2.643"
+      />
+      <path
+        d="M22 8.82a15 15 0 0 0-11.288-3.764"
+      />
+      <path
+        d="m2 2 20 20"
+      />
+    </svg>
+  </div>
+  <div
+    class="ui-state-copy"
+  >
+    <h2
+      id=":r2:"
+    >
+      OFFLINE MODE
+    </h2>
+    <p>
+      This route stays on the machine.
+    </p>
+  </div>
+</section>
+`;
+
+exports[`shared UI states > renders the permission variant 1`] = `
+<div
+  class="ui-dialog-backdrop"
+>
+  <section
+    aria-describedby=":r4:"
+    aria-labelledby=":r3:"
+    aria-modal="true"
+    class="ui-dialog"
+    role="alertdialog"
+    tabindex="-1"
+  >
+    <div
+      class="ui-dialog-heading"
+    >
+      <div>
+        <span
+          class="eyebrow"
+        >
+          CONFIRMATION
+        </span>
+        <h2
+          id=":r3:"
+        >
+          Allow workspace access?
+        </h2>
+      </div>
+      <button
+        aria-label="Close dialog"
+        class="ui-dialog-close"
+        title="Close dialog"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x"
+          fill="none"
+          height="17"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="17"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="ui-dialog-body"
+    >
+      <div
+        aria-hidden="true"
+        class="ui-dialog-icon"
+      >
+        <svg
+          class="lucide lucide-triangle-alert"
+          fill="none"
+          height="19"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="19"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+          />
+          <path
+            d="M12 9v4"
+          />
+          <path
+            d="M12 17h.01"
+          />
+        </svg>
+      </div>
+      <div>
+        <p
+          id=":r4:"
+        >
+          The action needs workspace permission.
+        </p>
+        <dl
+          aria-label="Approval request details"
+          class="ui-dialog-approval-details"
+        >
+          <div>
+            <dt>
+              TOOL
+            </dt>
+            <dd>
+              <code>
+                terminal.exec
+              </code>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              COMMAND
+            </dt>
+            <dd>
+              <code>
+                python -c print(1)
+              </code>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              PATHS
+            </dt>
+            <dd>
+              <code>
+                C:/workspace/output.txt
+              </code>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              WORKDIR
+            </dt>
+            <dd>
+              <code>
+                C:/workspace
+              </code>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              IMPACT
+            </dt>
+            <dd>
+              starts one local process
+            </dd>
+          </div>
+          <div>
+            <dt>
+              SCOPE
+            </dt>
+            <dd>
+              ONCE
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+    <div
+      class="ui-dialog-actions"
+    >
+      <button
+        type="button"
+      >
+        CANCEL
+      </button>
+      <button
+        class="ui-dialog-confirm ui-dialog-danger"
+        type="button"
+      >
+        CONFIRM
+      </button>
+    </div>
+  </section>
+</div>
+`;

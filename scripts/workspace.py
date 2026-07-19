@@ -34,6 +34,12 @@ def check() -> None:
         raise SystemExit("\n".join(f"ERROR: {error}" for error in errors))
     _run(sys.executable, "scripts/generate_api.py", "--check")
     _run(sys.executable, "scripts/check_rc_traceability.py", "--check")
+    _run(sys.executable, "scripts/check_dependency_boundaries.py")
+    _run(sys.executable, "scripts/check_model_distribution.py")
+    _run(sys.executable, "scripts/check_rabbit_icon_language.py")
+    _run(sys.executable, "scripts/check_rabbit_visual_regression.py", "--check")
+    _run(sys.executable, "scripts/generate_design_tokens.py", "--check")
+    _run(sys.executable, "scripts/check_rabbit_coverage_matrix.py", "--check")
     _run(sys.executable, "scripts/check_delivery_plan.py")
 
 

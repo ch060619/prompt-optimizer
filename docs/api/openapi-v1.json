@@ -58,6 +58,17 @@
         "title": "AuthResponse",
         "type": "object"
       },
+      "CleanupRequest": {
+        "properties": {
+          "confirm": {
+            "default": false,
+            "title": "Confirm",
+            "type": "boolean"
+          }
+        },
+        "title": "CleanupRequest",
+        "type": "object"
+      },
       "DiffResult": {
         "properties": {
           "diff_lines": {
@@ -114,9 +125,25 @@
             "default": "offline",
             "enum": [
               "offline",
+              "local",
               "openai",
               "tongyi",
-              "zhipu"
+              "zhipu",
+              "anthropic",
+              "gemini",
+              "azure",
+              "vertex",
+              "bedrock",
+              "openrouter",
+              "deepseek",
+              "moonshot",
+              "qwen",
+              "doubao",
+              "siliconflow",
+              "groq",
+              "together",
+              "ollama",
+              "lmstudio"
             ],
             "title": "Provider",
             "type": "string"
@@ -176,6 +203,176 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "LocalModelEventRequest": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "event": {
+            "enum": [
+              "download_started",
+              "download_progress",
+              "download_paused",
+              "download_completed",
+              "verified",
+              "load_started",
+              "ready",
+              "busy",
+              "unload_started",
+              "unloaded",
+              "corrupt",
+              "update_available",
+              "update_started",
+              "failed",
+              "reset",
+              "disable",
+              "enable"
+            ],
+            "title": "Event",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress"
+          }
+        },
+        "required": [
+          "event"
+        ],
+        "title": "LocalModelEventRequest",
+        "type": "object"
+      },
+      "ModelCleanupRequest": {
+        "properties": {
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          }
+        },
+        "title": "ModelCleanupRequest",
+        "type": "object"
+      },
+      "ModelDirectoryCheckRequest": {
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          },
+          "required_bytes": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Required Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "ModelDirectoryCheckRequest",
+        "type": "object"
+      },
+      "ModelDirectoryMigrateRequest": {
+        "properties": {
+          "destination": {
+            "minLength": 1,
+            "title": "Destination",
+            "type": "string"
+          }
+        },
+        "required": [
+          "destination"
+        ],
+        "title": "ModelDirectoryMigrateRequest",
+        "type": "object"
+      },
+      "ModelRepairRequest": {
+        "properties": {
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "title": "ModelRepairRequest",
+        "type": "object"
+      },
+      "ModelRollbackRequest": {
+        "properties": {
+          "version": {
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "ModelRollbackRequest",
+        "type": "object"
+      },
+      "ModelVersionInstallRequest": {
+        "properties": {
+          "checksum": {
+            "maxLength": 71,
+            "minLength": 64,
+            "title": "Checksum",
+            "type": "string"
+          },
+          "source": {
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "version",
+          "checksum"
+        ],
+        "title": "ModelVersionInstallRequest",
+        "type": "object"
+      },
       "OptimizationSuggestion": {
         "properties": {
           "detail": {
@@ -214,8 +411,119 @@
         "title": "OptimizationSuggestion",
         "type": "object"
       },
+      "OptimizationTargets": {
+        "properties": {
+          "clarity": {
+            "default": true,
+            "title": "Clarity",
+            "type": "boolean"
+          },
+          "code_task": {
+            "default": true,
+            "title": "Code Task",
+            "type": "boolean"
+          },
+          "completeness": {
+            "default": true,
+            "title": "Completeness",
+            "type": "boolean"
+          },
+          "conciseness": {
+            "default": true,
+            "title": "Conciseness",
+            "type": "boolean"
+          },
+          "constraints": {
+            "default": true,
+            "title": "Constraints",
+            "type": "boolean"
+          },
+          "examples": {
+            "default": true,
+            "title": "Examples",
+            "type": "boolean"
+          },
+          "format": {
+            "default": true,
+            "title": "Format",
+            "type": "boolean"
+          },
+          "language_preservation": {
+            "default": true,
+            "title": "Language Preservation",
+            "type": "boolean"
+          },
+          "role": {
+            "default": true,
+            "title": "Role",
+            "type": "boolean"
+          }
+        },
+        "title": "OptimizationTargets",
+        "type": "object"
+      },
       "OptimizeMetadata": {
         "properties": {
+          "budget_blocked": {
+            "default": false,
+            "title": "Budget Blocked",
+            "type": "boolean"
+          },
+          "budget_limit_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Limit Cost"
+          },
+          "budget_limit_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Limit Tokens"
+          },
+          "credential_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credential Ref"
+          },
+          "error_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Category"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
           "error_summary": {
             "anyOf": [
               {
@@ -227,6 +535,72 @@
             ],
             "title": "Error Summary"
           },
+          "estimated_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Cost"
+          },
+          "estimated_input_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Input Tokens"
+          },
+          "estimated_output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Output Tokens"
+          },
+          "execution_location": {
+            "default": "local",
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Execution Location",
+            "type": "string"
+          },
+          "fallback_chain": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fallback Chain",
+            "type": "array"
+          },
+          "fallback_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "not_installed",
+                  "not_ready",
+                  "out_of_memory",
+                  "timeout"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback Reason"
+          },
           "fallback_used": {
             "default": false,
             "title": "Fallback Used",
@@ -236,6 +610,42 @@
             "title": "Latency Ms",
             "type": "integer"
           },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "provider_display_name": {
+            "title": "Provider Display Name",
+            "type": "string"
+          },
+          "provider_health": {
+            "default": "healthy",
+            "enum": [
+              "healthy",
+              "unavailable",
+              "fallback"
+            ],
+            "title": "Provider Health",
+            "type": "string"
+          },
+          "provider_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Request Id"
+          },
           "provider_requested": {
             "title": "Provider Requested",
             "type": "string"
@@ -243,18 +653,156 @@
           "provider_used": {
             "title": "Provider Used",
             "type": "string"
+          },
+          "quality_score_after": {
+            "title": "Quality Score After",
+            "type": "number"
+          },
+          "quality_score_before": {
+            "title": "Quality Score Before",
+            "type": "number"
+          },
+          "quality_score_delta": {
+            "title": "Quality Score Delta",
+            "type": "number"
+          },
+          "recovery_action": {
+            "anyOf": [
+              {
+                "enum": [
+                  "install",
+                  "repair",
+                  "free_memory",
+                  "retry",
+                  "configure_credentials",
+                  "check_balance",
+                  "wait_and_retry",
+                  "change_region",
+                  "choose_model",
+                  "fix_parameters",
+                  "review_content",
+                  "check_network",
+                  "cancel"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery Action"
+          },
+          "selection_scope": {
+            "default": "default",
+            "enum": [
+              "global",
+              "workspace",
+              "session",
+              "optimizer",
+              "default"
+            ],
+            "title": "Selection Scope",
+            "type": "string"
+          },
+          "system_prompt_version": {
+            "title": "System Prompt Version",
+            "type": "string"
           }
         },
         "required": [
           "provider_requested",
           "provider_used",
-          "latency_ms"
+          "provider_display_name",
+          "system_prompt_version",
+          "latency_ms",
+          "quality_score_before",
+          "quality_score_after",
+          "quality_score_delta"
         ],
         "title": "OptimizeMetadata",
         "type": "object"
       },
       "OptimizeRequest": {
         "properties": {
+          "max_cost": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Cost"
+          },
+          "max_tokens": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Tokens"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "optimizer_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optimizer Model"
+          },
+          "optimizer_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "offline",
+                  "local",
+                  "openai",
+                  "tongyi",
+                  "zhipu",
+                  "anthropic",
+                  "gemini",
+                  "azure",
+                  "vertex",
+                  "bedrock",
+                  "openrouter",
+                  "deepseek",
+                  "moonshot",
+                  "qwen",
+                  "doubao",
+                  "siliconflow",
+                  "groq",
+                  "together",
+                  "ollama",
+                  "lmstudio"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optimizer Provider"
+          },
           "prompt": {
             "title": "Prompt",
             "type": "string"
@@ -263,12 +811,53 @@
             "default": "offline",
             "enum": [
               "offline",
+              "local",
               "openai",
               "tongyi",
-              "zhipu"
+              "zhipu",
+              "anthropic",
+              "gemini",
+              "azure",
+              "vertex",
+              "bedrock",
+              "openrouter",
+              "deepseek",
+              "moonshot",
+              "qwen",
+              "doubao",
+              "siliconflow",
+              "groq",
+              "together",
+              "ollama",
+              "lmstudio"
             ],
             "title": "Provider",
             "type": "string"
+          },
+          "save_prompt_history": {
+            "default": true,
+            "title": "Save Prompt History",
+            "type": "boolean"
+          },
+          "strategy": {
+            "default": "combined",
+            "enum": [
+              "rules",
+              "model",
+              "combined"
+            ],
+            "title": "Strategy",
+            "type": "string"
+          },
+          "targets": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OptimizationTargets"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "template_id": {
             "anyOf": [
@@ -456,6 +1045,23 @@
       },
       "PromptVersion": {
         "properties": {
+          "accepted": {
+            "default": false,
+            "title": "Accepted",
+            "type": "boolean"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
           "analysis": {
             "$ref": "#/components/schemas/PromptAnalysis"
           },
@@ -467,6 +1073,17 @@
           "id": {
             "title": "Id",
             "type": "integer"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
           },
           "optimized_prompt": {
             "title": "Optimized Prompt",
@@ -491,6 +1108,39 @@
               }
             ],
             "title": "Project Id"
+          },
+          "provider_health": {
+            "default": "healthy",
+            "enum": [
+              "healthy",
+              "unavailable",
+              "fallback"
+            ],
+            "title": "Provider Health",
+            "type": "string"
+          },
+          "provider_used": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Used"
+          },
+          "selection_scope": {
+            "default": "default",
+            "enum": [
+              "global",
+              "workspace",
+              "session",
+              "optimizer",
+              "default"
+            ],
+            "title": "Selection Scope",
+            "type": "string"
           }
         },
         "required": [
@@ -501,6 +1151,41 @@
           "created_at"
         ],
         "title": "PromptVersion",
+        "type": "object"
+      },
+      "RunnerGenerateRequest": {
+        "properties": {
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "title": "RunnerGenerateRequest",
         "type": "object"
       },
       "ScoreBreakdown": {
@@ -732,6 +1417,23 @@
       },
       "VersionSummary": {
         "properties": {
+          "accepted": {
+            "default": false,
+            "title": "Accepted",
+            "type": "boolean"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -740,6 +1442,17 @@
           "id": {
             "title": "Id",
             "type": "integer"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
           },
           "optimized_preview": {
             "title": "Optimized Preview",
@@ -765,9 +1478,42 @@
             ],
             "title": "Project Id"
           },
+          "provider_health": {
+            "default": "healthy",
+            "enum": [
+              "healthy",
+              "unavailable",
+              "fallback"
+            ],
+            "title": "Provider Health",
+            "type": "string"
+          },
+          "provider_used": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Used"
+          },
           "score": {
             "title": "Score",
             "type": "number"
+          },
+          "selection_scope": {
+            "default": "default",
+            "enum": [
+              "global",
+              "workspace",
+              "session",
+              "optimizer",
+              "default"
+            ],
+            "title": "Selection Scope",
+            "type": "string"
           }
         },
         "required": [
@@ -961,6 +1707,101 @@
         ]
       }
     },
+    "/api/config": {
+      "get": {
+        "operationId": "config_api_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Config Api Config Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Config",
+        "tags": [
+          "legacy",
+          "config"
+        ]
+      }
+    },
+    "/api/data/cleanup": {
+      "post": {
+        "operationId": "cleanup_api_data_cleanup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cleanup Api Data Cleanup Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cleanup",
+        "tags": [
+          "legacy",
+          "data"
+        ]
+      }
+    },
+    "/api/data/cleanup/preview": {
+      "get": {
+        "operationId": "cleanup_preview_api_data_cleanup_preview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cleanup Preview Api Data Cleanup Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Cleanup Preview",
+        "tags": [
+          "legacy",
+          "data"
+        ]
+      }
+    },
     "/api/export": {
       "post": {
         "operationId": "export_api_export_post",
@@ -1067,6 +1908,55 @@
       }
     },
     "/api/history/{version_id}": {
+      "delete": {
+        "operationId": "delete_version_api_history__version_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Version",
+        "tags": [
+          "legacy"
+        ]
+      },
       "get": {
         "operationId": "version_api_history__version_id__get",
         "parameters": [
@@ -1119,6 +2009,64 @@
           }
         },
         "summary": "Version",
+        "tags": [
+          "legacy"
+        ]
+      }
+    },
+    "/api/history/{version_id}/accept": {
+      "post": {
+        "operationId": "accept_version_api_history__version_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptVersion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept Version",
         "tags": [
           "legacy"
         ]
@@ -1188,6 +2136,879 @@
         "summary": "Diff",
         "tags": [
           "legacy"
+        ]
+      }
+    },
+    "/api/local-models/cleanup": {
+      "post": {
+        "operationId": "cleanup_local_models_api_local_models_cleanup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelCleanupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cleanup Local Models Api Local Models Cleanup Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cleanup Local Models",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/directory": {
+      "get": {
+        "operationId": "local_model_directory_api_local_models_directory_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Model Directory Api Local Models Directory Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Local Model Directory",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/directory/check": {
+      "post": {
+        "operationId": "check_local_model_directory_api_local_models_directory_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelDirectoryCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Check Local Model Directory Api Local Models Directory Check Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Local Model Directory",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/directory/migrate": {
+      "post": {
+        "operationId": "migrate_local_model_directory_api_local_models_directory_migrate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelDirectoryMigrateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Migrate Local Model Directory Api Local Models Directory Migrate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Migrate Local Model Directory",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/{model_id}/events": {
+      "post": {
+        "operationId": "local_model_event_api_local_models__model_id__events_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalModelEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Model Event Api Local Models  Model Id  Events Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Model Event",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/{model_id}/registered": {
+      "delete": {
+        "operationId": "uninstall_registered_local_model_api_local_models__model_id__registered_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Uninstall Registered Local Model Api Local Models  Model Id  Registered Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Uninstall Registered Local Model",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/{model_id}/repair": {
+      "post": {
+        "operationId": "repair_local_model_api_local_models__model_id__repair_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelRepairRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Repair Local Model Api Local Models  Model Id  Repair Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Repair Local Model",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/{model_id}/rollback": {
+      "post": {
+        "operationId": "rollback_local_model_api_local_models__model_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelRollbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Local Model Api Local Models  Model Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rollback Local Model",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/{model_id}/state": {
+      "get": {
+        "operationId": "local_model_state_api_local_models__model_id__state_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Model State Api Local Models  Model Id  State Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Model State",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-models/{model_id}/versions": {
+      "post": {
+        "operationId": "install_local_model_version_api_local_models__model_id__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelVersionInstallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Install Local Model Version Api Local Models  Model Id  Versions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Install Local Model Version",
+        "tags": [
+          "legacy",
+          "local-models"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/capabilities": {
+      "get": {
+        "operationId": "local_runner_capabilities_api_local_runners__runner__capabilities_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Capabilities Api Local Runners  Runner  Capabilities Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Capabilities",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/generate": {
+      "post": {
+        "operationId": "generate_local_runner_api_local_runners__runner__generate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunnerGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Generate Local Runner Api Local Runners  Runner  Generate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Local Runner",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/health": {
+      "get": {
+        "operationId": "local_runner_health_api_local_runners__runner__health_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Health Api Local Runners  Runner  Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Health",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/models": {
+      "get": {
+        "operationId": "local_runner_models_api_local_runners__runner__models_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Models Api Local Runners  Runner  Models Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Models",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/models/{model_id}/load": {
+      "post": {
+        "operationId": "load_local_runner_model_api_local_runners__runner__models__model_id__load_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Load Local Runner Model Api Local Runners  Runner  Models  Model Id  Load Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Load Local Runner Model",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/models/{model_id}/unload": {
+      "post": {
+        "operationId": "unload_local_runner_model_api_local_runners__runner__models__model_id__unload_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Unload Local Runner Model Api Local Runners  Runner  Models  Model Id  Unload Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unload Local Runner Model",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/requests/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_local_runner_api_local_runners__runner__requests__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Local Runner Api Local Runners  Runner  Requests  Request Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Local Runner",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/stream": {
+      "post": {
+        "operationId": "stream_local_runner_api_local_runners__runner__stream_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunnerGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Local Runner",
+        "tags": [
+          "legacy",
+          "local-runners"
         ]
       }
     },
@@ -1269,6 +3090,38 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Request-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Last-Event-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
           }
         ],
         "requestBody": {
@@ -1297,6 +3150,50 @@
           }
         },
         "summary": "Optimize Stream",
+        "tags": [
+          "legacy"
+        ]
+      }
+    },
+    "/api/optimize/stream/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_optimize_stream_api_optimize_stream__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Optimize Stream Api Optimize Stream  Request Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Optimize Stream",
         "tags": [
           "legacy"
         ]
@@ -1917,6 +3814,101 @@
         ]
       }
     },
+    "/api/v1/config": {
+      "get": {
+        "operationId": "config_api_v1_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Config Api V1 Config Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Config",
+        "tags": [
+          "v1",
+          "config"
+        ]
+      }
+    },
+    "/api/v1/data/cleanup": {
+      "post": {
+        "operationId": "cleanup_api_v1_data_cleanup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cleanup Api V1 Data Cleanup Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cleanup",
+        "tags": [
+          "v1",
+          "data"
+        ]
+      }
+    },
+    "/api/v1/data/cleanup/preview": {
+      "get": {
+        "operationId": "cleanup_preview_api_v1_data_cleanup_preview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cleanup Preview Api V1 Data Cleanup Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Cleanup Preview",
+        "tags": [
+          "v1",
+          "data"
+        ]
+      }
+    },
     "/api/v1/export": {
       "post": {
         "operationId": "export_api_v1_export_post",
@@ -2023,6 +4015,55 @@
       }
     },
     "/api/v1/history/{version_id}": {
+      "delete": {
+        "operationId": "delete_version_api_v1_history__version_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Version",
+        "tags": [
+          "v1"
+        ]
+      },
       "get": {
         "operationId": "version_api_v1_history__version_id__get",
         "parameters": [
@@ -2075,6 +4116,64 @@
           }
         },
         "summary": "Version",
+        "tags": [
+          "v1"
+        ]
+      }
+    },
+    "/api/v1/history/{version_id}/accept": {
+      "post": {
+        "operationId": "accept_version_api_v1_history__version_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptVersion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept Version",
         "tags": [
           "v1"
         ]
@@ -2144,6 +4243,879 @@
         "summary": "Diff",
         "tags": [
           "v1"
+        ]
+      }
+    },
+    "/api/v1/local-models/cleanup": {
+      "post": {
+        "operationId": "cleanup_local_models_api_v1_local_models_cleanup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelCleanupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cleanup Local Models Api V1 Local Models Cleanup Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cleanup Local Models",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/directory": {
+      "get": {
+        "operationId": "local_model_directory_api_v1_local_models_directory_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Model Directory Api V1 Local Models Directory Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Local Model Directory",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/directory/check": {
+      "post": {
+        "operationId": "check_local_model_directory_api_v1_local_models_directory_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelDirectoryCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Check Local Model Directory Api V1 Local Models Directory Check Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Local Model Directory",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/directory/migrate": {
+      "post": {
+        "operationId": "migrate_local_model_directory_api_v1_local_models_directory_migrate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelDirectoryMigrateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Migrate Local Model Directory Api V1 Local Models Directory Migrate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Migrate Local Model Directory",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/{model_id}/events": {
+      "post": {
+        "operationId": "local_model_event_api_v1_local_models__model_id__events_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalModelEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Model Event Api V1 Local Models  Model Id  Events Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Model Event",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/{model_id}/registered": {
+      "delete": {
+        "operationId": "uninstall_registered_local_model_api_v1_local_models__model_id__registered_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Uninstall Registered Local Model Api V1 Local Models  Model Id  Registered Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Uninstall Registered Local Model",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/{model_id}/repair": {
+      "post": {
+        "operationId": "repair_local_model_api_v1_local_models__model_id__repair_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelRepairRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Repair Local Model Api V1 Local Models  Model Id  Repair Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Repair Local Model",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/{model_id}/rollback": {
+      "post": {
+        "operationId": "rollback_local_model_api_v1_local_models__model_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelRollbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Local Model Api V1 Local Models  Model Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rollback Local Model",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/{model_id}/state": {
+      "get": {
+        "operationId": "local_model_state_api_v1_local_models__model_id__state_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Model State Api V1 Local Models  Model Id  State Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Model State",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-models/{model_id}/versions": {
+      "post": {
+        "operationId": "install_local_model_version_api_v1_local_models__model_id__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelVersionInstallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Install Local Model Version Api V1 Local Models  Model Id  Versions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Install Local Model Version",
+        "tags": [
+          "v1",
+          "local-models"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/capabilities": {
+      "get": {
+        "operationId": "local_runner_capabilities_api_v1_local_runners__runner__capabilities_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Capabilities Api V1 Local Runners  Runner  Capabilities Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Capabilities",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/generate": {
+      "post": {
+        "operationId": "generate_local_runner_api_v1_local_runners__runner__generate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunnerGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Generate Local Runner Api V1 Local Runners  Runner  Generate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Local Runner",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/health": {
+      "get": {
+        "operationId": "local_runner_health_api_v1_local_runners__runner__health_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Health Api V1 Local Runners  Runner  Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Health",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/models": {
+      "get": {
+        "operationId": "local_runner_models_api_v1_local_runners__runner__models_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Models Api V1 Local Runners  Runner  Models Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Models",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/models/{model_id}/load": {
+      "post": {
+        "operationId": "load_local_runner_model_api_v1_local_runners__runner__models__model_id__load_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Load Local Runner Model Api V1 Local Runners  Runner  Models  Model Id  Load Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Load Local Runner Model",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/models/{model_id}/unload": {
+      "post": {
+        "operationId": "unload_local_runner_model_api_v1_local_runners__runner__models__model_id__unload_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "model_id",
+            "required": true,
+            "schema": {
+              "title": "Model Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Unload Local Runner Model Api V1 Local Runners  Runner  Models  Model Id  Unload Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unload Local Runner Model",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/requests/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_local_runner_api_v1_local_runners__runner__requests__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Local Runner Api V1 Local Runners  Runner  Requests  Request Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Local Runner",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/stream": {
+      "post": {
+        "operationId": "stream_local_runner_api_v1_local_runners__runner__stream_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunnerGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Local Runner",
+        "tags": [
+          "v1",
+          "local-runners"
         ]
       }
     },
@@ -2225,6 +5197,38 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Request-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Last-Event-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
           }
         ],
         "requestBody": {
@@ -2253,6 +5257,50 @@
           }
         },
         "summary": "Optimize Stream",
+        "tags": [
+          "v1"
+        ]
+      }
+    },
+    "/api/v1/optimize/stream/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_optimize_stream_api_v1_optimize_stream__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Optimize Stream Api V1 Optimize Stream  Request Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Optimize Stream",
         "tags": [
           "v1"
         ]

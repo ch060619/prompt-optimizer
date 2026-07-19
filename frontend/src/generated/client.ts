@@ -1,5 +1,5 @@
 // AUTO-GENERATED FILE. DO NOT EDIT.
-// RC ID: RC-062.
+// RC IDs: RC-062, RC-154, RC-181, RC-184.
 // Source: docs/api/openapi-v1.json
 // Generator: scripts/generate_api.py
 
@@ -9,6 +9,29 @@ export interface ApiClientOptions {
   baseUrl?: string;
   fetch?: typeof fetch;
   getToken?: () => string | null;
+}
+
+export class ApiRequestError extends Error {
+  readonly status: number;
+  readonly code?: string;
+  readonly category?: string;
+  readonly recoveryAction?: string;
+  readonly exitCode?: number;
+  readonly providerRequestId?: string;
+
+  constructor(status: number, payload: unknown, fallback: string) {
+    const envelope = payload && typeof payload === "object" ? payload as Record<string, unknown> : {};
+    const detail = envelope.detail && typeof envelope.detail === "object" ? envelope.detail as Record<string, unknown> : envelope;
+    const message = typeof envelope.detail === "string" ? envelope.detail : detail.message;
+    super(typeof message === "string" ? message : fallback);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.code = typeof detail.code === "string" ? detail.code : undefined;
+    this.category = typeof detail.category === "string" ? detail.category : undefined;
+    this.recoveryAction = typeof detail.recovery_action === "string" ? detail.recovery_action : undefined;
+    this.exitCode = typeof detail.exit_code === "number" ? detail.exit_code : undefined;
+    this.providerRequestId = typeof detail.provider_request_id === "string" ? detail.provider_request_id : undefined;
+  }
 }
 
 export function createApiClient(options: ApiClientOptions = {}) {
@@ -32,7 +55,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
       const detail = payload && typeof payload === "object" && "detail" in payload
         ? (payload as { detail?: unknown }).detail
         : response.statusText;
-      throw new Error(typeof detail === "string" ? detail : response.statusText);
+      throw new ApiRequestError(response.status, payload, typeof detail === "string" ? detail : response.statusText);
     }
     if (returnResponse) {
       return response as T;
@@ -48,6 +71,121 @@ export function createApiClient(options: ApiClientOptions = {}) {
   }
 
   return {
+    config() {
+      return request<Record<string, unknown>>(`/api/v1/config`, {
+        method: "GET",
+      });
+    },
+    localModelState(modelId: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/state`, {
+        method: "GET",
+      });
+    },
+    localModelEvent(modelId: string, body: Schema.LocalModelEventRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/events`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    localModelDirectory() {
+      return request<Record<string, unknown>>(`/api/v1/local-models/directory`, {
+        method: "GET",
+      });
+    },
+    checkLocalModelDirectory(body: Schema.ModelDirectoryCheckRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/directory/check`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    migrateLocalModelDirectory(body: Schema.ModelDirectoryMigrateRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/directory/migrate`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    installLocalModelVersion(modelId: string, body: Schema.ModelVersionInstallRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/versions`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    rollbackLocalModel(modelId: string, body: Schema.ModelRollbackRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/rollback`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    repairLocalModel(modelId: string, body: Schema.ModelRepairRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/repair`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    cleanupLocalModels(body: Schema.ModelCleanupRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/cleanup`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    uninstallRegisteredLocalModel(modelId: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/registered`, {
+        method: "DELETE",
+      });
+    },
+    localRunnerModels(runner: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/models`, {
+        method: "GET",
+      });
+    },
+    localRunnerCapabilities(runner: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/capabilities`, {
+        method: "GET",
+      });
+    },
+    localRunnerHealth(runner: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/health`, {
+        method: "GET",
+      });
+    },
+    loadLocalRunnerModel(runner: string, modelId: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/models/${encodeURIComponent(String(modelId))}/load`, {
+        method: "POST",
+      });
+    },
+    unloadLocalRunnerModel(runner: string, modelId: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/models/${encodeURIComponent(String(modelId))}/unload`, {
+        method: "POST",
+      });
+    },
+    generateLocalRunner(runner: string, body: Schema.RunnerGenerateRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/generate`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    streamLocalRunner(runner: string, body: Schema.RunnerGenerateRequest) {
+      return request<unknown>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/stream`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
+    cancelLocalRunner(runner: string, requestId: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/requests/${encodeURIComponent(String(requestId))}/cancel`, {
+        method: "POST",
+      });
+    },
+    cleanupPreview() {
+      return request<Record<string, unknown>>(`/api/v1/data/cleanup/preview`, {
+        method: "GET",
+      });
+    },
+    cleanup(body: Schema.CleanupRequest) {
+      return request<Record<string, unknown>>(`/api/v1/data/cleanup`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
     analyze(body: Schema.AnalyzeRequest) {
       return request<Schema.PromptAnalysis>(`/api/v1/analyze`, {
         method: "POST",
@@ -76,17 +214,30 @@ export function createApiClient(options: ApiClientOptions = {}) {
         method: "GET",
       });
     },
-    optimize(body: Schema.OptimizeRequest) {
+    optimize(body: Schema.OptimizeRequest, signal?: AbortSignal) {
       return request<Schema.OptimizeResponse>(`/api/v1/optimize`, {
         method: "POST",
         body: JSON.stringify(body),
+        ...(signal ? { signal } : {}),
       });
     },
-    optimizeStream(body: Schema.OptimizeRequest) {
+    optimizeStream(body: Schema.OptimizeRequest, signal?: AbortSignal, requestId?: string, afterSeq?: number) {
       return request<Response>(`/api/v1/optimize/stream`, {
         method: "POST",
         body: JSON.stringify(body),
+        ...(signal ? { signal } : {}),
+        ...(requestId || afterSeq !== undefined ? {
+          headers: {
+            ...(requestId ? { "X-Request-ID": requestId } : {}),
+            ...(afterSeq !== undefined ? { "Last-Event-ID": String(afterSeq) } : {}),
+          },
+        } : {}),
       }, true);
+    },
+    cancelOptimizeStream(requestId: string) {
+      return request<Record<string, unknown>>(`/api/v1/optimize/stream/${encodeURIComponent(String(requestId))}/cancel`, {
+        method: "POST",
+      });
     },
     createOptimizeTask(body: Schema.OptimizeRequest) {
       return request<Schema.TaskCreateResponse>(`/api/v1/tasks/optimize`, {
@@ -136,6 +287,16 @@ export function createApiClient(options: ApiClientOptions = {}) {
     version(versionId: number) {
       return request<Schema.PromptVersion>(`/api/v1/history/${encodeURIComponent(String(versionId))}`, {
         method: "GET",
+      });
+    },
+    deleteVersion(versionId: number) {
+      return request<Response>(`/api/v1/history/${encodeURIComponent(String(versionId))}`, {
+        method: "DELETE",
+      }, true);
+    },
+    acceptVersion(versionId: number) {
+      return request<Schema.PromptVersion>(`/api/v1/history/${encodeURIComponent(String(versionId))}/accept`, {
+        method: "POST",
       });
     },
     diff(versionId: number, otherId: number) {

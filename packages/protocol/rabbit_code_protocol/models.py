@@ -20,6 +20,52 @@ class TextBlock(ProtocolModel):
     text: str
 
 
+class DiagnosticContentBlock(ProtocolModel):
+    type: Literal["diagnostic"] = "diagnostic"
+    diagnostics: list[dict[str, Any]]
+
+
+class DiffContentBlock(ProtocolModel):
+    type: Literal["diff"] = "diff"
+    diff: str
+
+
+class FileContentBlock(ProtocolModel):
+    type: Literal["file"] = "file"
+    path: str
+    content: str | None = None
+
+
+class ImageContentBlock(ProtocolModel):
+    type: Literal["image"] = "image"
+    mime_type: str
+    data: str
+
+
+class ProgressContentBlock(ProtocolModel):
+    type: Literal["progress"] = "progress"
+    message: str
+    fraction: float | None = Field(default=None, ge=0, le=1)
+
+
+class ErrorContentBlock(ProtocolModel):
+    type: Literal["error"] = "error"
+    code: str
+    message: str
+    retryable: bool = False
+
+
+ContentBlock = (
+    TextBlock
+    | DiagnosticContentBlock
+    | DiffContentBlock
+    | FileContentBlock
+    | ImageContentBlock
+    | ProgressContentBlock
+    | ErrorContentBlock
+)
+
+
 class ToolCallBlock(ProtocolModel):
     type: Literal["tool_call"] = "tool_call"
     call_id: str = Field(min_length=1)
@@ -29,7 +75,7 @@ class ToolCallBlock(ProtocolModel):
 
 class Message(ProtocolModel):
     role: Literal["system", "user", "assistant", "tool"]
-    content: list[TextBlock | ToolCallBlock] = Field(min_length=1)
+    content: list[ContentBlock | ToolCallBlock] = Field(min_length=1)
 
 
 class Session(ProtocolModel):
@@ -87,11 +133,23 @@ class ApprovalRequest(ProtocolModel):
     action: str = Field(min_length=1)
     description: str
     risk: Literal["low", "medium", "high"]
+    tool: str = ""
+    command: list[str] = Field(default_factory=list)
+    paths: list[str] = Field(default_factory=list)
+    workdir: str = ""
+    impact: str = ""
+    authorization_scope: str = "once"
+    arguments: dict[str, Any] = Field(default_factory=dict)
+    snapshot: str = ""
+    expires_at: datetime | None = None
 
 
 class StreamEventType(StrEnum):
     STARTED = "started"
+    ANALYSIS = "analysis"
     DELTA = "delta"
+    SAVED = "saved"
+    FALLBACK = "fallback"
     PROGRESS = "progress"
     TOOL_CALL = "tool_call"
     APPROVAL_REQUIRED = "approval_required"

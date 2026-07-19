@@ -6,7 +6,8 @@ from typing import Protocol
 
 import httpx
 
-from prompt_optimizer.providers.base import ModelProvider, ModelRequest
+from prompt_optimizer.contracts import Provider
+from prompt_optimizer.providers.base import ModelRequest
 from prompt_optimizer.providers.offline import OfflineRuleProvider
 
 from .agent import AgentCore, AgentEvent, AgentEventType
@@ -20,7 +21,7 @@ class AgentRuntime(Protocol):
 
 
 class InProcessRuntime:
-    def __init__(self, provider: ModelProvider | None = None) -> None:
+    def __init__(self, provider: Provider | None = None) -> None:
         self.core = AgentCore(provider or OfflineRuleProvider())
 
     def stream(self, request: ModelRequest) -> Iterator[AgentEvent]:
@@ -66,6 +67,11 @@ def _parse_sse(lines: Iterator[str]) -> Iterator[AgentEvent]:
         elif not line and event_name and data:
             payload = json.loads(data)
             event_type = AgentEventType(event_name)
-            yield AgentEvent(event_type, payload.get("text"))
+            yield AgentEvent(
+                event_type,
+                payload.get("text"),
+                int(payload.get("seq", 0)),
+                payload.get("payload", {}),
+            )
             event_name = None
             data = None

@@ -8,7 +8,8 @@ from pathlib import Path
 
 import pytest
 
-# RC ID: RC-047. Freeze V2 behavior before Rabbit Code migration work begins.
+# RC IDs: RC-047, RC-146, RC-148. Freeze V2 behavior and explicitly approve
+# the current export contract change.
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = REPOSITORY_ROOT / "scripts" / "generate_v2_regression_baseline.py"
 GOLDEN_PATH = REPOSITORY_ROOT / "backend" / "tests" / "golden" / "v2_regression.json"
@@ -33,13 +34,13 @@ def test_baseline_update_has_explicit_rc_approval_and_migration_note() -> None:
     baseline = _load_baseline()
     approval = baseline["approval"]
     assert isinstance(approval, dict)
-    assert approval["rc_id"] == "RC-047"
+    assert approval["rc_id"] == "RC-148"
     assert approval["reason"]
     assert re.fullmatch(r"[0-9a-f]{40}", approval["source_commit"])
 
     note_path = REPOSITORY_ROOT / approval["migration_note"]
     assert note_path.is_file()
-    assert "RC ID: RC-047" in note_path.read_text(encoding="utf-8")
+    assert f"RC ID: {approval['rc_id']}" in note_path.read_text(encoding="utf-8")
 
 
 def test_v2_golden_snapshot_covers_core_semantics() -> None:

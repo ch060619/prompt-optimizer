@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Awaitable, Callable, Generator, Iterator
+from collections.abc import Awaitable, Callable, Iterator
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -14,32 +14,62 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
+from prompt_optimizer.cleanup import CleanupError
 from prompt_optimizer.core.models import (
     AnalyzeRequest,
     AuthRequest,
     AuthResponse,
+    CleanupRequest,
     DiffResult,
     EvaluateTaskRequest,
     ExportRequest,
+    LocalModelEventRequest,
+    ModelCleanupRequest,
+    ModelDirectoryCheckRequest,
+    ModelDirectoryMigrateRequest,
+    ModelRepairRequest,
+    ModelRollbackRequest,
+    ModelVersionInstallRequest,
+    OptimizeMetadata,
     OptimizeRequest,
     OptimizeResponse,
     ProjectSpace,
     PromptAnalysis,
     PromptTemplate,
     PromptVersion,
+    RunnerGenerateRequest,
     TaskCreateResponse,
     TaskRecord,
     UserPublic,
     VersionSummary,
 )
 from prompt_optimizer.identity import PRODUCT_NAME
-from prompt_optimizer.paths import PROJECT_ROOT
-from prompt_optimizer.providers import ModelProviderError, ModelRequest, ProviderEventType
+from prompt_optimizer.local_model_state import (
+    LocalModelState,
+    LocalModelStateError,
+    LocalModelStateMachine,
+    recover_install_state,
+)
+from prompt_optimizer.model_lifecycle import ModelDirectoryError, ModelDirectoryService
+from prompt_optimizer.paths import PROJECT_ROOT, app_data_dir
+from prompt_optimizer.providers import ModelProviderError, ModelRequest
+from prompt_optimizer.public import provider_error_presentation
+from prompt_optimizer.runner_gateway import LocalRunnerGateway, RunnerGatewayError
 from prompt_optimizer.services import AppServices
+from prompt_optimizer.streaming import (
+    OptimizationStreamCursor,
+    OptimizationStreamCursorExpired,
+    OptimizationStreamEvent,
+    OptimizationStreamEventType,
+    OptimizationStreamLog,
+    encode_optimization_sse,
+)
 
 # RC ID: RC-048. Preserve the V2 API while exposing the versioned compatibility surface.
 # RC ID: RC-054. Expose Rabbit Code as the canonical API product identity.
-# RC ID: RC-049. Translate Provider events into the existing SSE chunk contract.
+# RC IDs: RC-154, RC-155, RC-184. Expose optimization targets, composition, and cleanup boundaries
+# through every API entry point.
+# RC IDs: RC-049, RC-181. Translate Provider events and expose safe configuration state.
 # RC ID: RC-058. Keep the strict versioned App Server boundary beside the compatibility factory.
 
 services = AppServices()
@@ -49,13 +79,25 @@ logger = logging.getLogger("prompt_optimizer.api")
 def create_app(
     app_services: AppServices | None = None,
     *,
+    runner_gateway: LocalRunnerGateway | None = None,
     include_legacy: bool = True,
     startup_token: str | None = None,
     protocol_version: str = "v1",
+    strict_boundary: bool = False,
+    max_body_bytes: int = 2_000_000,
 ) -> FastAPI:
     if startup_token == "":
         raise ValueError("startup_token 不能为空。")
+    if max_body_bytes <= 0:
+        raise ValueError("max_body_bytes must be positive")
+    if strict_boundary and startup_token is None:
+        raise ValueError("strict boundary requires a startup token")
     current_services = app_services or services
+    local_runner_gateway = runner_gateway or LocalRunnerGateway()
+    model_directory = ModelDirectoryService(
+        app_data_dir() / "model-registry.json",
+        app_data_dir() / "local-models",
+    )
     app = FastAPI(
         title=PRODUCT_NAME,
         version="2.0.0",
@@ -64,6 +106,9 @@ def create_app(
             {"name": "v1", "description": "新客户端使用的版本化 API 契约。"},
         ],
     )
+    app.state.startup_token = startup_token
+    app.state.strict_boundary = strict_boundary
+    app.state.max_body_bytes = max_body_bytes
 
     @app.middleware("http")
     async def request_logging(
@@ -97,6 +142,10 @@ def create_app(
             request: Request,
             call_next: Callable[[Request], Awaitable[Response]],
         ) -> Response:
+            if strict_boundary:
+                boundary_error = _strict_request_error(request, max_body_bytes)
+                if boundary_error is not None:
+                    return boundary_error
             is_health = request.url.path == "/api/v1/health"
             if request.url.path.startswith("/api/v1") and not is_health:
                 if request.headers.get("X-Rabbit-Code-Startup-Token") != startup_token:
@@ -122,13 +171,25 @@ def create_app(
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://[::1]:5173",
+        ],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "Last-Event-ID",
+            "X-Request-ID",
+            "X-Rabbit-Code-Protocol",
+            "X-Rabbit-Code-Startup-Token",
+        ],
     )
 
     api_router = APIRouter()
+    stream_log = OptimizationStreamLog(max_events=512)
 
     if startup_token is not None:
 
@@ -139,6 +200,210 @@ def create_app(
                 "protocol_version": protocol_version,
                 "startup_token_required": True,
             }
+
+    @api_router.get("/config", tags=["config"])
+    def config() -> dict[str, dict[str, object]]:
+        return current_services.config.resolve().display()
+
+    @api_router.get("/local-models/{model_id}/state", tags=["local-models"])
+    def local_model_state(model_id: str) -> dict[str, object]:
+        state = _load_local_model_state(model_id)
+        return _local_model_event(
+            event="recovered",
+            message="local model state recovered",
+            state=state,
+        )
+
+    @api_router.post("/local-models/{model_id}/events", tags=["local-models"])
+    def local_model_event(
+        model_id: str,
+        request: LocalModelEventRequest,
+    ) -> dict[str, object]:
+        state = _load_local_model_state(model_id)
+        machine = LocalModelStateMachine(state)
+        try:
+            event = machine.apply(
+                request.event,
+                message=request.message,
+                progress=request.progress,
+                error=request.error,
+            )
+        except LocalModelStateError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        _save_local_model_state(model_id, event.state)
+        return event.to_dict()
+
+    @api_router.get("/local-models/directory", tags=["local-models"])
+    def local_model_directory() -> dict[str, object]:
+        return {
+            "root": str(model_directory.root),
+            "registry": model_directory.snapshot(),
+        }
+
+    @api_router.post("/local-models/directory/check", tags=["local-models"])
+    def check_local_model_directory(request: ModelDirectoryCheckRequest) -> dict[str, object]:
+        try:
+            return model_directory.check_directory(
+                Path(request.path), required_bytes=request.required_bytes
+            ).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @api_router.post("/local-models/directory/migrate", tags=["local-models"])
+    def migrate_local_model_directory(
+        request: ModelDirectoryMigrateRequest,
+    ) -> dict[str, object]:
+        try:
+            return model_directory.migrate_directory(Path(request.destination)).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @api_router.post("/local-models/{model_id}/versions", tags=["local-models"])
+    def install_local_model_version(
+        model_id: str,
+        request: ModelVersionInstallRequest,
+    ) -> dict[str, object]:
+        try:
+            return model_directory.install_version(
+                model_id=model_id,
+                source=Path(request.source),
+                version=request.version,
+                checksum=request.checksum,
+            ).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @api_router.post("/local-models/{model_id}/rollback", tags=["local-models"])
+    def rollback_local_model(model_id: str, request: ModelRollbackRequest) -> dict[str, object]:
+        try:
+            return model_directory.rollback(model_id, request.version).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @api_router.post("/local-models/{model_id}/repair", tags=["local-models"])
+    def repair_local_model(model_id: str, request: ModelRepairRequest) -> dict[str, object]:
+        try:
+            source = Path(request.source) if request.source else None
+            return model_directory.repair(model_id, source=source).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @api_router.post("/local-models/cleanup", tags=["local-models"])
+    def cleanup_local_models(request: ModelCleanupRequest) -> dict[str, object]:
+        try:
+            return model_directory.cleanup(request.model_id).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @api_router.delete("/local-models/{model_id}/registered", tags=["local-models"])
+    def uninstall_registered_local_model(model_id: str) -> dict[str, object]:
+        try:
+            return model_directory.uninstall(model_id).to_dict()
+        except ModelDirectoryError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @api_router.get("/local-runners/{runner}/models", tags=["local-runners"])
+    def local_runner_models(runner: str) -> dict[str, object]:
+        try:
+            models = local_runner_gateway.list(runner)
+            return {
+                "runner": runner,
+                "models": [
+                    {"model_id": model.model_id, "loaded": model.loaded} for model in models
+                ],
+            }
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.get("/local-runners/{runner}/capabilities", tags=["local-runners"])
+    def local_runner_capabilities(runner: str) -> dict[str, object]:
+        try:
+            return local_runner_gateway.capabilities(runner).to_dict()
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.get("/local-runners/{runner}/health", tags=["local-runners"])
+    def local_runner_health(runner: str) -> dict[str, object]:
+        try:
+            health = local_runner_gateway.health(runner)
+            return {
+                "runner": runner,
+                "ready": health.ready,
+                "model_id": health.model_id,
+                "detail": health.detail,
+                "status": health.status,
+            }
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.post("/local-runners/{runner}/models/{model_id}/load", tags=["local-runners"])
+    def load_local_runner_model(runner: str, model_id: str) -> dict[str, str]:
+        try:
+            return local_runner_gateway.load(runner, model_id).to_dict()
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.post("/local-runners/{runner}/models/{model_id}/unload", tags=["local-runners"])
+    def unload_local_runner_model(runner: str, model_id: str) -> dict[str, str]:
+        try:
+            return local_runner_gateway.unload(runner, model_id).to_dict()
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.post("/local-runners/{runner}/generate", tags=["local-runners"])
+    def generate_local_runner(
+        runner: str,
+        request: RunnerGenerateRequest,
+    ) -> dict[str, object]:
+        try:
+            result = local_runner_gateway.generate(
+                runner,
+                ModelRequest(prompt=request.prompt, request_id=request.request_id),
+                model_id=request.model_id,
+            )
+            return result.to_dict()
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.post("/local-runners/{runner}/stream", tags=["local-runners"])
+    def stream_local_runner(
+        runner: str,
+        request: RunnerGenerateRequest,
+    ) -> StreamingResponse:
+        def events() -> Iterator[str]:
+            try:
+                for event in local_runner_gateway.stream(
+                    runner,
+                    ModelRequest(prompt=request.prompt, request_id=request.request_id),
+                    model_id=request.model_id,
+                ):
+                    yield _sse(event.event, event.to_dict())
+            except RunnerGatewayError as exc:
+                yield _sse("error", exc.to_dict())
+
+        return StreamingResponse(events(), media_type="text/event-stream")
+
+    @api_router.post("/local-runners/{runner}/requests/{request_id}/cancel", tags=["local-runners"])
+    def cancel_local_runner(runner: str, request_id: str) -> dict[str, object]:
+        try:
+            return {
+                "runner": runner,
+                "request_id": request_id,
+                "cancelled": local_runner_gateway.cancel(runner, request_id),
+            }
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.get("/data/cleanup/preview", tags=["data"])
+    def cleanup_preview() -> dict[str, object]:
+        return current_services.cleanup.preview().display()
+
+    @api_router.post("/data/cleanup", tags=["data"])
+    def cleanup(request: CleanupRequest) -> dict[str, object]:
+        try:
+            return current_services.cleanup.clear_all(confirm=request.confirm).display()
+        except CleanupError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @api_router.post("/analyze", response_model=PromptAnalysis)
     def analyze(request: AnalyzeRequest) -> PromptAnalysis:
@@ -175,53 +440,175 @@ def create_app(
         request: OptimizeRequest,
         authorization: str | None = Header(default=None),
     ) -> OptimizeResponse:
+        _validate_optimization_targets(request)
         try:
             user = _optional_user(current_services, authorization)
             prompt, template = _prepare_prompt(current_services, request)
-            return current_services.optimize_and_save(
+            return current_services.optimization.optimize(
                 original_prompt=request.prompt,
                 prompt=prompt,
                 template=template,
+                targets=request.targets,
+                strategy=request.strategy,
                 provider_name=request.provider,
+                model=request.model,
+                optimizer_provider=request.optimizer_provider,
+                optimizer_model=request.optimizer_model,
                 owner_id=user.id if user else None,
+                save_prompt_history=request.save_prompt_history,
+                max_tokens=request.max_tokens,
+                max_cost=request.max_cost,
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ModelProviderError as exc:
+            raise _provider_http_exception(exc) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @api_router.post("/optimize/stream", response_class=StreamingResponse)
     def optimize_stream(
         request: OptimizeRequest,
+        http_request: Request,
         authorization: str | None = Header(default=None),
+        request_id_header: str | None = Header(default=None, alias="X-Request-ID"),
+        last_event_id: int | None = Header(default=None, alias="Last-Event-ID"),
     ) -> StreamingResponse:
+        _validate_optimization_targets(request)
+
         def events() -> Iterator[str]:
+            request_id = request_id_header or uuid4().hex
+            legacy = http_request.url.path == "/api/optimize/stream"
             try:
                 user = _optional_user(current_services, authorization)
-                yield _sse("started", {"provider": request.provider})
-                prompt, template = _prepare_prompt(current_services, request)
-                preview = current_services.analyzer.analyze(prompt)
-                yield _sse("analysis", preview.model_dump(mode="json"))
-                result = yield from _stream_provider_result(
-                    current_services,
-                    request,
-                    prompt,
-                    template,
-                    user.id if user else None,
-                )
-                if result.version_id is not None:
-                    yield _sse(
-                        "saved",
-                        {
-                            "version_id": result.version_id,
-                            "metadata": result.metadata.model_dump(mode="json"),
-                        },
+                latest_seq = stream_log.latest_seq(request_id)
+                if latest_seq >= 0:
+                    cursor = OptimizationStreamCursor(
+                        request_id=request_id,
+                        after_seq=last_event_id if last_event_id is not None else -1,
                     )
-                yield _sse("completed", result.model_dump(mode="json"))
-            except (KeyError, ValueError) as exc:
+                    for stored in stream_log.replay(cursor):
+                        yield _stream_output(stored, legacy=legacy)
+                    return
+
+                started = stream_log.append(
+                    request_id,
+                    OptimizationStreamEventType.STARTED,
+                    {"provider": request.provider},
+                    event_key="started",
+                )
+                yield _stream_output(started, legacy=legacy)
+                prompt, template = _prepare_prompt(current_services, request)
+                for event in current_services.optimization.stream(
+                    original_prompt=request.prompt,
+                    prompt=prompt,
+                    template=template,
+                    targets=request.targets,
+                    strategy=request.strategy,
+                    provider_name=request.provider,
+                    model=request.model,
+                    optimizer_provider=request.optimizer_provider,
+                    optimizer_model=request.optimizer_model,
+                    owner_id=user.id if user else None,
+                    save_prompt_history=request.save_prompt_history,
+                    request_id=request_id,
+                    max_tokens=request.max_tokens,
+                    max_cost=request.max_cost,
+                ):
+                    if event.event == "analysis":
+                        if not isinstance(event.data, PromptAnalysis):
+                            raise RuntimeError("优化服务返回了无效分析。")
+                        stored = stream_log.append(
+                            request_id,
+                            OptimizationStreamEventType.ANALYSIS,
+                            event.data.model_dump(mode="json"),
+                            event_key="analysis",
+                        )
+                        yield _stream_output(stored, legacy=legacy)
+                    elif event.event == "chunk":
+                        stored = stream_log.append(
+                            request_id,
+                            OptimizationStreamEventType.DELTA,
+                            {"text": event.data},
+                        )
+                        yield _stream_output(stored, legacy=legacy)
+                    elif event.event == "fallback":
+                        if not isinstance(event.data, OptimizeMetadata):
+                            raise RuntimeError("优化服务返回了无效降级信息。")
+                        stored = stream_log.append(
+                            request_id,
+                            OptimizationStreamEventType.FALLBACK,
+                            event.data.model_dump(mode="json"),
+                        )
+                        yield _stream_output(stored, legacy=legacy)
+                    elif event.event == "completed":
+                        result = event.data
+                        if not isinstance(result, OptimizeResponse):
+                            raise RuntimeError("优化服务返回了无效结果。")
+                        if result.version_id is not None:
+                            saved = stream_log.append(
+                                request_id,
+                                OptimizationStreamEventType.SAVED,
+                                {
+                                    "version_id": result.version_id,
+                                    "metadata": result.metadata.model_dump(mode="json"),
+                                },
+                                event_key="saved",
+                            )
+                            yield _stream_output(saved, legacy=legacy)
+                        completed = stream_log.append(
+                            request_id,
+                            OptimizationStreamEventType.COMPLETED,
+                            result.model_dump(mode="json"),
+                            event_key="completed",
+                        )
+                        yield _stream_output(completed, legacy=legacy)
+            except OptimizationStreamCursorExpired as exc:
                 yield _sse("error", {"detail": str(exc)})
+            except Exception as exc:
+                if stream_log.is_cancelled(request_id):
+                    return
+                presentation = provider_error_presentation(exc)
+                error = stream_log.append(
+                    request_id,
+                    OptimizationStreamEventType.ERROR,
+                    {
+                        "code": presentation.code,
+                        "category": presentation.category,
+                        "detail": presentation.message,
+                        "retryable": presentation.retryable,
+                        "recovery_action": presentation.recovery_action,
+                        "exit_code": presentation.exit_code,
+                        "provider_request_id": presentation.request_id,
+                    },
+                    event_key="error",
+                )
+                yield _stream_output(error, legacy=legacy)
 
         return StreamingResponse(events(), media_type="text/event-stream")
+
+    @api_router.post("/optimize/stream/{request_id}/cancel")
+    def cancel_optimize_stream(request_id: str) -> dict[str, object]:
+        existing = stream_log.replay(
+            OptimizationStreamCursor(request_id=request_id, after_seq=-1)
+        )
+        if any(
+            item.type
+            in {
+                OptimizationStreamEventType.COMPLETED,
+                OptimizationStreamEventType.ERROR,
+                OptimizationStreamEventType.CANCELLED,
+            }
+            for item in existing
+        ):
+            return {
+                "request_id": request_id,
+                "cancelled": False,
+                "seq": stream_log.latest_seq(request_id),
+            }
+        cancelled = current_services.optimization.cancel(request_id)
+        event = stream_log.cancel(request_id)
+        return {"request_id": request_id, "cancelled": cancelled, "seq": event.seq}
 
     @api_router.post("/tasks/optimize", response_model=TaskCreateResponse)
     def create_optimize_task(
@@ -229,6 +616,7 @@ def create_app(
         background_tasks: BackgroundTasks,
         authorization: str | None = Header(default=None),
     ) -> TaskCreateResponse:
+        _validate_optimization_targets(request)
         user = _current_user(current_services, authorization)
         task = current_services.tasks.create(
             owner_id=user.id,
@@ -315,6 +703,29 @@ def create_app(
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
+    @api_router.post("/history/{version_id}/accept", response_model=PromptVersion)
+    def accept_version(
+        version_id: int,
+        authorization: str | None = Header(default=None),
+    ) -> PromptVersion:
+        try:
+            user = _current_user(current_services, authorization)
+            return current_services.versions.mark_accepted(version_id, user.id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @api_router.delete("/history/{version_id}", status_code=204)
+    def delete_version(
+        version_id: int,
+        authorization: str | None = Header(default=None),
+    ) -> Response:
+        try:
+            user = _current_user(current_services, authorization)
+            current_services.versions.delete(version_id, user.id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return Response(status_code=204)
+
     @api_router.get("/history/{version_id}/diff/{other_id}", response_model=DiffResult)
     def diff(
         version_id: int,
@@ -380,18 +791,55 @@ def create_app(
 def create_app_server(
     app_services: AppServices | None = None,
     *,
+    runner_gateway: LocalRunnerGateway | None = None,
     startup_token: str,
     protocol_version: str = "v1",
+    strict_boundary: bool = False,
+    max_body_bytes: int = 2_000_000,
 ) -> FastAPI:
     """Create the strict, versioned App Server while retaining the legacy factory."""
     if not startup_token:
         raise ValueError("startup_token 不能为空。")
     return create_app(
         app_services,
+        runner_gateway=runner_gateway,
         include_legacy=False,
         startup_token=startup_token,
         protocol_version=protocol_version,
+        strict_boundary=strict_boundary,
+        max_body_bytes=max_body_bytes,
     )
+
+
+def _strict_request_error(request: Request, max_body_bytes: int) -> JSONResponse | None:
+    client_host = request.client.host if request.client is not None else None
+    if client_host not in {"127.0.0.1", "::1"}:
+        return JSONResponse(status_code=400, content={"detail": "仅允许 Loopback 客户端。"})
+    raw_host = request.headers.get("host", "")
+    host = (
+        raw_host.partition("]")[0].lstrip("[")
+        if raw_host.startswith("[")
+        else raw_host.split(":", 1)[0]
+    ).lower()
+    if host not in {"127.0.0.1", "localhost", "::1"}:
+        return JSONResponse(status_code=400, content={"detail": "Host 不在 Loopback allowlist。"})
+    origin = request.headers.get("origin")
+    if origin not in {
+        None,
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://[::1]:5173",
+    }:
+        return JSONResponse(status_code=403, content={"detail": "Origin 不在 allowlist。"})
+    raw_length = request.headers.get("content-length")
+    if raw_length is not None:
+        try:
+            content_length = int(raw_length)
+        except ValueError:
+            return JSONResponse(status_code=400, content={"detail": "Content-Length 无效。"})
+        if content_length > max_body_bytes:
+            return JSONResponse(status_code=413, content={"detail": "请求体超过上限。"})
+    return None
 
 
 def _prepare_prompt(
@@ -404,6 +852,32 @@ def _prepare_prompt(
         rendered = current_services.templates.render(request.template_id, request.variables)
         prompt = f"{rendered}\n\n用户补充：{request.prompt}"
     return prompt, template
+
+
+def _validate_optimization_targets(request: OptimizeRequest) -> None:
+    if request.targets is not None and not request.targets.has_enabled_target():
+        raise HTTPException(status_code=400, detail="至少选择一项优化目标。")
+
+
+def _provider_http_exception(error: ModelProviderError) -> HTTPException:
+    presentation = provider_error_presentation(error)
+    return HTTPException(
+        status_code=presentation.http_status,
+        detail={
+            "code": presentation.code,
+            "category": presentation.category,
+            "message": presentation.message,
+            "retryable": presentation.retryable,
+            "recovery_action": presentation.recovery_action,
+            "exit_code": presentation.exit_code,
+            "provider_request_id": presentation.request_id,
+        },
+    )
+
+
+def _runner_http_exception(error: RunnerGatewayError) -> HTTPException:
+    status = 409 if error.code in {"runner_busy", "model_not_ready", "local_not_ready"} else 400
+    return HTTPException(status_code=status, detail=error.to_dict())
 
 
 def _current_user(current_services: AppServices, authorization: str | None) -> UserPublic:
@@ -428,12 +902,20 @@ def _run_optimize_task(
 ) -> None:
     def work() -> dict[str, object]:
         prompt, template = _prepare_prompt(current_services, request)
-        result = current_services.optimize_and_save(
+        result = current_services.optimization.optimize(
             original_prompt=request.prompt,
             prompt=prompt,
             template=template,
+            targets=request.targets,
+            strategy=request.strategy,
             provider_name=request.provider,
+            model=request.model,
+            optimizer_provider=request.optimizer_provider,
+            optimizer_model=request.optimizer_model,
             owner_id=owner_id,
+            save_prompt_history=request.save_prompt_history,
+            max_tokens=request.max_tokens,
+            max_cost=request.max_cost,
         )
         return result.model_dump(mode="json")
 
@@ -464,7 +946,7 @@ def _run_evaluate_task(
         items: list[dict[str, object]] = []
         for prompt in request.prompts:
             before = current_services.analyzer.analyze(prompt)
-            result = current_services.optimize_and_save(
+            result = current_services.optimization.optimize(
                 original_prompt=prompt,
                 prompt=prompt,
                 template=None,
@@ -489,75 +971,120 @@ def _run_evaluate_task(
     current_services.tasks.run(task_id, owner_id, work)
 
 
-def _stream_provider_result(
-    current_services: AppServices,
-    request: OptimizeRequest,
-    prompt: str,
-    template: PromptTemplate | None,
-    owner_id: int | None,
-) -> Generator[str, None, OptimizeResponse]:
-    started = perf_counter()
-    streamed_chunks: list[str] = []
-    provider_used: str = request.provider
-    fallback_used = False
-    error_summary: str | None = None
-    try:
-        provider = current_services.providers.get(request.provider)
-        provider_used = provider.name
-        for event in provider.stream(ModelRequest(prompt=prompt, template=template)):
-            if event.type is not ProviderEventType.DELTA or not event.text:
-                continue
-            chunk = event.text
-            streamed_chunks.append(chunk)
-            yield _sse("chunk", {"text": chunk})
-    except (ModelProviderError, RuntimeError, ValueError) as exc:
-        if request.provider == "offline":
-            raise
-        fallback_used = True
-        error_summary = str(exc)
-        fallback_response = current_services.providers.get("offline").optimize(
-            ModelRequest(prompt=prompt, template=template)
-        )
-        fallback = current_services.save_optimized_text(
-            original_prompt=request.prompt,
-            prompt=prompt,
-            optimized_prompt=fallback_response.analysis.optimized_prompt or prompt,
-            provider_requested=request.provider,
-            provider_used=fallback_response.provider_used,
-            fallback_used=fallback_used,
-            latency_ms=fallback_response.latency_ms,
-            error_summary=error_summary,
-            owner_id=owner_id,
-        )
-        yield _sse("fallback", fallback.metadata.model_dump(mode="json"))
-        for chunk in _chunks(fallback.analysis.optimized_prompt or ""):
-            yield _sse("chunk", {"text": chunk})
-        return fallback
-    optimized_prompt = "".join(streamed_chunks)
-    latency_ms = int((perf_counter() - started) * 1000)
-    return current_services.save_optimized_text(
-        original_prompt=request.prompt,
-        prompt=prompt,
-        optimized_prompt=optimized_prompt,
-        provider_requested=request.provider,
-        provider_used=provider_used,
-        fallback_used=fallback_used,
-        latency_ms=latency_ms,
-        error_summary=error_summary,
-        owner_id=owner_id,
-    )
-
-
 def _sse(event: str, payload: object) -> str:
     data = json.dumps(payload, ensure_ascii=False)
     return f"event: {event}\ndata: {data}\n\n"
 
 
-def _chunks(text: str, size: int = 120) -> Iterator[str]:
-    if not text:
-        return
-    for start in range(0, len(text), size):
-        yield text[start : start + size]
+def _stream_output(event: OptimizationStreamEvent, *, legacy: bool) -> str:
+    if not legacy:
+        return encode_optimization_sse(event)
+    event_name = "chunk" if event.type is OptimizationStreamEventType.DELTA else event.type.value
+    return _sse(event_name, event.payload)
+
+
+_LOCAL_MODEL_STATUSES = {
+    "not_installed",
+    "downloading",
+    "paused",
+    "verifying",
+    "loading",
+    "ready",
+    "busy",
+    "stopping",
+    "unloaded",
+    "corrupt",
+    "update",
+    "failed",
+    "disabled",
+}
+
+
+def _local_model_root(model_id: str) -> Path:
+    if not model_id or model_id in {".", ".."} or Path(model_id).name != model_id:
+        raise HTTPException(status_code=400, detail="本地模型 ID 无效。")
+    return app_data_dir() / "local-models" / model_id
+
+
+def _load_local_model_state(model_id: str) -> LocalModelState:
+    root = _local_model_root(model_id)
+    lifecycle_path = root / "lifecycle-state.json"
+    if lifecycle_path.is_file():
+        try:
+            payload = json.loads(lifecycle_path.read_text(encoding="utf-8"))
+            if not isinstance(payload, dict):
+                raise ValueError("invalid lifecycle state")
+            status = payload.get("status")
+            if status not in _LOCAL_MODEL_STATUSES:
+                raise ValueError("invalid lifecycle status")
+            return LocalModelState(
+                model_id=model_id,
+                runner=str(payload.get("runner") or "ollama"),
+                status=status,
+                progress=int(payload.get("progress") or 0),
+                installed_path=(
+                    payload["installed_path"]
+                    if isinstance(payload.get("installed_path"), str)
+                    else None
+                ),
+                version=payload.get("version") if isinstance(payload.get("version"), str) else None,
+                error=payload.get("error") if isinstance(payload.get("error"), str) else None,
+                last_event=str(payload.get("last_event") or "recovered"),
+            )
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            return LocalModelState(
+                model_id=model_id,
+                runner="ollama",
+                status="corrupt",
+                error=f"invalid lifecycle state: {exc}",
+            )
+    install_state_path = root / "install-state.json"
+    if install_state_path.is_file():
+        try:
+            return recover_install_state(install_state_path)
+        except LocalModelStateError as exc:
+            return LocalModelState(
+                model_id=model_id,
+                runner="ollama",
+                status="corrupt",
+                error=str(exc),
+            )
+    installed_path = root / model_id
+    return LocalModelState(
+        model_id=model_id,
+        runner="ollama",
+        status="ready" if installed_path.is_file() else "not_installed",
+        progress=100 if installed_path.is_file() else 0,
+        installed_path=str(installed_path) if installed_path.is_file() else None,
+    )
+
+
+def _save_local_model_state(model_id: str, state: LocalModelState) -> None:
+    root = _local_model_root(model_id)
+    root.mkdir(parents=True, exist_ok=True)
+    target = root / "lifecycle-state.json"
+    temporary = root / ".lifecycle-state.json.tmp"
+    temporary.write_text(
+        json.dumps(state.to_dict(), ensure_ascii=False, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(target)
+
+
+def _local_model_event(
+    *,
+    event: str,
+    message: str,
+    state: LocalModelState,
+) -> dict[str, object]:
+    return {
+        "event": event,
+        "message": message,
+        "lifecycle_event": state.last_event,
+        "lifecycle_status": state.status,
+        "recovery_actions": list(state.recovery_actions),
+        "state": state.to_dict(),
+    }
 
 
 app = create_app()

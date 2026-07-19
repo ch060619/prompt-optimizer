@@ -19,7 +19,7 @@ GENERATED_PATHS = {
     "schema.ts": GENERATED_DIR / "schema.ts",
     "client.ts": GENERATED_DIR / "client.ts",
 }
-GENERATED_HEADER = "// AUTO-GENERATED FILE. DO NOT EDIT.\n// RC ID: RC-062.\n// Source: docs/api/openapi-v1.json\n// Generator: scripts/generate_api.py\n\n"
+GENERATED_HEADER = "// AUTO-GENERATED FILE. DO NOT EDIT.\n// RC IDs: RC-062, RC-154, RC-181, RC-184.\n// Source: docs/api/openapi-v1.json\n// Generator: scripts/generate_api.py\n\n"
 
 JsonObject = dict[str, Any]
 
@@ -221,6 +221,10 @@ def generate_operation(
         args.append(f"{parameter_name}{optional}: {ts_type(parameter.get('schema', {}))}")
     if body_type:
         args.append(f"body: Schema.{body_type}")
+    if name in {"optimize", "optimizeStream"}:
+        args.append("signal?: AbortSignal")
+    if name == "optimizeStream":
+        args.extend(["requestId?: string", "afterSeq?: number"])
 
     path_value = path_expression(path, path_parameters)
     query_lines = []
@@ -247,6 +251,19 @@ def generate_operation(
     call_lines.append(f'        method: "{method.upper()}",')
     if body_type:
         call_lines.append("        body: JSON.stringify(body),")
+    if name in {"optimize", "optimizeStream"}:
+        call_lines.append("        ...(signal ? { signal } : {}),")
+    if name == "optimizeStream":
+        call_lines.extend(
+            [
+                "        ...(requestId || afterSeq !== undefined ? {",
+                "          headers: {",
+                '            ...(requestId ? { "X-Request-ID": requestId } : {}),',
+                '            ...(afterSeq !== undefined ? { "Last-Event-ID": String(afterSeq) } : {}),',
+                "          },",
+                "        } : {}),",
+            ]
+        )
     call_lines.append("      }, true);" if response == "Response" else "      });")
     call_lines.append("    },")
     return call_lines
@@ -261,6 +278,29 @@ def generate_client(spec: JsonObject) -> str:
             "  baseUrl?: string;",
             "  fetch?: typeof fetch;",
             "  getToken?: () => string | null;",
+            "}",
+            "",
+            "export class ApiRequestError extends Error {",
+            "  readonly status: number;",
+            "  readonly code?: string;",
+            "  readonly category?: string;",
+            "  readonly recoveryAction?: string;",
+            "  readonly exitCode?: number;",
+            "  readonly providerRequestId?: string;",
+            "",
+            "  constructor(status: number, payload: unknown, fallback: string) {",
+            "    const envelope = payload && typeof payload === \"object\" ? payload as Record<string, unknown> : {};",
+            "    const detail = envelope.detail && typeof envelope.detail === \"object\" ? envelope.detail as Record<string, unknown> : envelope;",
+            "    const message = typeof envelope.detail === \"string\" ? envelope.detail : detail.message;",
+            "    super(typeof message === \"string\" ? message : fallback);",
+            "    this.name = \"ApiRequestError\";",
+            "    this.status = status;",
+            "    this.code = typeof detail.code === \"string\" ? detail.code : undefined;",
+            "    this.category = typeof detail.category === \"string\" ? detail.category : undefined;",
+            "    this.recoveryAction = typeof detail.recovery_action === \"string\" ? detail.recovery_action : undefined;",
+            "    this.exitCode = typeof detail.exit_code === \"number\" ? detail.exit_code : undefined;",
+            "    this.providerRequestId = typeof detail.provider_request_id === \"string\" ? detail.provider_request_id : undefined;",
+            "  }",
             "}",
             "",
             "export function createApiClient(options: ApiClientOptions = {}) {",
@@ -284,7 +324,7 @@ def generate_client(spec: JsonObject) -> str:
             '      const detail = payload && typeof payload === "object" && "detail" in payload',
             "        ? (payload as { detail?: unknown }).detail",
             "        : response.statusText;",
-            '      throw new Error(typeof detail === "string" ? detail : response.statusText);',
+            "      throw new ApiRequestError(response.status, payload, typeof detail === \"string\" ? detail : response.statusText);",
             "    }",
             "    if (returnResponse) {",
             "      return response as T;",

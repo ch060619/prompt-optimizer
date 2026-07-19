@@ -1,31 +1,154 @@
+from prompt_optimizer.providers.anthropic import AnthropicMessagesAdapter
 from prompt_optimizer.providers.base import (
     ModelProvider,
     ModelProviderError,
     ModelRequest,
     ModelResponse,
+    ProviderBalanceError,
+    ProviderBudgetExceededError,
+    ProviderCancelledError,
     ProviderCapabilities,
+    ProviderCircuitOpenError,
     ProviderConfig,
+    ProviderContentFilterError,
+    ProviderErrorCategory,
     ProviderEvent,
     ProviderEventType,
+    ProviderModelError,
+    ProviderNetworkError,
+    ProviderParameterError,
     ProviderRateLimitError,
+    ProviderRegionError,
+    ProviderServerError,
     ProviderTimeoutError,
+    ProviderUnauthorizedError,
+    ToolCall,
+    raise_provider_http_error,
+    sanitize_provider_request_id,
+)
+from prompt_optimizer.providers.capabilities import (
+    CAPABILITY_MATRIX,
+    CAPABILITY_SCHEMA_VERSION,
+    CapabilitySnapshot,
+    ProviderCapabilityResolver,
+)
+from prompt_optimizer.providers.claude_boundary import (
+    resolve_claude_code_format,
+    validate_claude_credential_kind,
+)
+from prompt_optimizer.providers.connection_test import (
+    ConnectionTestResult,
+    ConnectionTestStep,
+    ProviderConnectionTester,
+)
+from prompt_optimizer.providers.discovery import (
+    ModelDiscoveryResult,
+    ModelDiscoveryService,
+    validate_model_id,
+)
+from prompt_optimizer.providers.gemini import GeminiAdapter
+from prompt_optimizer.providers.hosted import (
+    AzureOpenAIAdapter,
+    BedrockConverseAdapter,
+    VertexAIAdapter,
+)
+from prompt_optimizer.providers.local import (
+    LocalModelFailure,
+    LocalModelNotInstalled,
+    LocalModelOutOfMemory,
+    LocalModelProvider,
+    LocalModelRunner,
+    LocalModelTimeout,
+    LocalModelUnavailable,
+    LocalRunnerHealth,
+    UnavailableLocalRunner,
 )
 from prompt_optimizer.providers.openai import OpenAICompatibleAdapter
-from prompt_optimizer.providers.registry import ProviderRegistry
+from prompt_optimizer.providers.presets import PRESETS, ProviderPreset, get_preset
+from prompt_optimizer.providers.registry import ProviderRegistry, ProviderSelection
+from prompt_optimizer.providers.responses import OpenAIResponsesAdapter
+from prompt_optimizer.providers.runners import (
+    DEFAULT_RUNNER,
+    RUNNER_COMPARISON,
+    InMemoryRunnerAdapter,
+    LocalRunnerAdapter,
+    RunnerModel,
+    RunnerOperation,
+    RunnerRegistry,
+)
+from prompt_optimizer.providers.selection import ModelRoute, ModelSelectionStore
+from prompt_optimizer.runner_resources import RunnerResourceConfig, safe_runner_config
 
 # RC ID: RC-049. Export the shared Provider contract and adapter boundary.
 
 __all__ = [
     "ModelProvider",
     "ModelProviderError",
+    "LocalModelProvider",
+    "LocalModelRunner",
+    "LocalModelFailure",
+    "LocalModelNotInstalled",
+    "LocalModelOutOfMemory",
+    "LocalModelTimeout",
+    "LocalModelUnavailable",
+    "LocalRunnerHealth",
     "ModelRequest",
     "ModelResponse",
     "OpenAICompatibleAdapter",
+    "OpenAIResponsesAdapter",
+    "GeminiAdapter",
+    "AnthropicMessagesAdapter",
+    "resolve_claude_code_format",
+    "validate_claude_credential_kind",
+    "AzureOpenAIAdapter",
+    "VertexAIAdapter",
+    "BedrockConverseAdapter",
+    "PRESETS",
+    "ProviderPreset",
+    "get_preset",
     "ProviderCapabilities",
+    "CAPABILITY_MATRIX",
+    "CAPABILITY_SCHEMA_VERSION",
+    "CapabilitySnapshot",
+    "ProviderCapabilityResolver",
+    "ModelDiscoveryResult",
+    "ModelDiscoveryService",
+    "validate_model_id",
+    "ConnectionTestResult",
+    "ConnectionTestStep",
+    "ProviderConnectionTester",
+    "ProviderCancelledError",
+    "ProviderBalanceError",
+    "ProviderBudgetExceededError",
     "ProviderConfig",
+    "ProviderCircuitOpenError",
+    "ProviderContentFilterError",
+    "ProviderErrorCategory",
     "ProviderEvent",
     "ProviderEventType",
+    "ProviderModelError",
+    "ProviderNetworkError",
+    "ProviderParameterError",
     "ProviderRateLimitError",
+    "ProviderRegionError",
+    "ProviderServerError",
+    "ToolCall",
     "ProviderRegistry",
+    "ProviderSelection",
+    "ModelRoute",
+    "ModelSelectionStore",
     "ProviderTimeoutError",
+    "ProviderUnauthorizedError",
+    "raise_provider_http_error",
+    "sanitize_provider_request_id",
+    "UnavailableLocalRunner",
+    "DEFAULT_RUNNER",
+    "RUNNER_COMPARISON",
+    "InMemoryRunnerAdapter",
+    "LocalRunnerAdapter",
+    "RunnerModel",
+    "RunnerOperation",
+    "RunnerRegistry",
+    "RunnerResourceConfig",
+    "safe_runner_config",
 ]

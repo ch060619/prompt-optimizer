@@ -1,0 +1,49 @@
+schema_version: 1
+rc_id: RC-188
+models:
+  - model_id: google/gemma-3-1b-it
+    family: Gemma
+    source_url: https://huggingface.co/google/gemma-3-1b-it
+    revision: dcc83ea841ab6100d6b47a070329e1ba4cf78752
+    file_sha256: 3d4ef8d71c14db7e448a09ebe891cfb6bf32c57a9b44499ae0d1c098e48516b6
+    parameters_billions: 1.0
+    quantization: safetensors
+    context_length: 8192
+    disk_bytes: 1999811208
+    ram_bytes: 4294967296
+    vram_bytes: 2147483648
+    chat_template: gemma-3
+    chat_template_status: metadata-reviewed
+    eos_token: <end_of_turn>
+    model_card_status: verified-200-metadata-only
+    license_spdx: LicenseRef-Gemma-Terms
+    license_url: https://ai.google.dev/gemma/terms
+    license_status: metadata-gated-manual-confirmation
+    license_constraints: gated terms require user acceptance before download
+    license_version: LicenseRef-Gemma-Terms
+    gated: true
+    user_confirmation_required: true
+    distribution: ondemand
+  - model_id: Qwen/Qwen2.5-Coder-1.5B-Instruct
+    family: Qwen2.5-Coder
+    source_url: https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct
+    revision: 2e1fd397ee46e1388853d2af2c993145b0f1098a
+    file_sha256: c1b9b30e907950516ba3c646bdf570d8084c25a6410a0cdca80cf04b11bc13a8
+    parameters_billions: 1.5
+    quantization: safetensors
+    context_length: 32768
+    disk_bytes: 3087467144
+    ram_bytes: 6442450944
+    vram_bytes: 3221225472
+    chat_template: qwen2
+    chat_template_status: metadata-reviewed
+    eos_token: <|im_end|>
+    model_card_status: verified-200
+    license_spdx: Apache-2.0
+    license_url: https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct/blob/2e1fd397ee46e1388853d2af2c993145b0f1098a/LICENSE
+    license_status: verified-200
+    license_constraints: Apache-2.0 terms apply to user downloads
+    license_version: Apache-2.0
+    gated: false
+    user_confirmation_required: true
+    distribution: ondemand

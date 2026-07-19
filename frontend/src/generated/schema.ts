@@ -1,5 +1,5 @@
 // AUTO-GENERATED FILE. DO NOT EDIT.
-// RC ID: RC-062.
+// RC IDs: RC-062, RC-154, RC-181, RC-184.
 // Source: docs/api/openapi-v1.json
 // Generator: scripts/generate_api.py
 
@@ -18,6 +18,10 @@ export interface AuthResponse {
   user: UserPublic;
 }
 
+export interface CleanupRequest {
+  confirm?: boolean;
+}
+
 export interface DiffResult {
   old_id: number;
   new_id: number;
@@ -29,7 +33,7 @@ export interface DiffResult {
 
 export interface EvaluateTaskRequest {
   prompts: Array<string>;
-  provider?: "offline" | "openai" | "tongyi" | "zhipu";
+  provider?: "offline" | "local" | "openai" | "tongyi" | "zhipu" | "anthropic" | "gemini" | "azure" | "vertex" | "bedrock" | "openrouter" | "deepseek" | "moonshot" | "qwen" | "doubao" | "siliconflow" | "groq" | "together" | "ollama" | "lmstudio";
 }
 
 export interface ExportRequest {
@@ -42,6 +46,40 @@ export interface HTTPValidationError {
   detail?: Array<ValidationError>;
 }
 
+export interface LocalModelEventRequest {
+  event: "download_started" | "download_progress" | "download_paused" | "download_completed" | "verified" | "load_started" | "ready" | "busy" | "unload_started" | "unloaded" | "corrupt" | "update_available" | "update_started" | "failed" | "reset" | "disable" | "enable";
+  message?: string;
+  progress?: number | null;
+  error?: string | null;
+}
+
+export interface ModelCleanupRequest {
+  model_id?: string | null;
+}
+
+export interface ModelDirectoryCheckRequest {
+  path: string;
+  required_bytes?: number;
+}
+
+export interface ModelDirectoryMigrateRequest {
+  destination: string;
+}
+
+export interface ModelRepairRequest {
+  source?: string | null;
+}
+
+export interface ModelRollbackRequest {
+  version: string;
+}
+
+export interface ModelVersionInstallRequest {
+  source: string;
+  version: string;
+  checksum: string;
+}
+
 export interface OptimizationSuggestion {
   dimension: string;
   title: string;
@@ -50,19 +88,61 @@ export interface OptimizationSuggestion {
   priority: "high" | "medium" | "low";
 }
 
+export interface OptimizationTargets {
+  clarity?: boolean;
+  completeness?: boolean;
+  constraints?: boolean;
+  format?: boolean;
+  role?: boolean;
+  examples?: boolean;
+  code_task?: boolean;
+  conciseness?: boolean;
+  language_preservation?: boolean;
+}
+
 export interface OptimizeMetadata {
   provider_requested: string;
   provider_used: string;
+  provider_display_name: string;
+  system_prompt_version: string;
+  model?: string | null;
+  execution_location?: "local" | "cloud";
+  credential_ref?: string | null;
   fallback_used?: boolean;
   latency_ms: number;
   error_summary?: string | null;
+  error_code?: string | null;
+  error_category?: string | null;
+  provider_request_id?: string | null;
+  fallback_chain?: Array<string>;
+  estimated_input_tokens?: number | null;
+  estimated_output_tokens?: number | null;
+  estimated_cost?: number | null;
+  budget_limit_tokens?: number | null;
+  budget_limit_cost?: number | null;
+  budget_blocked?: boolean;
+  fallback_reason?: "not_installed" | "not_ready" | "out_of_memory" | "timeout" | null;
+  recovery_action?: "install" | "repair" | "free_memory" | "retry" | "configure_credentials" | "check_balance" | "wait_and_retry" | "change_region" | "choose_model" | "fix_parameters" | "review_content" | "check_network" | "cancel" | null;
+  selection_scope?: "global" | "workspace" | "session" | "optimizer" | "default";
+  provider_health?: "healthy" | "unavailable" | "fallback";
+  quality_score_before: number;
+  quality_score_after: number;
+  quality_score_delta: number;
 }
 
 export interface OptimizeRequest {
   prompt: string;
   template_id?: string | null;
   variables?: Record<string, unknown>;
-  provider?: "offline" | "openai" | "tongyi" | "zhipu";
+  provider?: "offline" | "local" | "openai" | "tongyi" | "zhipu" | "anthropic" | "gemini" | "azure" | "vertex" | "bedrock" | "openrouter" | "deepseek" | "moonshot" | "qwen" | "doubao" | "siliconflow" | "groq" | "together" | "ollama" | "lmstudio";
+  model?: string | null;
+  optimizer_provider?: "offline" | "local" | "openai" | "tongyi" | "zhipu" | "anthropic" | "gemini" | "azure" | "vertex" | "bedrock" | "openrouter" | "deepseek" | "moonshot" | "qwen" | "doubao" | "siliconflow" | "groq" | "together" | "ollama" | "lmstudio" | null;
+  optimizer_model?: string | null;
+  save_prompt_history?: boolean;
+  targets?: OptimizationTargets | null;
+  strategy?: "rules" | "model" | "combined";
+  max_tokens?: number | null;
+  max_cost?: number | null;
 }
 
 export interface OptimizeResponse {
@@ -106,6 +186,18 @@ export interface PromptVersion {
   optimized_prompt: string;
   analysis: PromptAnalysis;
   created_at: string;
+  accepted?: boolean;
+  accepted_at?: string | null;
+  provider_used?: string | null;
+  model?: string | null;
+  selection_scope?: "global" | "workspace" | "session" | "optimizer" | "default";
+  provider_health?: "healthy" | "unavailable" | "fallback";
+}
+
+export interface RunnerGenerateRequest {
+  prompt: string;
+  model_id?: string | null;
+  request_id?: string | null;
 }
 
 export interface ScoreBreakdown {
@@ -160,4 +252,10 @@ export interface VersionSummary {
   optimized_preview: string;
   score: number;
   created_at: string;
+  accepted?: boolean;
+  accepted_at?: string | null;
+  provider_used?: string | null;
+  model?: string | null;
+  selection_scope?: "global" | "workspace" | "session" | "optimizer" | "default";
+  provider_health?: "healthy" | "unavailable" | "fallback";
 }

@@ -10,6 +10,8 @@ from prompt_optimizer.core.models import (
     ProjectSpace,
     PromptAnalysis,
     PromptVersion,
+    ProviderHealth,
+    ProviderSelectionScope,
     TaskKind,
     TaskRecord,
     TaskStatus,
@@ -53,6 +55,11 @@ class StorageService:
         analysis: PromptAnalysis,
         owner_id: int = 1,
         project_id: int | None = None,
+        accepted: bool = False,
+        provider_used: str | None = None,
+        model: str | None = None,
+        selection_scope: ProviderSelectionScope = "default",
+        provider_health: ProviderHealth = "healthy",
     ) -> int:
         project_id = project_id or self.ensure_default_project(owner_id).id
         with self._connect() as connection:
@@ -65,9 +72,15 @@ class StorageService:
                         original_prompt,
                         optimized_prompt,
                         analysis_json,
+                        accepted,
+                        accepted_at,
+                        provider_used,
+                        model,
+                        selection_scope,
+                        provider_health,
                         created_at
                     )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     owner_id,
@@ -75,6 +88,12 @@ class StorageService:
                     original_prompt,
                     optimized_prompt,
                     analysis.model_dump_json(),
+                    int(accepted),
+                    datetime.now(UTC).isoformat() if accepted else None,
+                    provider_used,
+                    model,
+                    selection_scope,
+                    provider_health,
                     datetime.now(UTC).isoformat(),
                 ),
             )
@@ -94,6 +113,12 @@ class StorageService:
                     original_prompt,
                     optimized_prompt,
                     analysis_json,
+                    accepted,
+                    accepted_at,
+                    provider_used,
+                    model,
+                    selection_scope,
+                    provider_health,
                     created_at
                 FROM prompt_versions
                 WHERE owner_id = ?
@@ -114,6 +139,12 @@ class StorageService:
                     original_prompt,
                     optimized_prompt,
                     analysis_json,
+                    accepted,
+                    accepted_at,
+                    provider_used,
+                    model,
+                    selection_scope,
+                    provider_health,
                     created_at
                 FROM prompt_versions
                 WHERE id = ? AND owner_id = ?
@@ -123,6 +154,28 @@ class StorageService:
         if row is None:
             raise KeyError(f"未找到版本：{version_id}")
         return self._version_from_row(row)
+
+    def mark_version_accepted(self, version_id: int, owner_id: int) -> None:
+        with self._connect() as connection:
+            cursor = connection.execute(
+                """
+                UPDATE prompt_versions
+                SET accepted = 1, accepted_at = ?
+                WHERE id = ? AND owner_id = ?
+                """,
+                (datetime.now(UTC).isoformat(), version_id, owner_id),
+            )
+        if cursor.rowcount == 0:
+            raise KeyError(f"未找到版本：{version_id}")
+
+    def delete_version(self, version_id: int, owner_id: int) -> None:
+        with self._connect() as connection:
+            cursor = connection.execute(
+                "DELETE FROM prompt_versions WHERE id = ? AND owner_id = ?",
+                (version_id, owner_id),
+            )
+        if cursor.rowcount == 0:
+            raise KeyError(f"未找到版本：{version_id}")
 
     def create_user(self, username: str, password_hash: str) -> UserPublic:
         now = datetime.now(UTC).isoformat()
@@ -409,6 +462,27 @@ class StorageService:
                 "INTEGER NOT NULL DEFAULT 1",
             )
             self._ensure_column(connection, "prompt_versions", "project_id", "INTEGER")
+            self._ensure_column(
+                connection,
+                "prompt_versions",
+                "accepted",
+                "INTEGER NOT NULL DEFAULT 0",
+            )
+            self._ensure_column(connection, "prompt_versions", "accepted_at", "TEXT")
+            self._ensure_column(connection, "prompt_versions", "provider_used", "TEXT")
+            self._ensure_column(connection, "prompt_versions", "model", "TEXT")
+            self._ensure_column(
+                connection,
+                "prompt_versions",
+                "selection_scope",
+                "TEXT NOT NULL DEFAULT 'default'",
+            )
+            self._ensure_column(
+                connection,
+                "prompt_versions",
+                "provider_health",
+                "TEXT NOT NULL DEFAULT 'healthy'",
+            )
             connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS user_templates (
@@ -500,6 +574,16 @@ class StorageService:
             optimized_preview=row["optimized_prompt"][:80],
             score=analysis.score.total_score,
             created_at=datetime.fromisoformat(row["created_at"]),
+            accepted=bool(row["accepted"]),
+            accepted_at=(
+                datetime.fromisoformat(row["accepted_at"])
+                if row["accepted_at"]
+                else None
+            ),
+            provider_used=row["provider_used"],
+            model=row["model"],
+            selection_scope=row["selection_scope"],
+            provider_health=row["provider_health"],
         )
 
     @staticmethod
@@ -513,4 +597,14 @@ class StorageService:
             optimized_prompt=row["optimized_prompt"],
             analysis=analysis,
             created_at=datetime.fromisoformat(row["created_at"]),
+            accepted=bool(row["accepted"]),
+            accepted_at=(
+                datetime.fromisoformat(row["accepted_at"])
+                if row["accepted_at"]
+                else None
+            ),
+            provider_used=row["provider_used"],
+            model=row["model"],
+            selection_scope=row["selection_scope"],
+            provider_health=row["provider_health"],
         )
