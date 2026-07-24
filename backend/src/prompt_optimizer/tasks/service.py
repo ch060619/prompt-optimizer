@@ -7,6 +7,8 @@ from typing import Any
 from prompt_optimizer.contracts import Storage
 from prompt_optimizer.core.models import TaskKind, TaskRecord
 
+# RC ID: RC-225. Reconcile durable tasks after an App Server restart.
+
 
 class TaskService:
     def __init__(self, storage: Storage) -> None:
@@ -28,6 +30,9 @@ class TaskService:
 
     def get(self, task_id: str, owner_id: int) -> TaskRecord:
         return self.storage.get_task(task_id, owner_id)
+
+    def recover_incomplete(self) -> int:
+        return self.storage.recover_incomplete_tasks()
 
     def run(self, task_id: str, owner_id: int, work: Callable[[], dict[str, Any]]) -> None:
         try:

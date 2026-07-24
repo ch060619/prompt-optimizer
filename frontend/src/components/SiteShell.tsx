@@ -5,6 +5,7 @@ import Lenis from "lenis";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
 
 import { PRODUCT_NAME } from "../brand";
+import { AppLink } from "../navigation";
 import { recordViewport } from "../windowPreferences";
 import { RabbitMark, type RabbitVariant } from "./RabbitMark";
 
@@ -12,18 +13,19 @@ import { RabbitMark, type RabbitVariant } from "./RabbitMark";
 // RC ID: RC-129. Keep route Rabbit artwork below the content hierarchy and decorative-only.
 
 const productLinks = [
-  ["Prompt workspace", "/workspace"],
-  ["Evaluations", "/evaluations"],
-  ["Templates", "/prompt-management"],
-  ["Background tasks", "/prompt-chaining"]
+  ["Workspace home", "/workspace/home"],
+  ["Agent tasks", "/workspace/task"],
+  ["Change review", "/workspace/review"],
+  ["Prompt assets", "/workspace/assets"]
 ] as const;
 
 const companyLinks = [
-  ["Documentation", "/blog"],
-  ["Contact", "/contact"]
+  ["Providers and models", "/workspace/providers"],
+  ["Diagnostics", "/workspace/diagnostics"],
+  ["Settings", "/workspace/settings"]
 ] as const;
 
-export function SiteShell({ children, authenticated = false, isWorkspace = false, showSharedRabbit = false, rabbitVariant, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; showSharedRabbit?: boolean; rabbitVariant?: RabbitVariant; onSignOut?: () => void }) {
+export function SiteShell({ children, authenticated = false, isWorkspace = false, showSharedRabbit = false, rabbitVariant, hideHeader = false, onSignOut }: { children: ReactNode; authenticated?: boolean; isWorkspace?: boolean; showSharedRabbit?: boolean; rabbitVariant?: RabbitVariant; hideHeader?: boolean; onSignOut?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLElement>(null);
@@ -62,19 +64,42 @@ export function SiteShell({ children, authenticated = false, isWorkspace = false
       return;
     }
 
+    const revealElements = Array.from(frameRef.current?.querySelectorAll<HTMLElement>(".reveal-on-scroll") ?? []);
+    if (revealElements.length === 0) {
+      return;
+    }
+
     const previousScrollRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
     gsap.registerPlugin(ScrollTrigger);
     const lenis = new Lenis({ autoRaf: false, lerp: 0.08 });
-    let frame = 0;
+    let frame: number | null = null;
     const raf = (time: number) => {
       lenis.raf(time);
       frame = window.requestAnimationFrame(raf);
     };
-    frame = window.requestAnimationFrame(raf);
+    const startFrame = () => {
+      if (frame === null && document.visibilityState === "visible") {
+        frame = window.requestAnimationFrame(raf);
+      }
+    };
+    const stopFrame = () => {
+      if (frame !== null) {
+        window.cancelAnimationFrame(frame);
+        frame = null;
+      }
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        startFrame();
+      } else {
+        stopFrame();
+      }
+    };
+    startFrame();
     const context = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>(".reveal-on-scroll").forEach((element) => {
+      revealElements.forEach((element) => {
         gsap.fromTo(element, { autoAlpha: 0, y: 28 }, {
           autoAlpha: 1,
           duration: 0.7,
@@ -85,9 +110,11 @@ export function SiteShell({ children, authenticated = false, isWorkspace = false
       });
     }, frameRef);
     ScrollTrigger.refresh();
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      window.cancelAnimationFrame(frame);
+      stopFrame();
+      document.removeEventListener("visibilitychange", handleVisibility);
       context.revert();
       lenis.destroy();
       window.history.scrollRestoration = previousScrollRestoration;
@@ -106,8 +133,8 @@ export function SiteShell({ children, authenticated = false, isWorkspace = false
   }, []);
 
   return (
-    <div className="site-frame" ref={frameRef}>
-      <SiteHeader authenticated={authenticated} isWorkspace={isWorkspace} menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} onSignOut={onSignOut} />
+    <div className={hideHeader ? "site-frame site-frame-bare-workspace" : "site-frame"} ref={frameRef}>
+      {hideHeader ? null : <SiteHeader authenticated={authenticated} isWorkspace={isWorkspace} menuOpen={menuOpen} menuButtonRef={menuButtonRef} onMenuToggle={() => setMenuOpen((open) => !open)} onSignOut={onSignOut} />}
       <div className="site-content">
         {showSharedRabbit ? <SharedRabbit /> : null}
         {rabbitVariant ? <div aria-hidden="true" data-rabbit-layer="decorative" data-rabbit-route={window.location.pathname} className={`route-rabbit-slot route-rabbit-slot-${rabbitVariant}`}><RabbitMark variant={rabbitVariant} decorative /></div> : null}
@@ -135,21 +162,21 @@ function SiteHeader({ authenticated, isWorkspace, menuOpen, menuButtonRef, onMen
           {menuOpen ? <X size={23} strokeWidth={1.5} /> : <Menu size={23} strokeWidth={1.5} />}
         </button>
       </div>
-      <a className="site-logo" href="/" aria-label={`${PRODUCT_NAME} home`}>
+      <AppLink className="site-logo" href={isWorkspace ? "/workspace/home" : "/"} aria-label={`${PRODUCT_NAME} home`}>
         {PRODUCT_NAME}
-      </a>
+      </AppLink>
       <nav className="site-nav" aria-label="Primary navigation">
-        <a href="/prompt-management">WORKSPACE</a>
-        <a href="/evaluations">EVALUATIONS</a>
-        <a href="/blog">BUILD NOTES</a>
-        <a href="/contact">CONTACT</a>
+        <AppLink href="/workspace/home">WORKSPACE</AppLink>
+        <AppLink href="/workspace/task">TASKS</AppLink>
+        <AppLink href="/workspace/review">REVIEW</AppLink>
+        <AppLink href="/workspace/settings">SETTINGS</AppLink>
       </nav>
       {authenticated ? (
         <button className="header-action" type="button" onClick={onSignOut}>SIGN OUT <ArrowUpRight size={14} aria-hidden="true" /></button>
       ) : (
-        <a className="header-action" href={isWorkspace ? "/login" : "/workspace"}>
+        <AppLink className="header-action" href={isWorkspace ? "/login" : "/workspace/home"}>
           {isWorkspace ? "LOGIN" : "OPEN WORKSPACE"} <ArrowUpRight size={14} aria-hidden="true" />
-        </a>
+        </AppLink>
       )}
     </header>
   );
@@ -162,19 +189,19 @@ function SiteMenu({ menuRef, onClose }: { menuRef: RefObject<HTMLElement>; onClo
         <div className="site-menu-group">
           <span className="eyebrow">PRODUCTS</span>
           {productLinks.map(([label, href]) => (
-            <a key={href} className="menu-link" href={href} onClick={onClose}>
+            <AppLink key={href} className="menu-link" href={href} onClick={onClose}>
               <span>{label}</span>
               <ArrowUpRight size={18} aria-hidden="true" />
-            </a>
+            </AppLink>
           ))}
         </div>
         <div className="site-menu-group">
           <span className="eyebrow">PROJECT</span>
           {companyLinks.map(([label, href]) => (
-            <a key={href} className="menu-link" href={href} onClick={onClose}>
+            <AppLink key={href} className="menu-link" href={href} onClick={onClose}>
               <span>{label}</span>
               <ArrowUpRight size={18} aria-hidden="true" />
-            </a>
+            </AppLink>
           ))}
           <button className="menu-close-link" type="button" onClick={onClose}>
             CLOSE MENU <X size={16} aria-hidden="true" />

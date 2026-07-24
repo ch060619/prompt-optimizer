@@ -67,7 +67,7 @@ def _normalized_evaluation_report(report: str, fixture_path: Path) -> str:
     for line in report.replace(fixture_path.as_posix(), EVALUATION_FIXTURE.as_posix()).splitlines():
         if line.startswith("| regression-"):
             cells = line.split("|")
-            cells[-2] = " <latency-ms> "
+            cells[-3 if "| BR-" in line else -2] = " <latency-ms> "
             line = "|".join(cells)
         normalized_lines.append(line)
     return "\n".join(normalized_lines)

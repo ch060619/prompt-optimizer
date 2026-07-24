@@ -17,11 +17,11 @@ class Optimizer:
         template: PromptTemplate | None = None,
         language_profile: LanguageProfile | None = None,
         targets: OptimizationTargets | None = None,
+        protected_structure: StructuredPrompt | None = None,
     ) -> PromptAnalysis:
         analysis = self.analyzer.analyze(prompt)
-        profile = language_profile or LanguageProfile.detect(
-            StructuredPrompt.parse(prompt).language_text()
-        )
+        structure = protected_structure or StructuredPrompt.parse(prompt)
+        profile = language_profile or LanguageProfile.detect(structure.language_text())
         selected = targets or OptimizationTargets()
         if profile.primary == "en":
             sections = [
@@ -39,7 +39,10 @@ class Optimizer:
                 if profile.primary == "en"
                 else f"可参考模板：\n{template.template}"
             )
-        if profile.primary == "en" and targets is None:
+        has_output_format = any(
+            segment.kind == "output_format" for segment in structure.segments
+        )
+        if profile.primary == "en" and targets is None and not has_output_format:
             sections.extend(
                 [
                     "Context: explain the background, audience, usage, and important constraints.",
@@ -49,7 +52,7 @@ class Optimizer:
                     "state assumptions and risks when needed.",
                 ]
             )
-        elif targets is None:
+        elif targets is None and not has_output_format:
             sections.extend(
                 [
                     "上下文：说明任务背景、受众、使用场景和重要限制。",
@@ -91,6 +94,8 @@ class Optimizer:
             }
         if targets is not None:
             for name, section in target_sections.items():
+                if name == "format" and has_output_format:
+                    continue
                 if getattr(selected, name):
                     sections.append(section)
             if selected.language_preservation:

@@ -5,7 +5,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Literal
 
-# RC ID: RC-194. Keep local model lifecycle states and backend events explicit.
+# RC IDs: RC-194, RC-225. Keep local model lifecycle states and restart recovery explicit.
 
 LocalModelStatus = Literal[
     "not_installed",
@@ -276,7 +276,7 @@ def recover_state(
     file_exists = installed_path is not None and installed_path.is_file()
     if state.status in {"downloading", "paused", "verifying"}:
         return state
-    if state.status in {"failed", "corrupt", "update"}:
+    if state.status in {"failed", "corrupt", "update", "disabled"}:
         return state
     if not file_exists:
         return replace(state, status="not_installed", progress=0, last_event="recovered")

@@ -20,15 +20,26 @@ from prompt_optimizer.core.models import (
 )
 from prompt_optimizer.identity import compatible_env
 from prompt_optimizer.paths import default_db_path
-from prompt_optimizer.storage.backup import BackupResult, backup_database, read_schema_version
+from prompt_optimizer.storage.backup import (
+    BackupResult,
+    backup_database,
+    read_schema_version,
+    verify_database,
+)
+from prompt_optimizer.storage.errors import ResilientSQLiteConnection
 from prompt_optimizer.storage.files import FileStore
+from prompt_optimizer.storage.migrations import (
+    TARGET_SCHEMA_VERSION,
+    SQLiteMigrationRunner,
+)
 
 # RC ID: RC-054. Prefer Rabbit Code configuration with a legacy fallback.
 
 DEMO_USERNAME = "demo"
 DEMO_PASSWORD_HASH = AuthService().hash_password("demo-password", "demo-salt")
 DEFAULT_PROJECT_NAME = "默认项目"
-SCHEMA_VERSION = 1
+LEGACY_SCHEMA_VERSION = 1
+SCHEMA_VERSION = TARGET_SCHEMA_VERSION
 
 
 class StorageService:
@@ -37,16 +48,23 @@ class StorageService:
         db_path: Path | None = None,
         backup_dir: Path | None = None,
         config_path: Path | None = None,
+        busy_timeout_seconds: float = 30.0,
     ) -> None:
+        if busy_timeout_seconds < 0:
+            raise ValueError("busy_timeout_seconds must not be negative")
         self.db_path = db_path or default_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.file_store = FileStore(self.db_path.parent / "files")
         self.backup_dir = backup_dir or self.db_path.parent / "backups"
         configured_path = config_path or compatible_env("CONFIG")
         self.config_path = Path(configured_path).expanduser() if configured_path else None
+        self.busy_timeout_seconds = busy_timeout_seconds
         self.last_backup: BackupResult | None = None
+        if self.db_path.exists():
+            verify_database(self.db_path)
         self._backup_before_migration()
         self._init_db()
+        SQLiteMigrationRunner().apply(self.db_path)
 
     def save_version(
         self,
@@ -61,8 +79,9 @@ class StorageService:
         selection_scope: ProviderSelectionScope = "default",
         provider_health: ProviderHealth = "healthy",
     ) -> int:
-        project_id = project_id or self.ensure_default_project(owner_id).id
         with self._connect() as connection:
+            if project_id is None:
+                project_id = self._ensure_default_project(connection, owner_id).id
             cursor = connection.execute(
                 """
                 INSERT INTO prompt_versions
@@ -177,6 +196,60 @@ class StorageService:
         if cursor.rowcount == 0:
             raise KeyError(f"未找到版本：{version_id}")
 
+    def retention_candidates(
+        self,
+        *,
+        owner_id: int,
+        session_cutoff: datetime,
+        history_cutoff: datetime,
+        max_history_entries: int,
+    ) -> tuple[tuple[str, ...], tuple[int, ...]]:
+        with self._connect() as connection:
+            task_rows = connection.execute(
+                "SELECT id, status, updated_at FROM tasks WHERE owner_id = ?",
+                (owner_id,),
+            ).fetchall()
+            history_rows = connection.execute(
+                """
+                SELECT id, created_at
+                FROM prompt_versions
+                WHERE owner_id = ?
+                ORDER BY id DESC
+                """,
+                (owner_id,),
+            ).fetchall()
+        task_ids = tuple(
+            str(row["id"])
+            for row in task_rows
+            if row["status"] not in {"queued", "running"}
+            and _parse_datetime(row["updated_at"]) < session_cutoff
+        )
+        history_ids = tuple(
+            int(row["id"])
+            for index, row in enumerate(history_rows)
+            if index >= max_history_entries
+            or _parse_datetime(row["created_at"]) < history_cutoff
+        )
+        return task_ids, history_ids
+
+    def delete_retention_records(
+        self,
+        *,
+        task_ids: tuple[str, ...],
+        history_ids: tuple[int, ...],
+        owner_id: int,
+    ) -> tuple[int, int]:
+        with self._connect() as connection:
+            task_count = _delete_in(connection, "tasks", "id", task_ids, owner_id)
+            history_count = _delete_in(
+                connection,
+                "prompt_versions",
+                "id",
+                history_ids,
+                owner_id,
+            )
+        return task_count, history_count
+
     def create_user(self, username: str, password_hash: str) -> UserPublic:
         now = datetime.now(UTC).isoformat()
         try:
@@ -189,6 +262,9 @@ class StorageService:
                     (username, password_hash, now),
                 )
                 user_id = cursor.lastrowid
+                if user_id is None:
+                    raise RuntimeError("创建用户失败。")
+                self._ensure_default_project(connection, int(user_id))
         except sqlite3.IntegrityError as exc:
             raise ValueError("用户名已存在。") from exc
         if user_id is None:
@@ -198,7 +274,6 @@ class StorageService:
             username=username,
             created_at=datetime.fromisoformat(now),
         )
-        self.ensure_default_project(user.id)
         return user
 
     def get_user_by_username(self, username: str) -> tuple[UserPublic, str] | None:
@@ -248,34 +323,41 @@ class StorageService:
 
     def ensure_default_project(self, owner_id: int) -> ProjectSpace:
         with self._connect() as connection:
-            row = connection.execute(
+            return self._ensure_default_project(connection, owner_id)
+
+    @staticmethod
+    def _ensure_default_project(
+        connection: sqlite3.Connection,
+        owner_id: int,
+    ) -> ProjectSpace:
+        row = connection.execute(
+            """
+            SELECT id, owner_id, name, created_at
+            FROM project_spaces
+            WHERE owner_id = ?
+            ORDER BY id
+            LIMIT 1
+            """,
+            (owner_id,),
+        ).fetchone()
+        if row is None:
+            now = datetime.now(UTC).isoformat()
+            cursor = connection.execute(
                 """
-                SELECT id, owner_id, name, created_at
-                FROM project_spaces
-                WHERE owner_id = ?
-                ORDER BY id
-                LIMIT 1
+                INSERT INTO project_spaces (owner_id, name, created_at)
+                VALUES (?, ?, ?)
                 """,
-                (owner_id,),
-            ).fetchone()
-            if row is None:
-                now = datetime.now(UTC).isoformat()
-                cursor = connection.execute(
-                    """
-                    INSERT INTO project_spaces (owner_id, name, created_at)
-                    VALUES (?, ?, ?)
-                    """,
-                    (owner_id, DEFAULT_PROJECT_NAME, now),
-                )
-                project_id = cursor.lastrowid
-                if project_id is None:
-                    raise RuntimeError("创建项目空间失败。")
-                return ProjectSpace(
-                    id=int(project_id),
-                    owner_id=owner_id,
-                    name=DEFAULT_PROJECT_NAME,
-                    created_at=datetime.fromisoformat(now),
-                )
+                (owner_id, DEFAULT_PROJECT_NAME, now),
+            )
+            project_id = cursor.lastrowid
+            if project_id is None:
+                raise RuntimeError("创建项目空间失败。")
+            return ProjectSpace(
+                id=int(project_id),
+                owner_id=owner_id,
+                name=DEFAULT_PROJECT_NAME,
+                created_at=datetime.fromisoformat(now),
+            )
         return ProjectSpace(
             id=int(row["id"]),
             owner_id=int(row["owner_id"]),
@@ -407,15 +489,40 @@ class StorageService:
             updated_at=datetime.fromisoformat(row["updated_at"]),
         )
 
+    def recover_incomplete_tasks(self) -> int:
+        """Mark tasks interrupted by an App Server restart as retryable failures."""
+        now = datetime.now(UTC).isoformat()
+        with self._connect() as connection:
+            cursor = connection.execute(
+                """
+                UPDATE tasks
+                SET status = 'failed',
+                    error = ?,
+                    updated_at = ?
+                WHERE status IN ('queued', 'running')
+                """,
+                (
+                    "App Server restarted before task completed; retry using the saved input.",
+                    now,
+                ),
+            )
+        return cursor.rowcount
+
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.db_path, timeout=30.0)
+        connection = sqlite3.connect(
+            self.db_path,
+            timeout=self.busy_timeout_seconds,
+            factory=ResilientSQLiteConnection,
+        )
         connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA busy_timeout = 30000")
+        connection.execute(f"PRAGMA busy_timeout = {int(self.busy_timeout_seconds * 1000)}")
         connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA synchronous = NORMAL")
         return connection
 
     def _init_db(self) -> None:
         with self._connect() as connection:
+            current_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
             connection.execute("PRAGMA journal_mode = WAL")
             connection.execute("PRAGMA synchronous = NORMAL")
             connection.execute("PRAGMA foreign_keys = ON")
@@ -521,7 +628,20 @@ class StorageService:
                 )
                 """
             )
-            connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS project_spaces_owner "
+                "ON project_spaces(owner_id, id)"
+            )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS prompt_versions_owner_created "
+                "ON prompt_versions(owner_id, created_at)"
+            )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS tasks_owner_updated "
+                "ON tasks(owner_id, updated_at)"
+            )
+            if current_version < LEGACY_SCHEMA_VERSION:
+                connection.execute(f"PRAGMA user_version = {LEGACY_SCHEMA_VERSION}")
         demo = self.ensure_demo_user()
         default_project = self.ensure_default_project(demo.id)
         with self._connect() as connection:
@@ -608,3 +728,25 @@ class StorageService:
             selection_scope=row["selection_scope"],
             provider_health=row["provider_health"],
         )
+
+
+def _parse_datetime(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value)
+    return parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed.astimezone(UTC)
+
+
+def _delete_in(
+    connection: sqlite3.Connection,
+    table: str,
+    column: str,
+    ids: tuple[str, ...] | tuple[int, ...],
+    owner_id: int,
+) -> int:
+    if not ids:
+        return 0
+    placeholders = ", ".join("?" for _ in ids)
+    cursor = connection.execute(
+        f"DELETE FROM {table} WHERE owner_id = ? AND {column} IN ({placeholders})",
+        (owner_id, *ids),
+    )
+    return cursor.rowcount

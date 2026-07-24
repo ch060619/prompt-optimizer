@@ -1,170 +1,115 @@
-# Rabbit Code 提示词工程工具
+# Rabbit Code
 
-Rabbit Code 是一个离线优先的提示词分析、优化、模板管理、版本对比与导出工具。项目保留 `prompt_optimizer` Python 模块路径作为兼容层，包含 Python 后端核心库、命令行界面、本地 FastAPI 服务和 React Web 工作台，不依赖外部 AI API，适合本地使用和开源二次开发。
+Rabbit Code 是离线优先的提示词工程工作台：分析和优化提示词、管理模板、保存版本、查看 diff，并通过 CLI、Web 工作台或 Tauri 桌面壳使用。离线规则路径不需要云端 API；OpenAI 兼容、Gemini、Anthropic、Azure、Vertex 和 Bedrock 路径按需配置。
 
-## V2.0 版本状态
+![Rabbit Code 桌面工作台](桌面端参考图.png)
 
-V2.0 聚焦 AI 工程化能力补强：模型 Provider 抽象、SSE 流式优化、多用户归属、后台任务、评测集、结构化日志、Docker 构建和 CI 检查。
+![Rabbit Code 终端工作流](终端参考图.png)
 
-本次发布保留旧版本在 `main` 分支，V2.0 使用 `release/v2.0` 分支保存发布线，并用 `v2.0` Git tag 标记可复现的版本快照。GitHub Release 基于 `v2.0` tag 创建，而不是只依赖分支。
+## 当前支持范围
 
-已在本机完成的真实验证：
+- 正式发布目标：Windows 11 x64、Ubuntu 24.04 x64。
+- CPU-only 离线规则路径是最低可用基线。
+- macOS 不在首发构建、测试和支持范围内。
+- 本地模型和云端 Provider 都不随安装包携带；用户选择模型、许可证和数据发送边界。
+- 当前包版本是 `3.0.0`；`prompt_optimizer` Python 模块路径和 `prompt-opt` 命令为兼容入口。
 
-- 后端测试覆盖率：`81%`，来自 `pytest --cov=prompt_optimizer --cov-report=term-missing`。
-- 评测集：`55` 条样本，报告由 CLI 生成在 [docs/evaluation-report.md](docs/evaluation-report.md)。
-- Docker：已通过 `docker build -t rabbit-code:local .` 构建，并完成容器内 `/docs`、`/openapi.json`、`/api/templates`、`/api/analyze`、`/api/auth/register`、`/api/auth/login`、`/api/optimize` 冒烟验证。
+完整矩阵见 [支持矩阵](docs/support-matrix.md)。
 
-## 核心功能
+## 功能
 
-- 提示词分析与评分：按清晰度、具体性、上下文、输出格式、约束、角色、示例、可执行性评分。
-- 智能优化建议：基于规则和启发式算法生成具体改进建议。
-- 模板库管理：内置技术、创意、商务、教育、通用场景模板。
-- 版本控制与对比：SQLite 保存优化历史，支持版本 diff 和分数变化。
-- 模型接入抽象：支持离线规则 Provider，并预留 OpenAI、通义、智谱 HTTP Provider。
-- 流式与异步：提供 SSE 流式优化接口，以及后台优化、导出、评测任务。
-- 多用户归属：JWT 登录后按用户隔离历史版本、项目空间和任务。
-- 多格式导出：支持 Markdown、JSON、TXT、CSV。
-- 双入口使用：CLI 覆盖全部能力，Web UI 提供本地工作台。
+- 对清晰度、具体性、上下文、输出格式、约束、角色、示例和可执行性评分。
+- 通过离线规则生成改进建议，也可路由到已配置的模型 Provider。
+- 管理技术、创意、商务、教育和通用模板。
+- 将优化结果保存到本地 SQLite，支持历史、版本 diff 和 Markdown/JSON/TXT/CSV 导出。
+- 使用 SSE 流式优化或后台任务；取消、失败、Provider 降级和本地模型恢复状态会保留在结果元数据中。
+- Web 工作台提供项目、任务、变更审查、终端、Provider/模型、提示词资产、设置和诊断入口。
 
-## 环境要求
+## 安装与快速开始
+
+### 依赖
 
 - Python 3.12+
-- Node.js 18+（仅开发或构建前端时需要）
+- Node.js 20.19+，仅在开发或构建前端时需要
 - Git
-- Docker Desktop（可选，仅 Docker 启动或镜像构建时需要）
+- Docker Desktop，可选，仅用于本地开发/测试
 
-## 一键启动
-
-Windows 用户可以直接双击 `start.bat`。脚本默认使用本地 Python/Node.js 模式：检查 Python、Node.js 18+ 和 npm，创建 `.venv`，安装后端依赖，安装/构建前端，并启动本地 Web 服务。
-
-启动后访问：
-
-```text
-http://127.0.0.1:8000
-```
-
-也可以显式选择启动模式：
-
-```bat
-start.bat local
-start.bat docker
-```
-
-`start.bat docker` 会检查 Docker Desktop 是否运行，构建 `rabbit-code:v2.0` 和 `rabbit-code:local` 镜像，并以前台容器方式启动服务；旧 `prompt-optimizer:*` 标签仍作为兼容别名生成。
-
-## 安装步骤
+克隆后安装后端：
 
 ```bash
-git clone <your-repo-url>
+git clone <repository-url>
 cd prompt-optimizer
-
 python -m venv .venv
-.venv\Scripts\activate
-pip install -e backend[dev]
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+# Linux
+# . .venv/bin/activate
+python -m pip install -e "backend[dev]"
 ```
 
-前端开发依赖：
+构建并启动 Web 工作台：
 
 ```bash
-cd frontend
-npm install
+npm --prefix frontend install
+npm --prefix frontend run build
+rabbit serve --host 127.0.0.1 --port 8000
 ```
 
-## 命令行使用
+浏览器访问 <http://127.0.0.1:8000>。Windows 也可以运行 `start.bat local`；Docker 模式是 `start.bat docker`。
+
+### CLI 最短路径
 
 ```bash
-  rabbit prompt analyze "你是一名老师，请解释机器学习，输出格式为列表。"
-  rabbit prompt optimize "帮我写一封商务邮件"
-  rabbit prompt optimize "帮我写一封商务邮件" --provider offline
-  rabbit prompt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
-  rabbit prompt templates list --category tech
-  rabbit prompt templates show tech-code-generation
-  rabbit prompt history list
-  rabbit prompt history diff 1 2
-  rabbit prompt export 1 --format md --output result.md
+rabbit version
+rabbit analyze "解释机器学习，并用三条要点回答。"
+rabbit optimize "帮我写一封商务邮件" --provider offline
+rabbit templates list --category tech
+rabbit history list
+rabbit doctor --json
 ```
 
-启动本地 Web 服务：
+<!-- docs-check:run -->
+```python
+python scripts/check_docs.py
+```
+
+使用 `rabbit prompt ...` 仍然有效。完整命令和 GUI 工作流见 [使用手册](docs/user-guide.md)。
+
+## Provider 与本地模型
+
+默认 `offline` 不发送提示词。云端 Provider 必须明确设置 API Key、模型和端点，密钥保存在操作系统凭据边界或进程环境中，不写入 README、日志、Issue 或截图。配置细节见 [Provider 接入指南](docs/providers/provider-integration.md)。
+
+本地模型需要用户自行安装运行器、确认模型许可证并留出磁盘/RAM；安装包不暗带权重。见 [本地模型指南](docs/providers/local-models.md)。
+
+## 数据、隐私和删除
+
+默认数据目录是 Windows `%APPDATA%\rabbit-code`，Linux `$XDG_DATA_HOME/rabbit-code` 或 `~/.local/share/rabbit-code`。可用 `RABBIT_CODE_HOME` 和 `RABBIT_CODE_DB` 覆盖。旧的 `PROMPT_OPTIMIZER_*` 变量仅用于迁移兼容，并会提示弃用。
+
+提示词历史、任务、缓存、日志和 Provider 元数据可能包含用户输入派生内容；不要把敏感数据发送到未审查的 Provider。遥测默认关闭，启用时只允许匿名技术元数据，不包含提示词、文件、凭据、请求体或响应。删除预览和保留策略见 [安全、隐私与删除](docs/security/privacy-and-data.md) 与应用设置页。
+
+## 开发与质量检查
 
 ```bash
-  rabbit prompt serve --host 127.0.0.1 --port 8000
+python scripts/check_docs.py
+pytest backend/tests
+ruff check backend
+mypy backend/src
+npm --prefix frontend test
+npm --prefix frontend run lint
+npm --prefix frontend run build
 ```
 
-开发模式前端：
+性能数字只能引用 [基准 JSON](docs/performance/baseline.json) 和对应生成命令的实际输出；不能手填到 README 或发布说明。
 
-```bash
-cd frontend
-npm run dev
-```
+架构、开发、测试、发布和协作入口：
 
-浏览器访问 `http://127.0.0.1:5173`，API 请求会代理到 `http://127.0.0.1:8000`。
-
-## 项目结构
-
-```text
-backend/                  Python 核心库、CLI、API、测试
-frontend/                 React + Vite Web 工作台
-data/rules/               内置评分规则
-data/templates/           内置提示词模板
-data/evaluation/          提示词评测集
-docs/                     架构、计划、规范和贡献文档
-.github/workflows/ci.yml  自动化测试与质量检查
-Dockerfile                多阶段 Docker 构建
-.dockerignore             Docker 构建上下文排除规则
-```
-
-## 评测集
-
-项目内置 50+ 条多场景提示词评测样本，覆盖技术、商务、教育、创意、客服、数据分析和长文本场景。运行以下命令可生成本地评测报告：
-
-```bash
-  rabbit prompt evaluate --dataset data/evaluation/prompts.yml --output docs/evaluation-report.md
-```
-
-报告记录优化前后得分、人工标签、规则误判备注、Provider、降级状态和本地耗时。仓库中的 [评测报告](docs/evaluation-report.md) 由上述命令生成，简历中的 QPS、耗时、覆盖率等数字应只引用实际运行结果。
-
-## 工程化亮点
-
-- 规则引擎链路：评分维度、建议生成、优化结果和版本保存可独立测试。
-- 模型降级链路：远程 Provider 超时、限流或失败时自动回退离线规则，并返回 metadata。
-- 验证方法链路：内置评测集、报告生成、测试覆盖率命令和 [压测方法](docs/performance.md)，所有性能数字以实际运行为准。
-
-## 本地数据
-
-默认 SQLite 数据库保存到系统应用数据目录。新安装使用 Rabbit Code 名称；升级时会自动发现旧 `prompt-optimizer` 目录。新环境变量优先，旧变量在 Rabbit Code 3.0.0 前兼容并发出弃用警告：
-
-```bash
-set RABBIT_CODE_HOME=<your-data-dir>
-set RABBIT_CODE_DB=<your-data-dir>\rabbit-code.sqlite3
-```
-
-旧变量 `PROMPT_OPTIMIZER_HOME`、`PROMPT_OPTIMIZER_DB`、`PROMPT_OPTIMIZER_CONFIG`、`PROMPT_OPTIMIZER_JWT_SECRET` 和 `PROMPT_OPTIMIZER_<PROVIDER>_*` 仅作为迁移回退。发行包名为 `rabbit-code`，Python 模块路径和 `prompt-opt` 命令在兼容期保留；新客户端和脚本使用 `rabbit`。
-
-## 测试与质量检查
-
-```bash
-cd backend
-pytest --cov=prompt_optimizer --cov-report=term-missing
-ruff check .
-mypy src
-
-cd ../frontend
-npm test
-npm run lint
-npm run build
-```
-
-Docker 验证：
-
-```bash
-docker build -t rabbit-code:local .
-docker run --rm --name rabbit-code-smoke -p 8000:8000 rabbit-code:local
-```
-
-## 贡献指南
-
-欢迎提交 Issue 和 Pull Request。请阅读 [贡献指南](docs/contribution.md) 和 [代码规范](docs/coding-style.md)。提交前请运行测试和静态检查，确保新增模板、规则或功能有相应测试覆盖。
+- [架构说明](docs/architecture/rabbit-code.md)
+- [开发与发布指南](docs/development-guide.md)
+- [贡献指南](docs/contribution.md)
+- [安全策略](SECURITY.md)
+- [第三方许可](THIRD_PARTY_NOTICES.md)
+- [RC 追踪索引](docs/traceability/rc-index.md)
 
 ## 许可证
 
-本项目基于 MIT License 开源。
+源代码使用 [MIT License](LICENSE)。第三方依赖、模型和图片有各自的许可证与使用条件；发布或导入前请阅读 [第三方声明](THIRD_PARTY_NOTICES.md) 和本地模型许可证记录。

@@ -18,6 +18,7 @@ from prompt_optimizer.core.models import (
     UserPublic,
     VersionSummary,
 )
+from prompt_optimizer.core.structure import StructuredPrompt
 
 # RC ID: RC-066. Define replaceable Agent, Provider, Tool, Permission, Storage, and optimizer ports.
 
@@ -72,6 +73,7 @@ class PromptOptimizer(Protocol):
         template: PromptTemplate | None = None,
         language_profile: Any = None,
         targets: Any = None,
+        protected_structure: StructuredPrompt | None = None,
     ) -> PromptAnalysis:
         pass
 
@@ -139,6 +141,9 @@ class Storage(Protocol):
         pass
 
     def get_task(self, task_id: str, owner_id: int) -> TaskRecord:
+        pass
+
+    def recover_incomplete_tasks(self) -> int:
         pass
 
 

@@ -86,6 +86,11 @@
             "title": "New Score",
             "type": "number"
           },
+          "next_cursor": {
+            "default": 0,
+            "title": "Next Cursor",
+            "type": "integer"
+          },
           "old_id": {
             "title": "Old Id",
             "type": "integer"
@@ -94,9 +99,19 @@
             "title": "Old Score",
             "type": "number"
           },
+          "original_bytes": {
+            "default": 0,
+            "title": "Original Bytes",
+            "type": "integer"
+          },
           "score_delta": {
             "title": "Score Delta",
             "type": "number"
+          },
+          "truncated": {
+            "default": false,
+            "title": "Truncated",
+            "type": "boolean"
           }
         },
         "required": [
@@ -153,6 +168,163 @@
           "prompts"
         ],
         "title": "EvaluateTaskRequest",
+        "type": "object"
+      },
+      "ExecutionDestination": {
+        "properties": {
+          "execution_location": {
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Execution Location",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "network_access": {
+            "title": "Network Access",
+            "type": "boolean"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "provider_display_name": {
+            "title": "Provider Display Name",
+            "type": "string"
+          },
+          "target_host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Host"
+          },
+          "target_service": {
+            "title": "Target Service",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_location",
+          "provider",
+          "provider_display_name",
+          "target_service",
+          "network_access"
+        ],
+        "title": "ExecutionDestination",
+        "type": "object"
+      },
+      "ExecutionDestinationRequest": {
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "optimizer_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optimizer Model"
+          },
+          "optimizer_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "offline",
+                  "local",
+                  "openai",
+                  "tongyi",
+                  "zhipu",
+                  "anthropic",
+                  "gemini",
+                  "azure",
+                  "vertex",
+                  "bedrock",
+                  "openrouter",
+                  "deepseek",
+                  "moonshot",
+                  "qwen",
+                  "doubao",
+                  "siliconflow",
+                  "groq",
+                  "together",
+                  "ollama",
+                  "lmstudio"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optimizer Provider"
+          },
+          "provider": {
+            "default": "offline",
+            "enum": [
+              "offline",
+              "local",
+              "openai",
+              "tongyi",
+              "zhipu",
+              "anthropic",
+              "gemini",
+              "azure",
+              "vertex",
+              "bedrock",
+              "openrouter",
+              "deepseek",
+              "moonshot",
+              "qwen",
+              "doubao",
+              "siliconflow",
+              "groq",
+              "together",
+              "ollama",
+              "lmstudio"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "strategy": {
+            "default": "combined",
+            "enum": [
+              "rules",
+              "model",
+              "combined"
+            ],
+            "title": "Strategy",
+            "type": "string"
+          }
+        },
+        "title": "ExecutionDestinationRequest",
         "type": "object"
       },
       "ExportRequest": {
@@ -502,6 +674,16 @@
             ],
             "title": "Credential Ref"
           },
+          "destination": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionDestination"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "error_category": {
             "anyOf": [
               {
@@ -682,6 +864,8 @@
                   "fix_parameters",
                   "review_content",
                   "check_network",
+                  "free_disk",
+                  "choose_port",
                   "cancel"
                 ],
                 "type": "string"
@@ -907,6 +1091,196 @@
           "metadata"
         ],
         "title": "OptimizeResponse",
+        "type": "object"
+      },
+      "PerformanceMetricsSnapshot": {
+        "properties": {
+          "average_first_token_ms": {
+            "minimum": 0.0,
+            "title": "Average First Token Ms",
+            "type": "number"
+          },
+          "average_latency_ms": {
+            "minimum": 0.0,
+            "title": "Average Latency Ms",
+            "type": "number"
+          },
+          "average_model_load_ms": {
+            "minimum": 0.0,
+            "title": "Average Model Load Ms",
+            "type": "number"
+          },
+          "failure_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Failure Rate",
+            "type": "number"
+          },
+          "first_token_count": {
+            "minimum": 0.0,
+            "title": "First Token Count",
+            "type": "integer"
+          },
+          "first_token_total_ms": {
+            "minimum": 0.0,
+            "title": "First Token Total Ms",
+            "type": "integer"
+          },
+          "input_tokens": {
+            "minimum": 0.0,
+            "title": "Input Tokens",
+            "type": "integer"
+          },
+          "max_cpu_percent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Cpu Percent"
+          },
+          "max_gpu_memory_bytes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Gpu Memory Bytes"
+          },
+          "max_ram_bytes": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Ram Bytes"
+          },
+          "model_load_failures": {
+            "minimum": 0.0,
+            "title": "Model Load Failures",
+            "type": "integer"
+          },
+          "model_loads": {
+            "minimum": 0.0,
+            "title": "Model Loads",
+            "type": "integer"
+          },
+          "output_tokens": {
+            "minimum": 0.0,
+            "title": "Output Tokens",
+            "type": "integer"
+          },
+          "provider_metrics": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            "title": "Provider Metrics",
+            "type": "object"
+          },
+          "requests_failed": {
+            "minimum": 0.0,
+            "title": "Requests Failed",
+            "type": "integer"
+          },
+          "requests_succeeded": {
+            "minimum": 0.0,
+            "title": "Requests Succeeded",
+            "type": "integer"
+          },
+          "requests_total": {
+            "minimum": 0.0,
+            "title": "Requests Total",
+            "type": "integer"
+          },
+          "resource_samples": {
+            "minimum": 0.0,
+            "title": "Resource Samples",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "rc219-v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "tool_calls": {
+            "minimum": 0.0,
+            "title": "Tool Calls",
+            "type": "integer"
+          },
+          "tool_success_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Tool Success Rate",
+            "type": "number"
+          },
+          "tool_successes": {
+            "minimum": 0.0,
+            "title": "Tool Successes",
+            "type": "integer"
+          },
+          "total_latency_ms": {
+            "minimum": 0.0,
+            "title": "Total Latency Ms",
+            "type": "integer"
+          },
+          "total_model_load_ms": {
+            "minimum": 0.0,
+            "title": "Total Model Load Ms",
+            "type": "integer"
+          },
+          "window_started_at": {
+            "format": "date-time",
+            "title": "Window Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "window_started_at",
+          "requests_total",
+          "requests_succeeded",
+          "requests_failed",
+          "failure_rate",
+          "total_latency_ms",
+          "average_latency_ms",
+          "first_token_count",
+          "first_token_total_ms",
+          "average_first_token_ms",
+          "input_tokens",
+          "output_tokens",
+          "tool_calls",
+          "tool_successes",
+          "tool_success_rate",
+          "model_loads",
+          "model_load_failures",
+          "total_model_load_ms",
+          "average_model_load_ms",
+          "resource_samples"
+        ],
+        "title": "PerformanceMetricsSnapshot",
         "type": "object"
       },
       "ProjectSpace": {
@@ -1153,6 +1527,61 @@
         "title": "PromptVersion",
         "type": "object"
       },
+      "ProviderPrivacyNotice": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "execution_location": {
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Execution Location",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "privacy_policy_url": {
+            "title": "Privacy Policy Url",
+            "type": "string"
+          },
+          "request_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Request Fields",
+            "type": "array"
+          },
+          "retention_risk": {
+            "title": "Retention Risk",
+            "type": "string"
+          },
+          "service_region": {
+            "title": "Service Region",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "version",
+          "execution_location",
+          "request_fields",
+          "service_region",
+          "privacy_policy_url",
+          "retention_risk"
+        ],
+        "title": "ProviderPrivacyNotice",
+        "type": "object"
+      },
       "RunnerGenerateRequest": {
         "properties": {
           "model_id": {
@@ -1186,6 +1615,84 @@
           "prompt"
         ],
         "title": "RunnerGenerateRequest",
+        "type": "object"
+      },
+      "RunnerResourceConfigRequest": {
+        "properties": {
+          "concurrency": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concurrency"
+          },
+          "context_length": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Length"
+          },
+          "gpu_layers": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gpu Layers"
+          },
+          "idle_timeout_seconds": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idle Timeout Seconds"
+          },
+          "temperature_limit_celsius": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature Limit Celsius"
+          },
+          "threads": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threads"
+          }
+        },
+        "title": "RunnerResourceConfigRequest",
         "type": "object"
       },
       "ScoreBreakdown": {
@@ -1799,6 +2306,115 @@
         "tags": [
           "legacy",
           "data"
+        ]
+      }
+    },
+    "/api/data/retention": {
+      "post": {
+        "operationId": "retention_api_data_retention_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retention Api Data Retention Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retention",
+        "tags": [
+          "legacy",
+          "data"
+        ]
+      }
+    },
+    "/api/data/retention/preview": {
+      "get": {
+        "operationId": "retention_preview_api_data_retention_preview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retention Preview Api Data Retention Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Retention Preview",
+        "tags": [
+          "legacy",
+          "data"
+        ]
+      }
+    },
+    "/api/execution-destination": {
+      "post": {
+        "operationId": "execution_destination_preview_api_execution_destination_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutionDestinationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionDestination"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Execution Destination Preview",
+        "tags": [
+          "legacy"
         ]
       }
     },
@@ -2907,6 +3523,51 @@
         ]
       }
     },
+    "/api/local-runners/{runner}/queue": {
+      "get": {
+        "operationId": "local_runner_queue_api_local_runners__runner__queue_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Queue Api Local Runners  Runner  Queue Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Queue",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
     "/api/local-runners/{runner}/requests/{request_id}/cancel": {
       "post": {
         "operationId": "cancel_local_runner_api_local_runners__runner__requests__request_id__cancel_post",
@@ -2955,6 +3616,104 @@
           }
         },
         "summary": "Cancel Local Runner",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/local-runners/{runner}/resources": {
+      "get": {
+        "operationId": "local_runner_resources_api_local_runners__runner__resources_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Resources Api Local Runners  Runner  Resources Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Resources",
+        "tags": [
+          "legacy",
+          "local-runners"
+        ]
+      },
+      "post": {
+        "operationId": "configure_local_runner_resources_api_local_runners__runner__resources_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunnerResourceConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Configure Local Runner Resources Api Local Runners  Runner  Resources Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Configure Local Runner Resources",
         "tags": [
           "legacy",
           "local-runners"
@@ -3012,10 +3771,48 @@
         ]
       }
     },
+    "/api/metrics": {
+      "get": {
+        "operationId": "metrics_api_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricsSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "legacy",
+          "metrics"
+        ]
+      }
+    },
     "/api/optimize": {
       "post": {
         "operationId": "optimize_api_optimize_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Request-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",
@@ -3199,6 +3996,50 @@
         ]
       }
     },
+    "/api/optimize/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_optimize_api_optimize__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Optimize Api Optimize  Request Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Optimize",
+        "tags": [
+          "legacy"
+        ]
+      }
+    },
     "/api/projects": {
       "get": {
         "operationId": "projects_api_projects_get",
@@ -3249,6 +4090,32 @@
         "summary": "Projects",
         "tags": [
           "legacy"
+        ]
+      }
+    },
+    "/api/provider-privacy": {
+      "get": {
+        "operationId": "provider_privacy_api_provider_privacy_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderPrivacyNotice"
+                  },
+                  "title": "Response Provider Privacy Api Provider Privacy Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Provider Privacy",
+        "tags": [
+          "legacy",
+          "providers"
         ]
       }
     },
@@ -3906,6 +4773,115 @@
         "tags": [
           "v1",
           "data"
+        ]
+      }
+    },
+    "/api/v1/data/retention": {
+      "post": {
+        "operationId": "retention_api_v1_data_retention_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retention Api V1 Data Retention Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retention",
+        "tags": [
+          "v1",
+          "data"
+        ]
+      }
+    },
+    "/api/v1/data/retention/preview": {
+      "get": {
+        "operationId": "retention_preview_api_v1_data_retention_preview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retention Preview Api V1 Data Retention Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Retention Preview",
+        "tags": [
+          "v1",
+          "data"
+        ]
+      }
+    },
+    "/api/v1/execution-destination": {
+      "post": {
+        "operationId": "execution_destination_preview_api_v1_execution_destination_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutionDestinationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionDestination"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Execution Destination Preview",
+        "tags": [
+          "v1"
         ]
       }
     },
@@ -5014,6 +5990,51 @@
         ]
       }
     },
+    "/api/v1/local-runners/{runner}/queue": {
+      "get": {
+        "operationId": "local_runner_queue_api_v1_local_runners__runner__queue_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Queue Api V1 Local Runners  Runner  Queue Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Queue",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
     "/api/v1/local-runners/{runner}/requests/{request_id}/cancel": {
       "post": {
         "operationId": "cancel_local_runner_api_v1_local_runners__runner__requests__request_id__cancel_post",
@@ -5062,6 +6083,104 @@
           }
         },
         "summary": "Cancel Local Runner",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      }
+    },
+    "/api/v1/local-runners/{runner}/resources": {
+      "get": {
+        "operationId": "local_runner_resources_api_v1_local_runners__runner__resources_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Local Runner Resources Api V1 Local Runners  Runner  Resources Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Local Runner Resources",
+        "tags": [
+          "v1",
+          "local-runners"
+        ]
+      },
+      "post": {
+        "operationId": "configure_local_runner_resources_api_v1_local_runners__runner__resources_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runner",
+            "required": true,
+            "schema": {
+              "title": "Runner",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunnerResourceConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Configure Local Runner Resources Api V1 Local Runners  Runner  Resources Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Configure Local Runner Resources",
         "tags": [
           "v1",
           "local-runners"
@@ -5119,10 +6238,48 @@
         ]
       }
     },
+    "/api/v1/metrics": {
+      "get": {
+        "operationId": "metrics_api_v1_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceMetricsSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "v1",
+          "metrics"
+        ]
+      }
+    },
     "/api/v1/optimize": {
       "post": {
         "operationId": "optimize_api_v1_optimize_post",
         "parameters": [
+          {
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Request-Id"
+            }
+          },
           {
             "in": "header",
             "name": "authorization",
@@ -5306,6 +6463,50 @@
         ]
       }
     },
+    "/api/v1/optimize/{request_id}/cancel": {
+      "post": {
+        "operationId": "cancel_optimize_api_v1_optimize__request_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Optimize Api V1 Optimize  Request Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Optimize",
+        "tags": [
+          "v1"
+        ]
+      }
+    },
     "/api/v1/projects": {
       "get": {
         "operationId": "projects_api_v1_projects_get",
@@ -5356,6 +6557,32 @@
         "summary": "Projects",
         "tags": [
           "v1"
+        ]
+      }
+    },
+    "/api/v1/provider-privacy": {
+      "get": {
+        "operationId": "provider_privacy_api_v1_provider_privacy_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderPrivacyNotice"
+                  },
+                  "title": "Response Provider Privacy Api V1 Provider Privacy Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Provider Privacy",
+        "tags": [
+          "v1",
+          "providers"
         ]
       }
     },

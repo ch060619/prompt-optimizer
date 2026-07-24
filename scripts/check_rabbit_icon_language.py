@@ -26,7 +26,13 @@ def validate(files: list[tuple[Path, str]]) -> list[str]:
 
     for path, content in files:
         if "<Star" in content or ", Star," in content:
-            errors.append(f"unscoped Star icon remains in {path.as_posix()}; use Heart or Pin for non-optimization actions")
+            allowed_skill_star = (
+                path == Path("frontend/src/App.tsx")
+                and "Star as SkillStar" in content
+                and '<a href="/workspace/assets"><SkillStar' in content
+            )
+            if not allowed_skill_star:
+                errors.append(f"unscoped Star icon remains in {path.as_posix()}; use Heart or Pin for non-optimization actions")
 
     by_path = {path: content for path, content in files}
     if "<RabbitMark" not in by_path.get(Path("frontend/src/App.tsx"), ""):
@@ -42,7 +48,7 @@ def main() -> int:
         for error in errors:
             print(f"ERROR: {error}")
         return 1
-    print("Rabbit icon language is valid: Sparkles is reserved for prompt optimization and no unscoped Star remains.")
+    print("Rabbit icon language is valid: Sparkles is reserved for prompt optimization and Star is limited to the skills navigation.")
     return 0
 
 

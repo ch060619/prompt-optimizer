@@ -8,7 +8,13 @@ on:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      RABBIT_CODE_REAL_PROVIDER_TESTS: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,9 +24,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e backend[dev]
+      - name: Compile backend
+        run: python -m compileall -q backend/src
       # RC ID: RC-043
       - name: RC traceability
         run: python scripts/check_rc_traceability.py --check
+      # RC ID: RC-271
+      - name: Documentation links, assets, and smoke commands
+        run: python scripts/check_docs.py --run
       # RC ID: RC-066
       - name: Dependency boundaries
         run: python scripts/check_dependency_boundaries.py
@@ -74,6 +85,9 @@ jobs:
       # RC ID: RC-211
       - name: Security baseline and SBOM
         run: python scripts/security_scan.py --check
+      # RC ID: RC-215
+      - name: Structured log schema and redaction
+        run: python scripts/check_structured_logging.py
       # RC ID: RC-211
       - name: Python dependency audit
         run: |
@@ -85,14 +99,32 @@ jobs:
         run: mypy backend/src
       # RC ID: RC-173. Contract tests use MockTransport; real Provider tests are manual-only.
       - name: Provider Mock contract
-        env:
-          RABBIT_CODE_REAL_PROVIDER_TESTS: "0"
         run: pytest backend/tests/test_rc173_provider_contracts.py -q
       - name: Pytest
-        run: pytest --cov=prompt_optimizer --cov-report=term-missing backend/tests
+        run: pytest --cov=prompt_optimizer --cov-report=term-missing --cov-report=json:docs/evidence/RC-243/coverage-report.json backend/tests
+      # RC ID: RC-243
+      - name: Coverage policy
+        run: python scripts/check_rc243_coverage.py --check
+      # RC ID: RC-229. Compare reproducible offline performance against the committed baseline.
+      - name: Performance regression gate
+        run: |
+          python scripts/performance_baseline.py --iterations 25 --output performance-current.json --check
+          python benchmarks/performance_gate.py --baseline docs/performance/baseline.json --current performance-current.json --comparison-output performance-comparison.json --check
+      - name: Upload performance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rabbit-code-performance-${{ github.sha }}
+          path: |
+            performance-current.json
+            performance-comparison.json
 
   frontend:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -102,7 +134,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install frontend
         working-directory: frontend
-        run: npm install
+        run: npm ci
       - name: Lint
         working-directory: frontend
         run: npm run lint
@@ -115,4 +147,45 @@ jobs:
       # RC ID: RC-211
       - name: Production dependency audit
         working-directory: frontend
-        run: npm audit --omit=dev --audit-level=high
+        run: npm run audit:production
+
+  # RC ID: RC-280. Docker job: container build + API smoke test ONLY.
+  # This does NOT replace desktop/CLI installation verification.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t rabbit-code-api:dev .
+      - name: Start API container
+        run: |
+          docker run -d --name rabbit-code-test -p 127.0.0.1:8000:8000 rabbit-code-api:dev
+          sleep 5
+      - name: API smoke test
+        run: |
+          curl -sf http://127.0.0.1:8000/health || exit 1
+          echo "API health check passed"
+      - name: Container non-root check
+        run: |
+          USER=$(docker exec rabbit-code-test whoami)
+          if [ "$USER" = "root" ]; then
+            echo "FAIL: container runs as root"
+            exit 1
+          fi
+          echo "Container runs as: $USER"
+      - name: Teardown
+        if: always()
+        run: docker rm -f rabbit-code-test || true
+
+  # RC ID: RC-285. Automated license risk scan on every dependency change.
+  license-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install pyyaml
+      - name: Scan license risks
+        run: python scripts/scan_license_risks.py --check

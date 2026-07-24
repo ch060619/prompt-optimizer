@@ -9,9 +9,16 @@ htmlcov/
 *.sqlite3
 *.db
 node_modules/
+**/target/
 frontend/dist/
+backend/dist/
+backend/build/
 frontend/coverage/
 output/playwright/
+output/imagegen/
+output/reference/
+.runtime/
+.playwright-cli/
 .env
 .env.*
 !.env.example

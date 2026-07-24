@@ -111,6 +111,9 @@ describe("RC-146 prompt history persistence", () => {
     }));
 
     render(<App />);
+    fireEvent.change(await screen.findByRole("textbox", { name: "提示词输入" }), {
+      target: { value: "请用一句话解释测试。" },
+    });
     const optimize = await screen.findByRole("button", { name: "优化输入内容" });
     fireEvent.click(optimize);
     expect(await screen.findByRole("textbox", { name: "Optimized prompt preview" })).toHaveValue("优化后的提示词");
@@ -162,6 +165,9 @@ describe("RC-146 prompt history persistence", () => {
 
     render(<App />);
     expect(await screen.findByText("openai · gpt-test")).toBeInTheDocument();
+    fireEvent.change(await screen.findByRole("textbox", { name: "提示词输入" }), {
+      target: { value: "请用一句话解释测试。" },
+    });
     const optimize = screen.getByRole("button", { name: "优化输入内容" });
     fireEvent.click(optimize);
     await screen.findByRole("textbox", { name: "Optimized prompt preview" });

@@ -26,6 +26,15 @@ describe("Provider and model page", () => {
     expect(screen.getByText("NO MODELS DISCOVERED")).toBeInTheDocument();
   });
 
+  it("shows a versioned privacy boundary and custom endpoint responsibility", () => {
+    visitProviders();
+    render(<App />);
+
+    expect(screen.getByText("DATA HANDLING / custom-endpoint-v1")).toBeInTheDocument();
+    expect(screen.getByText(/CUSTOM ENDPOINT \/ USER RESPONSIBILITY/)).toBeInTheDocument();
+    expect(screen.getByText(/Unknown \/ configured endpoint/)).toBeInTheDocument();
+  });
+
   it("shows an environment credential source without receiving its value", async () => {
     visitProviders();
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({

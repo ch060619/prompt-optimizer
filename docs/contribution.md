@@ -1,5 +1,7 @@
 # 贡献指南
 
+根目录的 [CONTRIBUTING.md](../CONTRIBUTING.md) 是英文协作入口；Issue 表单、PR 模板、行为准则、路线图和变更日志位于仓库根目录与 `.github/`。安全问题必须使用 [SECURITY.md](../SECURITY.md) 的私密渠道，不要提交公开 Issue。
+
 ## 提交流程
 
 1. Fork 仓库并创建功能分支。
@@ -32,4 +34,3 @@ npm run build
 ## 规则贡献
 
 新增或修改评分规则时，请同步更新 `docs/prompt-rules.md`，并补充测试说明规则行为。
-

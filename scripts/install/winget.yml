@@ -1,0 +1,28 @@
+# Winget manifest for Rabbit Code CLI
+# https://learn.microsoft.com/en-us/windows/package-manager/package/manifest
+PackageIdentifier: RabbitCode.RabbitCode
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Rabbit Code Contributors
+PublisherUrl: https://github.com/rabbit-code/rabbit-code
+PackageName: Rabbit Code
+PackageUrl: https://github.com/rabbit-code/rabbit-code
+License: MIT
+LicenseUrl: https://github.com/rabbit-code/rabbit-code/blob/main/LICENSE
+ShortDescription: Open-source cross-platform coding agent with prompt optimization
+Description: Rabbit Code is an open-source, cross-platform coding agent with terminal and desktop shared core capabilities, prompt optimization, and local model support.
+Tags:
+  - coding-agent
+  - prompt-optimization
+  - cli
+  - developer-tools
+Installers:
+  - InstallerLocale: en-US
+    Architecture: x64
+    InstallerType: portable
+    InstallerUrl: https://github.com/rabbit-code/rabbit-code/releases/download/v3.0.0/rabbit-code-3.0.0-windows-x64.exe
+    InstallerSha256: TBD
+    Commands:
+      - rabbit
+ManifestType: singleton
+ManifestVersion: 1.4.0

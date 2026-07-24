@@ -140,10 +140,63 @@ def run_agent(
         raise typer.Exit(code=exit_code)
 
 
+@app.command("tui")
+def run_tui(
+    prompt: Annotated[str | None, typer.Argument(help="待执行的提示词")] = None,
+    width: Annotated[int, typer.Option("--width", min=24)] = 80,
+    height: Annotated[int, typer.Option("--height", min=8)] = 24,
+) -> None:
+    """打开与共享 Agent Runtime 对接的终端界面。"""
+    args = ["tui", "--output", "text", "--width", str(width), "--height", str(height)]
+    if prompt is not None:
+        args.append(prompt)
+    exit_code = agent_cli_main(args)
+    if exit_code != EXIT_OK:
+        raise typer.Exit(code=exit_code)
+
+
 @app.command()
 def version() -> None:
     """显示 Rabbit Code 版本。"""
     typer.echo(f"{PRODUCT_NAME} {package_version()}")
+
+
+@app.command("check-update")
+def check_update(
+    channel: Annotated[str, typer.Option(help="Update channel (stable/beta/nightly)")] = "stable",
+) -> None:
+    """检查是否有可用更新。"""
+    from prompt_optimizer.update_checker import UpdateChecker, check_version_compatibility
+
+    current = package_version()
+    checker = UpdateChecker(current_version=current, channel=channel)  # type: ignore[arg-type]
+    update = checker.check()
+    if update is None:
+        typer.echo(f"{PRODUCT_NAME} {current} 已是最新版本（{channel} 渠道）。")
+        return
+
+    typer.echo(f"发现新版本: v{update.latest_version} (当前: v{update.current_version})")
+    typer.echo(f"渠道: {update.channel}，发布说明: {update.release_notes}")
+
+    compat = check_version_compatibility(
+        current=update.current_version,
+        target=update.latest_version,
+        min_required=update.min_required_version,
+    )
+    if not compat.is_compatible:
+        typer.echo(f"不兼容: {compat.warnings[0]}")
+        raise typer.Exit(code=1)
+    if compat.warnings:
+        for w in compat.warnings:
+            typer.echo(f"警告: {w}")
+    if update.is_breaking:
+        typer.echo("破坏性变更:")
+        for bc in update.breaking_changes:
+            typer.echo(f"  - {bc}")
+
+    typer.echo(f"下载: {update.download_url}")
+    typer.echo(f"SHA-256: {update.sha256}")
+    typer.echo("使用 pip install --upgrade rabbit-code 升级。")
 
 
 @app.command("path")

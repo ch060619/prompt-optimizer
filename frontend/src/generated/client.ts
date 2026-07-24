@@ -76,6 +76,16 @@ export function createApiClient(options: ApiClientOptions = {}) {
         method: "GET",
       });
     },
+    metrics() {
+      return request<Schema.PerformanceMetricsSnapshot>(`/api/v1/metrics`, {
+        method: "GET",
+      });
+    },
+    providerPrivacy() {
+      return request<Array<Schema.ProviderPrivacyNotice>>(`/api/v1/provider-privacy`, {
+        method: "GET",
+      });
+    },
     localModelState(modelId: string) {
       return request<Record<string, unknown>>(`/api/v1/local-models/${encodeURIComponent(String(modelId))}/state`, {
         method: "GET",
@@ -148,6 +158,22 @@ export function createApiClient(options: ApiClientOptions = {}) {
         method: "GET",
       });
     },
+    localRunnerQueue(runner: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/queue`, {
+        method: "GET",
+      });
+    },
+    localRunnerResources(runner: string) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/resources`, {
+        method: "GET",
+      });
+    },
+    configureLocalRunnerResources(runner: string, body: Schema.RunnerResourceConfigRequest) {
+      return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/resources`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
     loadLocalRunnerModel(runner: string, modelId: string) {
       return request<Record<string, unknown>>(`/api/v1/local-runners/${encodeURIComponent(String(runner))}/models/${encodeURIComponent(String(modelId))}/load`, {
         method: "POST",
@@ -186,6 +212,17 @@ export function createApiClient(options: ApiClientOptions = {}) {
         body: JSON.stringify(body),
       });
     },
+    retentionPreview() {
+      return request<Record<string, unknown>>(`/api/v1/data/retention/preview`, {
+        method: "GET",
+      });
+    },
+    retention(body: Schema.CleanupRequest) {
+      return request<Record<string, unknown>>(`/api/v1/data/retention`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    },
     analyze(body: Schema.AnalyzeRequest) {
       return request<Schema.PromptAnalysis>(`/api/v1/analyze`, {
         method: "POST",
@@ -214,11 +251,20 @@ export function createApiClient(options: ApiClientOptions = {}) {
         method: "GET",
       });
     },
-    optimize(body: Schema.OptimizeRequest, signal?: AbortSignal) {
+    optimize(body: Schema.OptimizeRequest, signal?: AbortSignal, requestId?: string) {
       return request<Schema.OptimizeResponse>(`/api/v1/optimize`, {
         method: "POST",
         body: JSON.stringify(body),
         ...(signal ? { signal } : {}),
+        ...(requestId ? {
+          headers: { "X-Request-ID": requestId },
+        } : {}),
+      });
+    },
+    executionDestinationPreview(body: Schema.ExecutionDestinationRequest) {
+      return request<Schema.ExecutionDestination>(`/api/v1/execution-destination`, {
+        method: "POST",
+        body: JSON.stringify(body),
       });
     },
     optimizeStream(body: Schema.OptimizeRequest, signal?: AbortSignal, requestId?: string, afterSeq?: number) {
@@ -236,6 +282,11 @@ export function createApiClient(options: ApiClientOptions = {}) {
     },
     cancelOptimizeStream(requestId: string) {
       return request<Record<string, unknown>>(`/api/v1/optimize/stream/${encodeURIComponent(String(requestId))}/cancel`, {
+        method: "POST",
+      });
+    },
+    cancelOptimize(requestId: string) {
+      return request<Record<string, unknown>>(`/api/v1/optimize/${encodeURIComponent(String(requestId))}/cancel`, {
         method: "POST",
       });
     },

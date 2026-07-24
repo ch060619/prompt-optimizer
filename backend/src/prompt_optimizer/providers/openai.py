@@ -21,6 +21,7 @@ from prompt_optimizer.providers.base import (
     ProviderEvent,
     ProviderEventType,
     ProviderNetworkError,
+    ProviderProxyError,
     ProviderRateLimitError,
     ProviderTimeoutError,
     ProviderUnauthorizedError,
@@ -107,33 +108,40 @@ class OpenAICompatibleAdapter:
                 except httpx.TimeoutException as exc:
                     last_error = exc
                     if attempt >= self.config.max_retries:
-                        raise ProviderTimeoutError(f"{self.name} 请求超时。") from exc
+                        timeout_error = ProviderTimeoutError(f"{self.name} 请求超时。")
+                        self._record_failure_if_retryable(timeout_error)
+                        raise timeout_error from exc
                     self._sleep_before_retry(
                         request,
                         self._retry_delay(ProviderTimeoutError("request timeout"), attempt),
                     )
                 except httpx.HTTPError as exc:
                     last_error = exc
+                    network_error = self._network_error(exc)
                     if attempt >= self.config.max_retries:
-                        raise ProviderNetworkError(f"{self.name} 网络请求失败。") from exc
+                        self._record_failure_if_retryable(network_error)
+                        raise network_error from exc
                     self._sleep_before_retry(
                         request,
-                        self._retry_delay(ProviderNetworkError("network failure"), attempt),
+                        self._retry_delay(network_error, attempt),
                     )
                 except ModelProviderError as exc:
                     last_error = exc
                     if not exc.retryable or attempt >= self.config.max_retries:
+                        self._record_failure_if_retryable(exc)
                         raise
                     self._sleep_before_retry(request, self._retry_delay(exc, attempt))
             raise RuntimeError(str(last_error) if last_error else f"{self.name} 请求失败。")
         except ProviderCancelledError:
             raise
         except httpx.TimeoutException as exc:
-            self._record_failure()
-            raise ProviderTimeoutError(f"{self.name} 请求超时。") from exc
+            timeout_error = ProviderTimeoutError(f"{self.name} 请求超时。")
+            self._record_failure_if_retryable(timeout_error)
+            raise timeout_error from exc
         except httpx.HTTPError as exc:
-            self._record_failure()
-            raise ProviderNetworkError(f"{self.name} 网络请求失败。") from exc
+            network_error = self._network_error(exc)
+            self._record_failure_if_retryable(network_error)
+            raise network_error from exc
         except RuntimeError:
             self._record_failure()
             raise
@@ -171,7 +179,7 @@ class OpenAICompatibleAdapter:
             raise ProviderTimeoutError(f"{self.name} 请求超时。") from exc
         except httpx.HTTPError as exc:
             self._record_failure()
-            raise ProviderNetworkError(f"{self.name} 网络请求失败。") from exc
+            raise self._network_error(exc) from exc
         except RuntimeError:
             self._record_failure()
             raise
@@ -206,6 +214,15 @@ class OpenAICompatibleAdapter:
             self._circuit_state = "open"
             self._circuit_opened_at = time.monotonic()
 
+    def _record_failure_if_retryable(self, error: ModelProviderError) -> None:
+        if error.retryable:
+            self._record_failure()
+
+    def _network_error(self, error: httpx.HTTPError) -> ProviderNetworkError:
+        if isinstance(error, httpx.ProxyError):
+            return ProviderProxyError(f"{self.name} 代理连接失败。")
+        return ProviderNetworkError(f"{self.name} 网络请求失败。")
+
     @staticmethod
     def _check_cancelled(request: ModelRequest) -> None:
         if request.cancel_event is not None and request.cancel_event.is_set():
@@ -224,7 +241,7 @@ class OpenAICompatibleAdapter:
         exponential = min(30.0, 0.2 * (2**attempt))
         retry_after = error.retry_after_seconds or 0.0
         delay = max(exponential, retry_after)
-        return min(300.0, delay + random.uniform(0.0, min(0.25, delay * 0.25)))
+        return float(min(300.0, delay + random.uniform(0.0, min(0.25, delay * 0.25))))
 
     def _client_for(self, endpoint: str) -> httpx.Client:
         if self._direct_client is None or not self._matches_no_proxy(endpoint):

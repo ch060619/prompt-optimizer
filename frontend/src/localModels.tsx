@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import { InstallDialog } from "./components/UiStates";
 import { writeDefaultLocalModel } from "./localModelSelection";
+import { AppLink } from "./navigation";
 import { providerRouteStorageKey, workspaceHomeHref, workspaceScope, writeWorkspaceRoute } from "./workspaceRoute";
 
 // RC IDs: RC-115, RC-185, RC-194. Render backend-driven local model lifecycle state.
@@ -451,11 +452,11 @@ function LocalSetupWizard() {
             <span className="eyebrow">LOCAL ROUTE READY</span>
             <h2>{selectedModel.name} is ready.</h2>
             <p>The runner passed its local health check. The workspace can now use this model without a remote API.</p>
-            <a className="local-model-primary" href={workspaceHomeHref()}><ArrowRight size={15} aria-hidden="true" /> OPEN WORKSPACE HOME</a>
+          <AppLink className="local-model-primary" href={workspaceHomeHref()}><ArrowRight size={15} aria-hidden="true" /> OPEN WORKSPACE HOME</AppLink>
           </section>
         ) : null}
 
-        <div className="local-setup-footer"><a href="/onboarding"><ArrowLeft size={15} aria-hidden="true" /> BACK TO ROUTES</a><span>{notice || (state.phase === "complete" ? "SETUP SAVED" : "PROGRESS SAVED LOCALLY")}</span></div>
+        <div className="local-setup-footer"><AppLink href="/onboarding"><ArrowLeft size={15} aria-hidden="true" /> BACK TO ROUTES</AppLink><span>{notice || (state.phase === "complete" ? "SETUP SAVED" : "PROGRESS SAVED LOCALLY")}</span></div>
       </section>
     </main>
   );

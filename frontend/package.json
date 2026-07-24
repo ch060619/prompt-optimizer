@@ -2,25 +2,24 @@
   "name": "rabbit-code-web",
   "version": "3.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --max-warnings 0",
-    "test": "vitest run"
+    "test": "vitest run",
+    "audit:production": "npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.0",
-    "typescript": "^5.5.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "lucide-react": "^0.468.0",
     "gsap": "^3.12.5",
-    "lenis": "^1.1.14"
+    "lenis": "^1.1.14",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.8",
@@ -29,10 +28,14 @@
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "axe-core": "^4.12.1",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.9",
     "jsdom": "^24.1.1",
-    "vitest": "^2.0.5"
+    "typescript": "^5.5.4",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   }
 }

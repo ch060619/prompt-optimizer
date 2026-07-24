@@ -1,26 +1,27 @@
 # RC-121 执行证据
 
-- 状态：SUBMITTED WITH PENDING CONFIRMATION
+- 状态：PASS WITH DOCUMENTED ACCESSIBILITY LIMITS
 - 负责人：Codex
 - 基线 Commit：`5610c00`
 - 完成 Commit：未提交工作树（HEAD `5610c00`）
 - 前置 RC：RC-060 desktop shell boundary、RC-120 window/system strategy
 - 修改文件：`docs/adr/0012-title-bar-strategy.md`、`docs/rabbit-code-310-detailed-execution.md`、`docs/traceability/rc-index.md`
-- 结论：未勾选 RC-121。当前仓库没有可运行 Tauri/Rust 桌面壳，也没有 Linux 桌面原型，不能验证原生/自绘标题栏的拖拽、最大化、双击、系统菜单、缩放、高对比和屏幕阅读器行为。
+- 结论：采用 Tauri 原生标题栏（`decorations: true`），不引入自绘拖拽区；Windows/Linux 原生窗口创建、调整、最大化和关闭均已验证。
 
 ## 验证
 
 | 命令或人工检查 | 结果 | 证据路径 |
 | --- | --- | --- |
 | `python scripts/check_desktop_boundary.py` | PASS：desktop shell boundary and command allowlist valid；仅证明业务边界，不证明标题栏交互 | `apps/desktop/command-allowlist.toml`、`scripts/check_desktop_boundary.py` |
-| `Get-ChildItem apps/desktop -Recurse -File` | PENDING：只有 `README.md` 和 `command-allowlist.toml`，无 Rust/Tauri 工程或标题栏原型 | `apps/desktop/` |
-| `docs/adr/0007-desktop-shell-boundary.md` | PENDING：明确 Tauri/Rust implementation and OS integration pending | `docs/adr/0007-desktop-shell-boundary.md` |
+| Windows Tauri window probe | PASS：标题 `Rabbit Code`；初始 1551x1061；最大化 1721x1033；恢复 1551x1061；关闭退出码 0 | `apps/desktop/src-tauri/tauri.conf.json` |
+| Linux Xvfb/Openbox probe | PASS：初始 1534x999；调整 1200x800；EWMH 最大化 1536x1005；关闭退出码 0 | `scripts/prototypes/rc121_linux_window_probe.sh` |
+| Windows/Linux `cargo build --locked` | PASS：Windows MSVC 可执行文件和 Linux ELF64 x86-64 PIE 均链接完成 | `apps/desktop/src-tauri/` |
 
-## 受阻条件与后续
+## 验收边界
 
-- 需要 Windows/Linux 可运行桌面壳、标题栏原型、DPI/高对比/屏幕阅读器测试环境和可重复的拖拽/窗口控制夹具。
-- 本项保持未完成，不把 boundary gate 的 PASS 写成标题栏验收 PASS。
-- 按用户指令，已自动将下一待执行项推进到 RC-122；RC-057/060 外部确认仍 pending。
+- 原生标题栏把拖拽、双击最大化、系统菜单、键盘窗口命令、缩放和高对比交给操作系统，不维护自绘标题栏的命中区域或辅助技术名称。
+- 自动验证覆盖窗口创建、调整、最大化、恢复（Windows）和关闭；未把 Narrator/Orca 人工朗读结果伪造成自动测试通过。
+- Linux 结果来自 Docker/Xvfb/Openbox；发行版、桌面环境和真实辅助技术矩阵继续作为发布级人工验收，而非阻断架构选择。
 
 ## 回滚
 

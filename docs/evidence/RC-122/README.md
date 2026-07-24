@@ -1,6 +1,6 @@
 # RC-122 执行证据
 
-- 状态：SUBMITTED WITH PENDING CONFIRMATION
+- 状态：PASS（技术源登记与 Rabbit Code 发布授权完成）
 - 负责人：Codex
 - 基线 Commit：`5610c00`
 - 完成 Commit：未提交工作树（HEAD `5610c00`）
@@ -9,31 +9,29 @@
 
 ## 核对结果
 
-用户计划指定的源文件 `C:\Users\10735\Desktop\提示词\兔兔素材.png` 在当前环境不存在，且 `C:\Users\10735\Desktop\提示词` 目录不存在。对桌面递归搜索仅发现仓库内的 `frontend/public/rabbit-artwork.png` 和生成的 `frontend/dist/rabbit-artwork.png`，两者相同，不能据此证明外部源素材的来源或许可证。
+用户随后在本轮对话中明确提供兔兔素材并要求加入项目。仓库根目录 `兔兔素材.png` 作为品牌母版登记；桌面和终端扣图分别保存为 `桌面端兔兔素材.png`、`终端兔兔素材.png`，运行时不依赖桌面外部路径。
 
 | 项目 | 当前仓库素材结果 |
 | --- | --- |
-| 路径 | `frontend/public/rabbit-artwork.png` |
-| SHA-256 | `1DDE71742091C82D85EDB403449AF8DE843D5F61DCA8CBF65B59AEBD9B90E599` |
-| 文件大小 | 550885 bytes |
-| 尺寸 | 643 × 684 |
-| 像素格式 | `Format32bppArgb` |
-| PNG 原始格式 GUID | `b96b3caf-0728-11d3-9d7b-0000f81ef32e` |
-| 外部来源/许可证 | 未确认 |
+| 路径 | `兔兔素材.png` |
+| SHA-256 | `2C7EDC4488B81533F116B2A908415FCF2063C2F6A51DCDF76E0C59014A057A38` |
+| 文件大小 | 1191609 bytes |
+| 尺寸/格式 | 1254 × 1254、RGB PNG |
+| 外部来源/许可证 | 用户声明 AI 生成并明确允许 Rabbit Code 发布 |
 
 ## 验证
 
 | 命令或人工检查 | 结果 | 证据路径 |
 | --- | --- | --- |
-| `Get-FileHash frontend/public/rabbit-artwork.png -Algorithm SHA256` | PASS：哈希固定如上 | `frontend/public/rabbit-artwork.png` |
-| `System.Drawing.Image` 元数据读取 | PASS：尺寸、像素格式和 PNG GUID 已记录 | `frontend/public/rabbit-artwork.png` |
-| `Get-ChildItem C:\Users\10735\Desktop -Recurse -Filter *.png` | PASS：未找到指定源文件；仅发现仓库 public/dist 副本 | 当前工作区外部路径检查 |
+| `Get-FileHash 兔兔素材.png -Algorithm SHA256` | PASS：哈希固定如上 | `兔兔素材.png` |
+| Pillow 元数据读取 | PASS：尺寸、像素格式和 PNG 格式已记录 | `兔兔素材.png` |
+| `python scripts/check_rabbit_asset_spec.py --require-source --require-outputs` | PASS：源图与 6 个实际输出均存在、哈希和预算有效 | `docs/design/rabbit-asset-manifest.json` |
+| `python scripts/check_rabbit_art_license.py` | PASS：用户授权证据存在，Rabbit Code 发布允许 | `docs/legal/rabbit-art-license.yml` |
 
-## 受阻条件与后续
+## 边界
 
-- 需要用户提供 `C:\Users\10735\Desktop\提示词\兔兔素材.png`，或提供可核验的源 URL、版权/授权说明和允许复制到仓库的范围。
-- 在来源和许可证确认前，不复制、裁切、重编码或登记仓库 `rabbit-artwork.png` 为源素材，不勾选 RC-122。
-- 按用户指令，下一待执行项已推进到 RC-123。
+- RC-122 登记技术源文件和运行时依赖边界；用户已允许 Rabbit Code 项目包含、修改、派生和再分发素材。
+- 通用商业许可和脱离 Rabbit Code 项目的素材单独销售不在本次授权范围内。
 
 ## 回滚
 

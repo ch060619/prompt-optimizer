@@ -8,7 +8,10 @@ from typing import Any
 
 from prompt_optimizer.public import sanitize_secret_text
 
-# RC ID: RC-210. Keep telemetry opt-in and diagnostics preview-gated and redacted.
+# RC IDs: RC-210, RC-220. Keep telemetry opt-in, versioned, local, and redacted.
+
+
+TELEMETRY_CONSENT_VERSION = "rc220-v1"
 
 
 class PrivacyConsentRequired(PermissionError):
@@ -19,6 +22,14 @@ class PrivacyConsentRequired(PermissionError):
 class TelemetryConsent:
     enabled: bool = False
     include_content: bool = False
+    consent_version: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "enabled": self.enabled,
+            "include_content": self.include_content,
+            "consent_version": self.consent_version,
+        }
 
 
 TelemetrySender = Callable[[tuple[Mapping[str, Any], ...]], None]
@@ -33,8 +44,19 @@ class TelemetryService:
     def consent(self) -> TelemetryConsent:
         return self._consent
 
-    def opt_in(self, *, include_content: bool = False) -> TelemetryConsent:
-        self._consent = TelemetryConsent(enabled=True, include_content=include_content)
+    def opt_in(
+        self,
+        *,
+        include_content: bool = False,
+        consent_version: str = TELEMETRY_CONSENT_VERSION,
+    ) -> TelemetryConsent:
+        if not consent_version.strip():
+            raise ValueError("consent_version must not be empty")
+        self._consent = TelemetryConsent(
+            enabled=True,
+            include_content=include_content,
+            consent_version=consent_version,
+        )
         return self._consent
 
     def revoke(self) -> TelemetryConsent:
@@ -55,7 +77,11 @@ class TelemetryService:
             return False
         removed: set[str] = set()
         safe_metadata = _without_content(_sanitize_public_payload(metadata), removed)
-        event: dict[str, Any] = {"event": event_name, "metadata": safe_metadata}
+        event: dict[str, Any] = {
+            "event": event_name,
+            "consent_version": self._consent.consent_version,
+            "metadata": safe_metadata,
+        }
         if content is not None and self._consent.include_content:
             event["content"] = _sanitize_public_payload(content)
         self._events.append(event)

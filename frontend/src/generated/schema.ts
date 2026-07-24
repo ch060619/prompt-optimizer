@@ -29,11 +29,32 @@ export interface DiffResult {
   new_score: number;
   score_delta: number;
   diff_lines: Array<string>;
+  truncated?: boolean;
+  original_bytes?: number;
+  next_cursor?: number;
 }
 
 export interface EvaluateTaskRequest {
   prompts: Array<string>;
   provider?: "offline" | "local" | "openai" | "tongyi" | "zhipu" | "anthropic" | "gemini" | "azure" | "vertex" | "bedrock" | "openrouter" | "deepseek" | "moonshot" | "qwen" | "doubao" | "siliconflow" | "groq" | "together" | "ollama" | "lmstudio";
+}
+
+export interface ExecutionDestination {
+  execution_location: "local" | "cloud";
+  provider: string;
+  provider_display_name: string;
+  model?: string | null;
+  target_service: string;
+  target_host?: string | null;
+  network_access: boolean;
+}
+
+export interface ExecutionDestinationRequest {
+  provider?: "offline" | "local" | "openai" | "tongyi" | "zhipu" | "anthropic" | "gemini" | "azure" | "vertex" | "bedrock" | "openrouter" | "deepseek" | "moonshot" | "qwen" | "doubao" | "siliconflow" | "groq" | "together" | "ollama" | "lmstudio";
+  model?: string | null;
+  optimizer_provider?: "offline" | "local" | "openai" | "tongyi" | "zhipu" | "anthropic" | "gemini" | "azure" | "vertex" | "bedrock" | "openrouter" | "deepseek" | "moonshot" | "qwen" | "doubao" | "siliconflow" | "groq" | "together" | "ollama" | "lmstudio" | null;
+  optimizer_model?: string | null;
+  strategy?: "rules" | "model" | "combined";
 }
 
 export interface ExportRequest {
@@ -107,6 +128,7 @@ export interface OptimizeMetadata {
   system_prompt_version: string;
   model?: string | null;
   execution_location?: "local" | "cloud";
+  destination?: ExecutionDestination | null;
   credential_ref?: string | null;
   fallback_used?: boolean;
   latency_ms: number;
@@ -122,7 +144,7 @@ export interface OptimizeMetadata {
   budget_limit_cost?: number | null;
   budget_blocked?: boolean;
   fallback_reason?: "not_installed" | "not_ready" | "out_of_memory" | "timeout" | null;
-  recovery_action?: "install" | "repair" | "free_memory" | "retry" | "configure_credentials" | "check_balance" | "wait_and_retry" | "change_region" | "choose_model" | "fix_parameters" | "review_content" | "check_network" | "cancel" | null;
+  recovery_action?: "install" | "repair" | "free_memory" | "retry" | "configure_credentials" | "check_balance" | "wait_and_retry" | "change_region" | "choose_model" | "fix_parameters" | "review_content" | "check_network" | "free_disk" | "choose_port" | "cancel" | null;
   selection_scope?: "global" | "workspace" | "session" | "optimizer" | "default";
   provider_health?: "healthy" | "unavailable" | "fallback";
   quality_score_before: number;
@@ -149,6 +171,34 @@ export interface OptimizeResponse {
   version_id?: number | null;
   analysis: PromptAnalysis;
   metadata: OptimizeMetadata;
+}
+
+export interface PerformanceMetricsSnapshot {
+  schema_version: string;
+  window_started_at: string;
+  requests_total: number;
+  requests_succeeded: number;
+  requests_failed: number;
+  failure_rate: number;
+  total_latency_ms: number;
+  average_latency_ms: number;
+  first_token_count: number;
+  first_token_total_ms: number;
+  average_first_token_ms: number;
+  input_tokens: number;
+  output_tokens: number;
+  tool_calls: number;
+  tool_successes: number;
+  tool_success_rate: number;
+  model_loads: number;
+  model_load_failures: number;
+  total_model_load_ms: number;
+  average_model_load_ms: number;
+  resource_samples: number;
+  max_cpu_percent?: number | null;
+  max_ram_bytes?: number | null;
+  max_gpu_memory_bytes?: number | null;
+  provider_metrics?: Record<string, unknown>;
 }
 
 export interface ProjectSpace {
@@ -194,10 +244,30 @@ export interface PromptVersion {
   provider_health?: "healthy" | "unavailable" | "fallback";
 }
 
+export interface ProviderPrivacyNotice {
+  id: string;
+  display_name: string;
+  version: string;
+  execution_location: "local" | "cloud";
+  request_fields: Array<string>;
+  service_region: string;
+  privacy_policy_url: string;
+  retention_risk: string;
+}
+
 export interface RunnerGenerateRequest {
   prompt: string;
   model_id?: string | null;
   request_id?: string | null;
+}
+
+export interface RunnerResourceConfigRequest {
+  threads?: number | null;
+  gpu_layers?: number | null;
+  context_length?: number | null;
+  concurrency?: number | null;
+  idle_timeout_seconds?: number | null;
+  temperature_limit_celsius?: number | null;
 }
 
 export interface ScoreBreakdown {

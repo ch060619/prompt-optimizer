@@ -16,8 +16,7 @@
 - Frontend ESLint: PASS.
 - Frontend TypeScript: PASS.
 
-## Environment Note
+## Environment Remediation
 
-- Running Vitest from the repository root is blocked by EPERM while scanning the
-  existing `.runtime/pytest-rc154` directory. Running the same test from the
-  `frontend` working directory passes.
+- The supported frontend-scoped Vitest command passes the full suite without
+  scanning runtime artifacts, and Vite production build passes.

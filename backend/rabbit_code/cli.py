@@ -145,6 +145,9 @@ def main(
         try:
             state = TuiSession(selected_runtime).submit(prompts[0])
             rendered = TuiRenderer.render(state, width=args.width, height=args.height)
+            artwork = TuiRenderer.inline_artwork()
+            if artwork:
+                output_stream.write(artwork + "\n")
             output_stream.write(rendered + "\n")
             output_stream.flush()
         except ValueError as exc:

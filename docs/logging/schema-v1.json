@@ -1,0 +1,31 @@
+{
+  "schema_version": "v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "timestamp",
+    "level",
+    "event",
+    "request_id",
+    "session_id",
+    "tool_id",
+    "task_id",
+    "status",
+    "metadata",
+    "redacted_fields"
+  ],
+  "properties": {
+    "schema_version": {"const": "v1"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "level": {"enum": ["debug", "info", "warning", "error"]},
+    "event": {"type": "string", "minLength": 1, "maxLength": 64},
+    "request_id": {"type": ["string", "null"]},
+    "session_id": {"type": ["string", "null"]},
+    "tool_id": {"type": ["string", "null"]},
+    "task_id": {"type": ["string", "null"]},
+    "status": {"type": ["string", "null"]},
+    "metadata": {"type": "object"},
+    "redacted_fields": {"type": "array", "items": {"type": "string"}}
+  }
+}

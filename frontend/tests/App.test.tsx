@@ -69,6 +69,73 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "优化输入内容" })).toBeInTheDocument();
   });
 
+  it("keeps empty optimization disabled and does not confuse it with send", async () => {
+    visitWorkspace();
+    const fetchMock = vi.fn((url: string) => {
+      if (url.startsWith("/api/v1/templates") || url === "/api/v1/history") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<App />);
+
+    const optimize = await screen.findByRole("button", { name: "优化输入内容" });
+    const send = screen.getByRole("button", { name: "发送" });
+    expect(optimize).toBeDisabled();
+    expect(send).toBeDisabled();
+    fireEvent.click(optimize);
+    expect(fetchMock.mock.calls.some(([url]) => url === "/api/v1/optimize")).toBe(false);
+  });
+
+  it("locks one optimization request and keeps the current prompt when it completes", async () => {
+    visitWorkspace();
+    const result = {
+      version_id: null,
+      analysis: {
+        prompt: "保留原始输入",
+        optimized_prompt: "优化预览",
+        score: { total_score: 80, dimensions: [] },
+        suggestions: [],
+        strengths: [],
+        created_at: "2026-06-15T00:00:00Z",
+      },
+      metadata: {
+        provider_requested: "offline",
+        provider_used: "offline",
+        fallback_used: false,
+        latency_ms: 1,
+        error_summary: null,
+      },
+    };
+    let resolveOptimize!: (response: ResponseLike) => void;
+    let optimizeCalls = 0;
+    stubFetch((url: string) => {
+      if (url.startsWith("/api/v1/templates") || url === "/api/v1/history") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      if (url === "/api/v1/optimize") {
+        optimizeCalls += 1;
+        return new Promise<ResponseLike>((resolve) => { resolveOptimize = resolve; });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+    render(<App />);
+
+    const composer = screen.getByRole("textbox", { name: "提示词输入" });
+    fireEvent.change(composer, { target: { value: "保留原始输入", selectionStart: 6, selectionEnd: 6 } });
+    const optimize = screen.getByRole("button", { name: "优化输入内容" });
+    await waitFor(() => expect(optimize).not.toBeDisabled());
+    fireEvent.click(optimize);
+    await waitFor(() => expect(optimizeCalls).toBe(1));
+    expect(optimizeCalls).toBe(1);
+    expect(screen.getByRole("button", { name: "发送" })).toBeDisabled();
+
+    resolveOptimize({ ok: true, json: () => Promise.resolve(result) });
+    expect(await screen.findByRole("textbox", { name: "Optimized prompt preview" })).toHaveValue("优化预览");
+    expect(screen.getByRole("textbox", { name: "提示词输入" })).toHaveValue("保留原始输入");
+  });
+
   it("uses Sparkles only on prompt optimization actions", async () => {
     visitWorkspace();
     stubFetch();
@@ -243,6 +310,7 @@ describe("App", () => {
       return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
     });
     render(<App />);
+    fireEvent.change(screen.getByRole("textbox", { name: "提示词输入" }), { target: { value: "快捷键测试" } });
     await screen.findByRole("button", { name: "优化输入内容" });
 
     fireEvent.keyDown(document, { key: "o", ctrlKey: true, shiftKey: true });
@@ -284,6 +352,7 @@ describe("App", () => {
 
     const optimize = await screen.findByRole("button", { name: "优化输入内容" });
     const composer = screen.getByRole("textbox", { name: "提示词输入" });
+    fireEvent.change(composer, { target: { value: "旧输入", selectionStart: 3, selectionEnd: 3 } });
     fireEvent.click(optimize);
     await waitFor(() => expect(resolveOptimize).toBeTypeOf("function"));
     fireEvent.change(composer, { target: { value: "用户已经编辑的新输入", selectionStart: 10, selectionEnd: 10 } });
@@ -331,6 +400,8 @@ describe("App", () => {
     });
     render(<App />);
 
+    const composer = screen.getByRole("textbox", { name: "提示词输入" });
+    fireEvent.change(composer, { target: { value: "原始输入", selectionStart: 4, selectionEnd: 4 } });
     fireEvent.click(await screen.findByRole("button", { name: "优化输入内容" }));
     const preview = await screen.findByRole("textbox", { name: "Optimized prompt preview" });
     expect(preview).toHaveValue("可编辑的优化结果");
@@ -379,6 +450,7 @@ describe("App", () => {
     });
     render(<App />);
 
+    fireEvent.change(screen.getByRole("textbox", { name: "提示词输入" }), { target: { value: "原始输入" } });
     fireEvent.click(await screen.findByRole("button", { name: "优化输入内容" }));
 
     const metadata = await screen.findByRole("region", { name: "Optimization metadata" });

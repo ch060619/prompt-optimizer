@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "description": "Open-source cross-platform coding agent with prompt optimization",
+  "homepage": "https://github.com/rabbit-code/rabbit-code",
+  "license": "MIT",
+  "notes": "Run 'rabbit --help' after installation to get started.",
+  "url": "https://github.com/rabbit-code/rabbit-code/releases/download/v3.0.0/rabbit-code-3.0.0-windows-x64.exe",
+  "hash": "TBD",
+  "bin": "rabbit.exe",
+  "checkver": {
+    "url": "https://api.github.com/repos/rabbit-code/rabbit-code/releases/latest",
+    "jsonpath": "$.tag_name",
+    "regex": "v([\\d.]+)"
+  },
+  "autoupdate": {
+    "url": "https://github.com/rabbit-code/rabbit-code/releases/download/v$version/rabbit-code-$version-windows-x64.exe"
+  }
+}

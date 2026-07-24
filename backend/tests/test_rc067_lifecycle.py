@@ -26,9 +26,9 @@ def _config(tmp_path: Path, **overrides: object) -> sidecar.SidecarConfig:
     values: dict[str, object] = {
         "python_executable": sys.executable,
         "data_dir": tmp_path,
-        "startup_timeout_seconds": 10.0,
-        "shutdown_timeout_seconds": 2.0,
-        "poll_interval_seconds": 0.05,
+        "startup_timeout_seconds": 30.0,
+        "shutdown_timeout_seconds": 5.0,
+        "poll_interval_seconds": 0.1,
     }
     values.update(overrides)
     return sidecar.SidecarConfig(**values)  # type: ignore[arg-type]

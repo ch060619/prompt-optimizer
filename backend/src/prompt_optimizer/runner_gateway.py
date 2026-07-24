@@ -3,18 +3,21 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, replace
 from threading import Event, Lock, Semaphore
-from time import monotonic
+from time import monotonic, perf_counter
 from typing import Literal
 from uuid import uuid4
 
+from prompt_optimizer.hardware import HardwareReport
+from prompt_optimizer.metrics import LocalMetricsAggregator
 from prompt_optimizer.providers.base import ModelRequest
-from prompt_optimizer.providers.local import LocalModelFailure
+from prompt_optimizer.providers.local import LocalModelFailure, LocalRunnerHealth
 from prompt_optimizer.providers.runners import (
     LocalRunnerAdapter,
     RunnerModel,
     RunnerOperation,
     RunnerRegistry,
 )
+from prompt_optimizer.runner_resources import RunnerResourceConfig, safe_runner_config
 
 # RC ID: RC-198. Keep FastAPI local runner operations behind one cancellable gateway.
 
@@ -71,6 +74,25 @@ class RunnerEvent:
         return payload
 
 
+@dataclass(frozen=True)
+class RunnerQueueStatus:
+    active: int
+    pending: int
+    capacity: int
+
+    @property
+    def available(self) -> int:
+        return max(0, self.capacity - self.active)
+
+    def to_dict(self) -> dict[str, int]:
+        return {
+            "active": self.active,
+            "pending": self.pending,
+            "capacity": self.capacity,
+            "available": self.available,
+        }
+
+
 class RunnerGatewayError(RuntimeError):
     def __init__(
         self,
@@ -119,27 +141,42 @@ class LocalRunnerGateway:
         self,
         *,
         registry: RunnerRegistry | None = None,
-        max_concurrency: int = 1,
+        max_concurrency: int | None = None,
         max_queue: int = 8,
         queue_timeout_seconds: float = 5.0,
         health_ttl_seconds: float = 5.0,
         clock: Callable[[], float] = monotonic,
+        metrics: LocalMetricsAggregator | None = None,
+        resource_config: RunnerResourceConfig | None = None,
+        hardware_report: HardwareReport | None = None,
+        context_length: int = 4096,
     ) -> None:
-        if max_concurrency <= 0 or max_queue < 0:
+        if resource_config is not None:
+            configured = resource_config
+        elif hardware_report is not None:
+            configured = safe_runner_config(hardware_report, context_length=context_length)
+        else:
+            configured = RunnerResourceConfig(
+                concurrency=max_concurrency if max_concurrency is not None else 1,
+            )
+        concurrency = configured.concurrency if max_concurrency is None else max_concurrency
+        if concurrency <= 0 or max_queue < 0:
             raise ValueError("runner concurrency limits are invalid")
         if queue_timeout_seconds < 0 or health_ttl_seconds < 0:
             raise ValueError("runner cache and queue timeouts must not be negative")
         self.registry = registry or RunnerRegistry()
-        self.max_concurrency = max_concurrency
+        self.resource_config = replace(configured, concurrency=concurrency)
+        self.max_concurrency = concurrency
         self.max_queue = max_queue
         self.queue_timeout_seconds = queue_timeout_seconds
         self.health_ttl_seconds = health_ttl_seconds
         self._clock = clock
+        self.metrics = metrics
         self._runners: dict[str, LocalRunnerAdapter] = {}
-        self._health_cache: dict[str, tuple[float, object]] = {}
+        self._health_cache: dict[str, tuple[float, LocalRunnerHealth]] = {}
         self._requests: dict[tuple[str, str], Event] = {}
         self._lock = Lock()
-        self._slots = Semaphore(max_concurrency)
+        self._slots = Semaphore(concurrency)
         self._active = 0
         self._pending = 0
 
@@ -150,7 +187,42 @@ class LocalRunnerGateway:
         self._runner(runner_name)
         return RunnerCapabilities(runner=runner_name)
 
-    def health(self, runner_name: str, *, force: bool = False):
+    def queue_status(self) -> RunnerQueueStatus:
+        with self._lock:
+            return RunnerQueueStatus(
+                active=self._active,
+                pending=self._pending,
+                capacity=self.max_concurrency,
+            )
+
+    def configure_resources(self, config: RunnerResourceConfig) -> RunnerResourceConfig:
+        with self._lock:
+            if self._active or self._pending:
+                raise RunnerBusyError()
+            self.resource_config = config
+            self.max_concurrency = config.concurrency
+            self._slots = Semaphore(config.concurrency)
+            runners = tuple(self._runners.values())
+        for runner in runners:
+            runner.configure(config)
+        return config
+
+    def resource_signal(self, runner_name: str) -> dict[str, object]:
+        health = self.health(runner_name, force=True)
+        temperature = health.temperature_celsius
+        return {
+            "runner": runner_name,
+            "out_of_memory": health.status == "out_of_memory",
+            "temperature_celsius": temperature,
+            "temperature_limit_celsius": self.resource_config.temperature_limit_celsius,
+            "should_throttle": health.status == "out_of_memory"
+            or (
+                temperature is not None
+                and temperature >= self.resource_config.temperature_limit_celsius
+            ),
+        }
+
+    def health(self, runner_name: str, *, force: bool = False) -> LocalRunnerHealth:
         now = self._clock()
         with self._lock:
             cached = self._health_cache.get(runner_name)
@@ -167,7 +239,23 @@ class LocalRunnerGateway:
         return operation
 
     def load(self, runner_name: str, model_id: str) -> RunnerOperation:
-        operation = self._runner(runner_name).load(model_id)
+        started = perf_counter()
+        try:
+            operation = self._runner(runner_name).load(model_id)
+        except Exception:
+            if self.metrics is not None:
+                self.metrics.record_model_load(
+                    model=model_id,
+                    latency_ms=int((perf_counter() - started) * 1000),
+                    success=False,
+                )
+            raise
+        if self.metrics is not None:
+            self.metrics.record_model_load(
+                model=model_id,
+                latency_ms=int((perf_counter() - started) * 1000),
+                success=operation.status == "ok",
+            )
         self._invalidate_health(runner_name)
         return operation
 
@@ -259,7 +347,7 @@ class LocalRunnerGateway:
             if runner is not None:
                 return runner
             try:
-                runner = self.registry.create(runner_name)
+                runner = self.registry.create(runner_name, config=self.resource_config)
             except ValueError as exc:
                 raise RunnerGatewayError(
                     str(exc),

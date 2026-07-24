@@ -1,7 +1,7 @@
 # Rabbit 素材派生资产规范
 
 - RC ID: RC-123
-- 状态：规范已建立；源素材和授权门禁 pending
+- 状态：规范、技术源登记和 Rabbit Code 发布授权已完成
 - 目标色彩空间：sRGB
 - 导出格式：PNG；需要透明度的变体必须保留 alpha
 - 命名：`rabbit-{variant}-{theme}-{size}.png`；`size` 是 CSS 像素基准，2x 文件使用同一基准尺寸的两倍像素
@@ -19,7 +19,7 @@
 
 ## 导出规则
 
-1. 源素材登记完成后，导出工具读取固定 SHA-256 的源文件，不能从桌面路径运行时加载。
+1. 导出工具读取仓库根目录 `兔兔素材.png` 的固定 SHA-256，不能从桌面路径运行时加载。
 2. 每个变体必须同时记录源 SHA-256、导出脚本版本、尺寸、主题、色彩空间和生成时间。
 3. 1x/2x 使用同一裁切焦点；2x 只提高像素密度，不改变安全区或视觉比例。
 4. 深色变体只调整背景/轮廓对比，不改变兔兔主体的识别焦点；浅色和深色预览都要检查透明边缘。
@@ -29,4 +29,6 @@
 
 `docs/design/rabbit-asset-manifest.json` 是机器可检验的唯一变体清单。
 `scripts/check_rabbit_asset_spec.py` 检查变体 ID、主题、1x/2x、最小显示尺寸和安全区字段。
-当前 `source.status=pending`，所以规范检查可以通过，实际导出和发布资产检查必须等待 RC-122 的源文件与许可证确认。
+当前 `source.status=registered`；`scripts/check_rabbit_asset_spec.py --require-source --require-outputs`
+会检查源图和实际 PNG/WebP/ICO 的路径、SHA-256、尺寸字段及文件预算。用户发布授权
+记录在 `docs/legal/rabbit-art-license.yml`。

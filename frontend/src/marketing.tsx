@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 
 import { PRODUCT_NAME } from "./brand";
 import { RabbitMark } from "./components/RabbitMark";
+import { AppLink } from "./navigation";
 
 // RC ID: RC-054. Render the Rabbit Code brand across the public shell.
 // RC ID: RC-058. Keep public API examples on the versioned App Server prefix.
@@ -102,11 +103,11 @@ export function HomePage() {
           <h1>The workspace for prompts that need a second pass.</h1>
           <p>Analyze intent, iterate with rules, compare versions, and keep the result close to the work that produced it.</p>
           <div className="hero-actions">
-            <a className="action-button action-button-primary" href="/login">LOGIN <ArrowUpRight size={15} /></a>
-            <a className="action-button" href="/register">REGISTER <ArrowUpRight size={15} /></a>
+        <AppLink className="action-button action-button-primary" href="/login">LOGIN <ArrowUpRight size={15} /></AppLink>
+        <AppLink className="action-button" href="/register">REGISTER <ArrowUpRight size={15} /></AppLink>
           </div>
         </div>
-        <a className="paper-preview" href="/prompt-management" aria-label="Open prompt workspace preview">
+      <AppLink className="paper-preview" href="/workspace/assets" aria-label="Open prompt workspace preview">
           <div className="ring-copy ring-copy-top">PROMPT MANAGEMENT · EVALUATION · VERSION CONTROL · </div>
           <div className="artwork-slot">
             <RabbitMark
@@ -117,7 +118,7 @@ export function HomePage() {
             />
           </div>
           <span className="paper-preview-label">OPEN THE PAPER / VIEW THE WORKSPACE <ArrowUpRight size={16} /></span>
-        </a>
+      </AppLink>
       </section>
       <section id="platform-overview" className="overview-section reveal-on-scroll">
         <SectionHeading kicker="PLATFORM OVERVIEW" title="A deliberate path from rough prompt to useful record." />
@@ -130,7 +131,7 @@ export function HomePage() {
       <section className="home-statement reveal-on-scroll">
         <span className="eyebrow">THE LOCAL POSITION</span>
         <h2>Keep the thinking, the change, and the evidence in one place.</h2>
-        <a className="text-link" href="/blog/architecture">READ THE ARCHITECTURE NOTES <ArrowUpRight size={15} /></a>
+          <AppLink className="text-link" href="/workspace/diagnostics">OPEN SYSTEM DIAGNOSTICS <ArrowUpRight size={15} /></AppLink>
       </section>
     </main>
   );
@@ -164,7 +165,7 @@ export function AuthPage({ mode, username, password, loading, error, user, onUse
         </div>
       </section>
       <section className="auth-form-panel">
-        <a className="auth-back-link" href="/"><ArrowLeft size={15} /> BACK TO HOME</a>
+      <AppLink className="auth-back-link" href="/"><ArrowLeft size={15} /> BACK TO HOME</AppLink>
         <div className="auth-form-heading">
           <span className="eyebrow">{isLogin ? "ACCOUNT LOGIN" : "NEW ACCOUNT"}</span>
           <h2>{isLogin ? "Welcome back." : "Start a local record."}</h2>
@@ -173,7 +174,7 @@ export function AuthPage({ mode, username, password, loading, error, user, onUse
         {user ? (
           <div className="auth-success" role="status">
             <strong>Signed in as {user.username}.</strong>
-            <a className="action-button action-button-primary" href="/workspace">OPEN WORKSPACE <ArrowUpRight size={15} /></a>
+          <AppLink className="action-button action-button-primary" href="/workspace">OPEN WORKSPACE <ArrowUpRight size={15} /></AppLink>
           </div>
         ) : (
           <form className="auth-page-form" onSubmit={onSubmit}>
@@ -183,7 +184,7 @@ export function AuthPage({ mode, username, password, loading, error, user, onUse
             <button className="action-button action-button-primary auth-submit" type="submit" disabled={loading}>{isLogin ? "LOGIN" : "CREATE ACCOUNT"} <ArrowUpRight size={15} /></button>
           </form>
         )}
-        <p className="auth-switch">{isLogin ? "Need an account?" : "Already have an account?"} <a href={isLogin ? "/register" : "/login"}>{isLogin ? "REGISTER" : "LOGIN"} <ArrowUpRight size={13} /></a></p>
+        <p className="auth-switch">{isLogin ? "Need an account?" : "Already have an account?"} <AppLink href={isLogin ? "/register" : "/login"}>{isLogin ? "REGISTER" : "LOGIN"} <ArrowUpRight size={13} /></AppLink></p>
       </section>
     </main>
   );
@@ -197,8 +198,8 @@ function ProductPage({ spec }: { spec: ProductSpec }) {
         <h1>{spec.title}</h1>
         <p>{spec.description}</p>
         <div className="hero-actions hero-actions-centered">
-          <a className="action-button action-button-primary" href="/workspace">USE THE WORKSPACE <ArrowUpRight size={15} /></a>
-          <a className="action-button" href="#features">VIEW FEATURES <ArrowDownRight size={15} /></a>
+          <AppLink className="action-button action-button-primary" href="/workspace">USE THE WORKSPACE <ArrowUpRight size={15} /></AppLink>
+          <AppLink className="action-button" href="#features">VIEW FEATURES <ArrowDownRight size={15} /></AppLink>
         </div>
         <ProductMockup variant={spec.mockup} />
       </section>
@@ -224,7 +225,7 @@ function ProductPage({ spec }: { spec: ProductSpec }) {
           <ul>
             {spec.details.map((detail) => <li key={detail}>{detail}</li>)}
           </ul>
-          <a className="text-link" href="/workspace">TRY IT WITH A REAL PROMPT <ArrowUpRight size={15} /></a>
+        <AppLink className="text-link" href="/workspace">TRY IT WITH A REAL PROMPT <ArrowUpRight size={15} /></AppLink>
         </div>
       </section>
       <FAQList title="Frequently asked questions" items={faqFor()} />
@@ -242,11 +243,11 @@ function BlogIndexPage() {
       </section>
       <section className="blog-list reveal-on-scroll">
         {blogPosts.map(([kicker, title, slug], index) => (
-          <a className={`blog-item blog-item-${index + 1}`} href={`/blog/${slug}`} key={slug}>
+            <AppLink className={`blog-item blog-item-${index + 1}`} href={`/blog/${slug}`} key={slug}>
             <span className="eyebrow">{kicker}</span>
             <h2>{title}</h2>
             <ArrowUpRight size={22} />
-          </a>
+            </AppLink>
         ))}
       </section>
     </main>
@@ -263,7 +264,7 @@ function ArticlePage({ slug }: { slug: string }) {
   return (
     <main className="template-page article-page">
       <section className="article-hero">
-        <a className="back-link" href="/blog"><ArrowUpRight size={15} className="back-icon" /> BACK TO BUILD NOTES</a>
+      <AppLink className="back-link" href="/blog"><ArrowUpRight size={15} className="back-icon" /> BACK TO BUILD NOTES</AppLink>
         <span className="eyebrow">{article[0]}</span>
         <h1>{article[1]}</h1>
         <div className="article-meta"><span>{PRODUCT_NAME}</span><span>LOCAL DOCUMENTATION</span><span>2026</span></div>
@@ -304,7 +305,7 @@ function ContactPage() {
 }
 
 function NotFoundPage({ path }: { path: string }) {
-  return <main className="template-page not-found-page"><span className="eyebrow">404 / ROUTE NOT FOUND</span><h1>{path} is not in the local map.</h1><a className="action-button action-button-primary" href="/">RETURN HOME <ArrowUpRight size={15} /></a></main>;
+  return <main className="template-page not-found-page"><span className="eyebrow">404 / ROUTE NOT FOUND</span><h1>{path} is not in the local map.</h1><AppLink className="action-button action-button-primary" href="/workspace/home">RETURN TO WORKSPACE <ArrowUpRight size={15} /></AppLink></main>;
 }
 
 function ProductMockup({ variant }: { variant: ProductSpec["mockup"] }) {

@@ -17,7 +17,7 @@
 - RC-154/155/156 combined regression: 10 passed
 - Targeted Ruff, generated API check, frontend ESLint, and TypeScript: PASS
 
-## Environment Notes
+## Current Validation
 
-- Full Vite build remains blocked by sandbox denial while esbuild reads ancestor
-  directories. The standalone TypeScript check passes.
+- The full frontend suite, ESLint, and the production Vite build pass in the
+  project workspace.

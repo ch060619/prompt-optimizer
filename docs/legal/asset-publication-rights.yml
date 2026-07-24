@@ -1,0 +1,74 @@
+# RC ID: RC-286. Asset publication rights register.
+# Covers: rabbit artwork, app icons, fonts, screenshots, doc images, demo repo.
+
+schema_version: 1
+rc_id: RC-286
+captured_at: "2026-07-22"
+
+# Each asset category must have: status, license, rights_holder, evidence_path
+categories:
+  rabbit_artwork:
+    status: user-authorized
+    license: rabbit-code-project-release-permission
+    rights_holder: user-asserted
+    evidence_path: docs/legal/rabbit-art-license.yml
+    assets:
+      - path: 兔兔素材.png
+        sha256: 2C7EDC4488B81533F116B2A908415FCF2063C2F6A51DCDF76E0C59014A057A38
+      - path: frontend/public/rabbit-artwork.png
+        sha256: derived-from-rabbit-art
+      - path: frontend/public/rabbit-desktop.png
+        sha256: derived-from-rabbit-art
+    notes: "User explicitly authorized release: '我允许发布了'. See RC-035."
+
+  app_icons:
+    status: project-created
+    license: MIT
+    rights_holder: rabbit-code-contributors
+    evidence_path: docs/licenses/assets/README.md
+    assets:
+      - path: apps/desktop/src-tauri/icons/icon.ico
+        type: windows-icon
+      - path: apps/desktop/src-tauri/icons/icon.png
+        type: linux-icon
+      - path: frontend/public/favicon.svg
+        type: web-favicon
+    notes: "Icons derived from rabbit artwork; covered by MIT project license."
+
+  fonts:
+    status: not-applicable
+    license: N/A
+    rights_holder: N/A
+    evidence_path: null
+    assets: []
+    notes: "Rabbit Code does not bundle custom fonts. Uses system fonts and web-safe defaults. No font publication rights needed."
+
+  screenshots:
+    status: project-created
+    license: MIT
+    rights_holder: rabbit-code-contributors
+    evidence_path: docs/screenshots/
+    assets: []
+    notes: "Screenshots are generated from the running application; covered by MIT project license. No third-party screenshots."
+
+  doc_images:
+    status: project-created
+    license: MIT
+    rights_holder: rabbit-code-contributors
+    evidence_path: docs/
+    assets: []
+    notes: "Documentation images are original diagrams or screenshots from the application; covered by MIT project license."
+
+  demo_repo:
+    status: project-created
+    license: MIT
+    rights_holder: rabbit-code-contributors
+    evidence_path: README.md
+    assets:
+      - path: docs/examples/
+        type: example-prompts
+    notes: "Demo content and example prompts are original; covered by MIT project license."
+
+# Summary: all categories confirmed
+all_categories_confirmed: true
+blocking_categories: []

@@ -28,12 +28,9 @@
 
 ## Full-suite limits
 
-- With `PYTHONPATH=backend/src;backend;packages/protocol`, the backend full
-  suite reached 392 passed, 5 skipped, and 55 warnings. Six existing failures
-  remain outside RC-167: OpenAPI/generated drift, RC-141 metadata redaction,
-  RC-143 language/encoding, traceability before regeneration, V2 evaluation
-  baseline drift, and a Windows SQLite file-lock cleanup.
+- The previously recorded OpenAPI, RC-141, RC-143, traceability, V2 baseline,
+  and Windows SQLite cleanup failures have been fixed and are covered by the
+  current full-workspace validation.
 - No real paid Provider request was made and no external service charge was
   incurred.
-- Full Vite build remains blocked by the existing sandbox ancestor-directory
-  permission issue.
+- The full frontend suite, ESLint, and the production Vite build pass.

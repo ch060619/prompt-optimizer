@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import os
@@ -18,6 +19,15 @@ ProgressCallback = Callable[[int, int], None]
 
 class ModelDirectoryError(RuntimeError):
     """Raised when a model directory lifecycle operation cannot be completed."""
+
+    code = "MODEL_DIRECTORY_ERROR"
+    retryable = False
+    recovery_action = "repair"
+
+
+class DiskSpaceError(ModelDirectoryError):
+    code = "DISK_FULL"
+    recovery_action = "free_disk"
 
 
 @dataclass(frozen=True)
@@ -145,7 +155,7 @@ class ModelDirectoryService:
         if not report.writable:
             raise ModelDirectoryError("model directory is not writable")
         if not report.sufficient:
-            raise ModelDirectoryError("model directory does not have enough free space")
+            raise DiskSpaceError("model directory does not have enough free space")
         self.root = Path(report.path)
         self._registry["root"] = str(self.root)
         self._save_registry()
@@ -179,12 +189,21 @@ class ModelDirectoryService:
                 raise ModelDirectoryError("copied model checksum mismatch")
             os.replace(temporary, target)
         except OSError as exc:
+            if _is_disk_full(exc):
+                raise DiskSpaceError("model version install failed: disk is full") from exc
             raise ModelDirectoryError(f"model version install failed: {exc}") from exc
         finally:
             temporary.unlink(missing_ok=True)
 
         models = self._models()
-        record = models.setdefault(model_id, {"active_version": version, "versions": []})
+        existing_record = models.get(model_id)
+        if existing_record is None:
+            record: dict[str, object] = {"active_version": version, "versions": []}
+            models[model_id] = record
+        elif isinstance(existing_record, dict):
+            record = existing_record
+        else:
+            raise ModelDirectoryError("model registry record must be an object")
         versions = [item for item in self._version_records(record) if item["version"] != version]
         versions.append(
             {
@@ -300,7 +319,7 @@ class ModelDirectoryService:
         required = sum(path.stat().st_size for _, path in files if path.is_file())
         report = self.check_directory(destination, required_bytes=required)
         if not report.sufficient:
-            raise ModelDirectoryError("migration destination does not have enough free space")
+            raise DiskSpaceError("migration destination does not have enough free space")
         if any(destination.iterdir()):
             raise ModelDirectoryError("migration destination must be empty")
         staging = destination.with_name(f".{destination.name}.rabbit-migration-{uuid.uuid4().hex}")
@@ -545,3 +564,7 @@ def _remove_tree(path: Path) -> None:
         shutil.rmtree(path, ignore_errors=True)
     elif path.exists() or path.is_symlink():
         path.unlink(missing_ok=True)
+
+
+def _is_disk_full(error: OSError) -> bool:
+    return error.errno == errno.ENOSPC or getattr(error, "winerror", None) == 112

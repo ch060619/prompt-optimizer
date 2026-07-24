@@ -1,3 +1,13 @@
+dataset_version: rc-158-v1
+random_seed: 158
+automatic_scoring:
+  metric: analyzer.total_score
+  range: 0-100
+  aggregate: mean
+blind_review:
+  reviewers: 2
+  assignment: deterministic shuffled batches
+  scale: 1-5
 cases:
   - id: regression-tech-001
     category: tech

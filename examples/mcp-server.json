@@ -1,0 +1,8 @@
+{
+  "name": "rabbit-code-example",
+  "transport": "stdio",
+  "command": "python examples/mcp_server.py",
+  "permissions": ["read"],
+  "require_auth": false,
+  "write_authorized": false
+}

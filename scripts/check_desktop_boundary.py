@@ -36,6 +36,9 @@ def validate_desktop_boundary(repository_root: Path) -> list[str]:
         errors.append(f"desktop allowlist is missing: {', '.join(sorted(missing))}")
     for source_root in (repository_root / "apps" / "desktop",):
         for path in source_root.rglob("*"):
+            relative_parts = path.relative_to(source_root).parts
+            if any(part in {"target", "node_modules", "dist"} for part in relative_parts):
+                continue
             if path.suffix not in {".py", ".rs", ".ts", ".tsx"}:
                 continue
             content = path.read_text(encoding="utf-8")

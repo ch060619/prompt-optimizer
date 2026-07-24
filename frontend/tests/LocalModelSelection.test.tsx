@@ -67,6 +67,9 @@ describe("local model selection", () => {
     );
     expect(localStorage.getItem("rabbit_code_default_local_model")).toBe("gemma-3-1b-it");
 
+    fireEvent.change(await screen.findByRole("textbox", { name: "提示词输入" }), {
+      target: { value: "请用一句话解释本地模型。" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "优化输入内容" }));
     expect(await screen.findByRole("textbox", { name: "Optimized prompt preview" })).toHaveValue(
       "optimized with qwen",

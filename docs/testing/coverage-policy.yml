@@ -1,0 +1,40 @@
+schema_version: 1
+rc_id: RC-243
+thresholds:
+  overall_percent: 65.0
+  changed_files_percent: 75.0
+report: docs/evidence/RC-243/coverage-report.json
+changed_files:
+  - backend/src/prompt_optimizer/core/optimizer.py
+  - backend/src/prompt_optimizer/services.py
+  - backend/src/prompt_optimizer/local_install.py
+  - backend/src/prompt_optimizer/model_lifecycle.py
+critical_paths:
+  permissions:
+    - backend/tests/test_rc207_local_api_security.py
+    - backend/tests/test_rc208_trust.py
+    - backend/tests/test_rc232_fastapi.py
+  secrets:
+    - backend/tests/test_rc179_secret_store.py
+    - backend/tests/test_rc180_redaction.py
+    - backend/tests/test_rc211_security_engineering.py
+    - backend/tests/test_rc239_security_matrix.py
+  installation:
+    - backend/tests/test_rc185_local_install.py
+    - backend/tests/test_rc197_model_lifecycle.py
+    - backend/tests/test_rc238_installation.py
+  migration:
+    - backend/tests/test_storage_backup.py
+    - backend/tests/test_rc197_model_lifecycle.py
+  cancellation:
+    - backend/tests/test_rc226_cancellation.py
+    - backend/tests/test_rc230_agent_core.py
+  recovery:
+    - backend/tests/test_rc225_recovery.py
+    - backend/tests/test_rc227_resilience.py
+    - backend/tests/test_rc233_cli.py
+mutation_checks:
+  - backend/tests/test_rc142_structured_input.py
+  - backend/tests/test_rc211_security_engineering.py
+  - backend/tests/test_rc227_resilience.py
+  - backend/tests/test_rc240_quality_gate.py

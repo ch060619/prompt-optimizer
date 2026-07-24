@@ -17,9 +17,11 @@
 - RC-154 regression tests: 3 passed
 - Targeted Ruff, Mypy, Python compilation, frontend ESLint, and TypeScript: PASS
 
-## Environment Notes
+## Environment Remediation
 
-- The workspace virtual environment points to an unavailable Windows Store Python.
-  Validation used the bundled Codex Python with the existing site-packages.
-- The full Vite build is blocked by sandbox denial while esbuild reads ancestor
-  directories; the standalone TypeScript check passes.
+- `.venv\Scripts\python.exe` is operational and is used by the final backend,
+  Ruff, Mypy, and performance gates.
+- The full Vite production build now passes from `frontend`; the prior ancestor
+  directory denial is no longer present.
+- Full repository Ruff passes after the RC-153 and `rabbit_code` import blocks
+  were normalized.

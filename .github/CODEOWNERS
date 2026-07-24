@@ -1,0 +1,26 @@
+# RC ID: RC-287. CODEOWNERS file for automatic review requirements.
+# Sensitive paths require maintainer review before merge.
+
+# Legal documents
+/docs/legal/           @maintainers
+
+# Architecture decisions
+/docs/adr/             @maintainers
+
+# CI/CD workflows
+/.github/workflows/    @maintainers
+
+# Build and validation scripts
+/scripts/              @maintainers
+
+# License files
+/LICENSE               @maintainers
+/NOTICE                @maintainers
+/THIRD_PARTY_NOTICES.md @maintainers
+
+# Security and governance
+/SECURITY.md           @maintainers
+/GOVERNANCE.md         @maintainers
+
+# Database migrations
+/backend/migrations/   @maintainers

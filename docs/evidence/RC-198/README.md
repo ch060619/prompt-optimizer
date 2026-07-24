@@ -18,4 +18,4 @@ The FastAPI contract test injects the gateway, loads an in-memory model through 
 
 ## Residual limits
 
-Real Ollama/llama.cpp processes, runner HTTP APIs, model weights, GPU hardware, and cross-process queue fault injection were not run. A full `workspace.py verify` remains blocked by the pre-existing Ruff `I001` import-order issue at `backend/tests/test_rc153_system_prompt.py:1`; that unrelated file remains untouched. Existing path migration and frontend jsdom navigation warnings remain non-blocking.
+Real Ollama/llama.cpp processes, runner HTTP APIs, model weights, GPU hardware, and cross-process queue fault injection were not run. The earlier Ruff import-order and frontend jsdom navigation issues have been fixed; full-workspace Ruff, frontend tests, and the production build now pass. Existing path migration warnings remain non-blocking.

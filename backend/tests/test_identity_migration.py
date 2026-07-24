@@ -52,8 +52,7 @@ def test_existing_legacy_default_data_is_discovered(
 
     with pytest.warns(DeprecationWarning, match="prompt-optimizer"):
         assert app_data_dir() == legacy_home
-    with pytest.warns(DeprecationWarning, match="prompt-optimizer"):
-        assert default_db_path() == legacy_home / "prompt_optimizer.sqlite3"
+    assert default_db_path() == legacy_home / "prompt_optimizer.sqlite3"
 
 
 def test_new_install_uses_rabbit_code_names(

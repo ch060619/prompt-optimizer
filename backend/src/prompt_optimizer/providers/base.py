@@ -18,6 +18,7 @@ from prompt_optimizer.core.models import (
     PromptAnalysis,
     PromptTemplate,
 )
+from prompt_optimizer.core.structure import StructuredPrompt
 from prompt_optimizer.prompts.system import SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION
 
 # RC IDs: RC-049, RC-154, RC-155, RC-160, RC-161, RC-162, RC-163, RC-166.
@@ -69,6 +70,7 @@ class ProviderConfig:
 @dataclass(frozen=True)
 class ModelRequest:
     prompt: str
+    protected_structure: StructuredPrompt | None = None
     template: PromptTemplate | None = None
     language_profile: LanguageProfile | None = None
     language_instruction: str | None = None
@@ -348,6 +350,10 @@ class ProviderContentFilterError(ModelProviderError):
 
 class ProviderNetworkError(ModelProviderError):
     category = ProviderErrorCategory.NETWORK
+
+
+class ProviderProxyError(ProviderNetworkError):
+    """A network failure caused by the configured HTTP proxy."""
 
 
 class ProviderServerError(ModelProviderError):

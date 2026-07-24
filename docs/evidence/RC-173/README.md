@@ -34,10 +34,9 @@
 
 - No real Provider request was made and no external service charge was
   incurred.
-- The full backend run was 448 passed, 7 skipped, and 4 failed: the stale
-  reverse-index failure was fixed and the traceability suite passed afterward;
-  the remaining failures are existing RC-141/RC-143 behavior and v2 golden/
-  evaluation-environment baseline issues.
-- Full repository Ruff still reports the pre-existing import-order issue in
-  `backend/tests/test_rc153_system_prompt.py`; the RC-173 scope and all new
-  tests pass Ruff.
+- The former RC-141 metadata substring false positive, RC-143 exception
+  wrapping, RC-158 V2 evaluation fixture drift, traceability drift, and Windows
+  cleanup-on-error failures have been corrected; the full suite is revalidated
+  at the final integration gate.
+- Full repository Ruff passes, including the RC-153 test and `rabbit_code`
+  package import blocks.

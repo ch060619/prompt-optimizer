@@ -1,7 +1,7 @@
 # ADR-0007：桌面壳职责和命令白名单
 
 - RC ID: RC-060
-- Status: Proposed；Tauri/Rust implementation and OS integration pending
+- Status: Accepted；Tauri/Rust boundary verified on Windows and Linux
 - Date: 2026-07-17
 
 ## Boundary
@@ -14,8 +14,10 @@ Agent state, Provider requests, prompts, sessions, permissions, and business wor
 App Server/Agent Core. The desktop shell may carry protocol messages but must not implement a
 second Agent state machine or call a Provider directly.
 
-## Pending Confirmation
+## Verification
 
-No Tauri dependency or Rust project is introduced while the current environment lacks a validated
-desktop build path. Windows/Linux packaging, OS Keychain behavior, sidecar crash handling, and
-parameter-level Rust tests remain required before this ADR can move from Proposed to Accepted.
+The Tauri 2 project lives in `apps/desktop/src-tauri`. Windows and Linux `cargo check/build`
+complete, and native-window probes create, resize, maximize and close the shell without leaving a
+process behind. The static boundary checker ignores generated build output but continues to reject
+Agent or Provider business logic in desktop source files. Packaging, OS Keychain round-trips and
+sidecar artifact binding remain release/security integration work.

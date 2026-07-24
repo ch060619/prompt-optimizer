@@ -3,6 +3,18 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) return "react";
+          if (id.includes("node_modules/lucide-react")) return "icons";
+          if (id.includes("node_modules/gsap") || id.includes("node_modules/lenis")) return "motion";
+          return undefined;
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
@@ -15,4 +27,3 @@ export default defineConfig({
     setupFiles: "./tests/setup.ts"
   }
 });
-

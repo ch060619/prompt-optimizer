@@ -11,6 +11,8 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from prompt_optimizer.limits import DEFAULT_DATA_LIMITS, validate_limit
+
 from .permissions import CapabilityDomain, PermissionPolicy
 from .security import sanitize_environment, validate_argv
 from .tool_results import BoundedOutput, ToolOutcome
@@ -40,6 +42,8 @@ class CommandResult:
     timed_out: bool
     stdout_bytes: int = 0
     stderr_bytes: int = 0
+    stdout_next_cursor: int = 0
+    stderr_next_cursor: int = 0
     stdout_sha256: str = ""
     stderr_sha256: str = ""
     stdout_truncated: bool = False
@@ -83,7 +87,7 @@ class ShellAdapter:
         input_text: str | None = None,
         timeout_seconds: float = 30.0,
         encoding: str = "utf-8",
-        max_output_bytes: int = 1_000_000,
+        max_output_bytes: int = DEFAULT_DATA_LIMITS.tool_output_bytes,
         cancel_event: threading.Event | None = None,
         retries: int = 0,
         retry_delay_seconds: float = 0.0,
@@ -117,7 +121,7 @@ class ShellAdapter:
         input_text: str | None = None,
         timeout_seconds: float = 30.0,
         encoding: str = "utf-8",
-        max_output_bytes: int = 1_000_000,
+        max_output_bytes: int = DEFAULT_DATA_LIMITS.tool_output_bytes,
         cancel_event: threading.Event | None = None,
         retries: int = 0,
         retry_delay_seconds: float = 0.0,
@@ -157,8 +161,11 @@ class ShellAdapter:
         retry_delay_seconds: float,
         retry_on: Sequence[ToolOutcome],
     ) -> CommandResult:
-        if max_output_bytes <= 0:
-            raise ValueError("max_output_bytes must be positive")
+        validate_limit(
+            max_output_bytes,
+            name="max_output_bytes",
+            maximum=DEFAULT_DATA_LIMITS.max_tool_output_bytes,
+        )
         if retries < 0:
             raise ValueError("retries must not be negative")
         if retry_delay_seconds < 0:
@@ -270,6 +277,8 @@ class ShellAdapter:
             timed_out=timed_out,
             stdout_bytes=stdout_metadata.bytes_seen,
             stderr_bytes=stderr_metadata.bytes_seen,
+            stdout_next_cursor=stdout_metadata.next_cursor,
+            stderr_next_cursor=stderr_metadata.next_cursor,
             stdout_sha256=stdout_metadata.sha256,
             stderr_sha256=stderr_metadata.sha256,
             stdout_truncated=stdout_metadata.truncated,

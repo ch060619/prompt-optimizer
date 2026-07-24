@@ -1,17 +1,17 @@
 schema_version: 1
 rc_id: RC-035
 captured_at: "2026-07-17"
-status: pending-human-confirmation
+status: user-authorized
 source:
-  requested_path: frontend/public/rabbit-artwork.png
+  requested_path: 兔兔素材.png
   present_at_capture: true
   observed_status: user-confirmed-identity
   original_external_path: "C:\\Users\\10735\\Desktop\\提示词\\兔兔素材.png"
   original_external_present_at_capture: false
 repository_candidate:
-  path: frontend/public/rabbit-artwork.png
-  sha256: 1DDE71742091C82D85EDB403449AF8DE843D5F61DCA8CBF65B59AEBD9B90E599
-  size_bytes: 550885
+  path: 兔兔素材.png
+  sha256: 2C7EDC4488B81533F116B2A908415FCF2063C2F6A51DCDF76E0C59014A057A38
+  size_bytes: 1191609
   provenance: user-stated-ai-generated-rights-unknown
 generation:
   creator_statement: user-stated-ai-generated
@@ -20,18 +20,19 @@ generation:
   terms_review: pending
   human_contribution_review: pending
 authorization:
-  rights_holder: unknown
-  written_statement: null
-  license: unknown
-  evidence_path: null
+  rights_holder: user-asserted
+  written_statement: "我允许发布了"
+  license: rabbit-code-project-release-permission
+  evidence_path: docs/legal/rabbit-art-release-authorization.md
   permissions:
     commercial_use: pending
-    open_source_use: pending
-    modification: pending
-    derivative_works: pending
-    redistribution: pending
-    attribution: pending
+    open_source_use: allowed-for-rabbit-code
+    modification: allowed-for-rabbit-code
+    derivative_works: allowed-for-rabbit-code
+    redistribution: allowed-for-rabbit-code
+    attribution: not-required
 release:
-  allowed: false
-  status: blocked
-  block_reason: missing-written-authorization
+  allowed: true
+  status: approved-by-user
+  approved_at: "2026-07-19"
+  block_reason: null

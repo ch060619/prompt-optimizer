@@ -10,14 +10,19 @@ describe("RabbitMark", () => {
   it("renders every supported variant from the fixed internal asset path", () => {
     const { container } = render(
       <div>
-        {(["full", "avatar", "mark", "empty", "mono"] as const).map((variant) => (
+        {(["full", "avatar", "mark", "empty", "mono", "desktop"] as const).map((variant) => (
           <RabbitMark key={variant} variant={variant} alt={`${variant} mark`} />
         ))}
       </div>,
     );
 
-    expect(container.querySelectorAll("img")).toHaveLength(3);
-    expect(Array.from(container.querySelectorAll("img")).every((image) => image.getAttribute("src") === "/rabbit-artwork.png")).toBe(true);
+    expect(container.querySelectorAll("img")).toHaveLength(4);
+    expect(Array.from(container.querySelectorAll("img")).map((image) => image.getAttribute("src"))).toEqual([
+      "/rabbit-artwork.png",
+      "/rabbit-artwork.png",
+      "/rabbit-artwork.png",
+      "/rabbit-desktop.png",
+    ]);
     expect(container.querySelectorAll("svg")).toHaveLength(2);
     expect(screen.getByAltText("full mark")).toBeInTheDocument();
   });

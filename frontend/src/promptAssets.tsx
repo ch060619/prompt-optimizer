@@ -1,6 +1,7 @@
 import { ArrowLeftRight, Check, ChevronLeft, ChevronRight, Download, FileJson, Filter, Heart, Search, Upload, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { UiDialog } from "./components/UiStates";
+import { AppLink } from "./navigation";
 
 // RC ID: RC-116. Render prompt assets, history, search/filter, comparison, and safe import/export.
 
@@ -128,7 +129,7 @@ export function PromptAssets() {
           <div className="prompt-asset-detail-heading"><div><span className="eyebrow">{selectedAsset.category.toUpperCase()} / VERSION {selectedAsset.version}</span><h2>{selectedAsset.title}</h2><p>Updated {selectedAsset.updatedAt}</p></div><button type="button" aria-label={selectedAsset.favorite ? "Remove favorite" : "Add favorite"} title={selectedAsset.favorite ? "Remove favorite" : "Add favorite"} onClick={() => toggleFavorite(selectedAsset.id)}><Heart size={18} fill={selectedAsset.favorite ? "currentColor" : "none"} aria-hidden="true" /></button></div>
           <div className="prompt-asset-score"><span>SCORE</span><strong>{selectedAsset.score}</strong><small>/ 100</small></div>
           <pre className="prompt-asset-prompt">{selectedAsset.prompt}</pre>
-          <div className="prompt-asset-actions"><a href={`/workspace?template=${selectedAsset.id}`} className="prompt-asset-use"><Check size={15} aria-hidden="true" /> USE IN COMPOSER</a><button type="button" title="Export selected asset as JSON" onClick={exportAsset}><Download size={15} aria-hidden="true" /> EXPORT JSON</button></div>
+          <div className="prompt-asset-actions"><AppLink href={`/workspace?template=${selectedAsset.id}`} className="prompt-asset-use"><Check size={15} aria-hidden="true" /> USE IN COMPOSER</AppLink><button type="button" title="Export selected asset as JSON" onClick={exportAsset}><Download size={15} aria-hidden="true" /> EXPORT JSON</button></div>
           <div className="prompt-asset-history"><div className="prompt-assets-list-heading"><span className="eyebrow">VERSION HISTORY</span><span>{historyForAsset.length}</span></div>{historyForAsset.map((entry) => <div className="prompt-asset-history-row" key={entry.id}><span>v{entry.version} / {entry.label}</span><b>{entry.score}</b><button type="button" onClick={() => setCompareId(entry.id)}><ArrowLeftRight size={14} aria-hidden="true" /> COMPARE</button></div>)}</div>
           {selectedHistory ? <section className="prompt-asset-compare" aria-label="Version comparison"><div><span className="eyebrow">COMPARING VERSIONS</span><button type="button" aria-label="Close version comparison" title="Close comparison" onClick={() => setCompareId(null)}><X size={15} aria-hidden="true" /></button></div><div className="prompt-asset-compare-grid"><div><small>SELECTED / v{selectedAsset.version}</small><p>{selectedAsset.prompt}</p></div><div><small>HISTORY / v{selectedHistory.version}</small><p>{selectedHistory.prompt}</p></div></div></section> : null}
         </section>

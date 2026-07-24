@@ -1,5 +1,6 @@
 import { Check, Clipboard, ExternalLink, Eye, FileText, HeartPulse, RefreshCw, ShieldCheck, Wrench, X } from "lucide-react";
 import { useState } from "react";
+import { AppLink } from "./navigation";
 import { sanitizePublicText } from "./publicOutput";
 
 // RC IDs: RC-118, RC-180. Render component health, redacted diagnostics, logs, licenses, and updates.
@@ -68,7 +69,7 @@ export function Diagnostics() {
       <div className="diagnostics-shell">
         <section className="diagnostics-components" aria-label="Component health">
           <div className="diagnostics-section-heading"><span className="eyebrow">COMPONENT HEALTH</span><HeartPulse size={16} aria-hidden="true" /></div>
-          <div className="diagnostics-component-list">{components.map((component) => <article className="diagnostics-component" key={component.id}><div className="diagnostics-component-heading"><div><strong>{component.name}</strong><small>{component.version}</small></div><b className={`diagnostics-state-${component.state}`}>{stateLabels[component.state]}</b></div><p>{component.detail}</p>{component.fix ? <div className="diagnostics-fix"><Wrench size={14} aria-hidden="true" /><span>{component.fix}</span>{component.id === "sidecar" ? <button type="button" onClick={restartSidecar}>RESTART SIDECAR</button> : <a href="/workspace/models">OPEN MODEL INSTALLER <ExternalLink size={13} aria-hidden="true" /></a>}</div> : <div className="diagnostics-ok"><Check size={14} aria-hidden="true" /> NO ACTION NEEDED</div>}</article>)}</div>
+      <div className="diagnostics-component-list">{components.map((component) => <article className="diagnostics-component" key={component.id}><div className="diagnostics-component-heading"><div><strong>{component.name}</strong><small>{component.version}</small></div><b className={`diagnostics-state-${component.state}`}>{stateLabels[component.state]}</b></div><p>{component.detail}</p>{component.fix ? <div className="diagnostics-fix"><Wrench size={14} aria-hidden="true" /><span>{component.fix}</span>{component.id === "sidecar" ? <button type="button" onClick={restartSidecar}>RESTART SIDECAR</button> : <AppLink href="/workspace/models">OPEN MODEL INSTALLER <ExternalLink size={13} aria-hidden="true" /></AppLink>}</div> : <div className="diagnostics-ok"><Check size={14} aria-hidden="true" /> NO ACTION NEEDED</div>}</article>)}</div>
         </section>
         <aside className="diagnostics-update" aria-label="Update status">
           <div className="diagnostics-section-heading"><span className="eyebrow">UPDATES</span><RefreshCw size={15} aria-hidden="true" /></div>
@@ -79,7 +80,7 @@ export function Diagnostics() {
           <div className="diagnostics-license"><FileText size={15} aria-hidden="true" /><span>MIT license, third-party notices, and privacy information are available with this build.</span></div>
         </aside>
       </div>
-      <section className="diagnostics-about" aria-label="About Rabbit Code"><div><span className="eyebrow">ABOUT</span><h2>Open tools, clear boundaries.</h2></div><div><p>Rabbit Code keeps product behavior, local workspace state, and external Provider credentials in separate boundaries.</p><a href="/blog">VIEW BUILD NOTES <ExternalLink size={14} aria-hidden="true" /></a></div></section>
+      <section className="diagnostics-about" aria-label="About Rabbit Code"><div><span className="eyebrow">ABOUT</span><h2>Open tools, clear boundaries.</h2></div><div><p>Rabbit Code keeps product behavior, local workspace state, and external Provider credentials in separate boundaries.</p><AppLink href="/workspace/settings">OPEN SETTINGS <ExternalLink size={14} aria-hidden="true" /></AppLink></div></section>
       {notice ? <p className="diagnostics-notice" role="status">{notice}</p> : null}
     </main>
   );

@@ -16,6 +16,7 @@ from prompt_optimizer.providers import (
     ProviderEventType,
     ProviderRegistry,
 )
+from prompt_optimizer.providers.offline import OfflineRuleProvider
 from prompt_optimizer.services import AppServices
 from prompt_optimizer.storage.service import StorageService
 from prompt_optimizer.storage.version_service import VersionService
@@ -87,6 +88,20 @@ def test_structure_parser_protects_required_input_spans() -> None:
 def test_structure_parser_rejects_unclosed_code_fence() -> None:
     with pytest.raises(StructuredInputError, match="代码围栏未闭合"):
         StructuredPrompt.parse("请保留：\n```python\nprint('x')")
+
+
+def test_internal_protected_structure_is_explicit_but_user_marker_stays_rejected() -> None:
+    source = "输出格式：JSON"
+    structure = StructuredPrompt.parse(source)
+    protected = structure.protect()
+
+    response = OfflineRuleProvider().optimize(
+        ModelRequest(prompt=protected, protected_structure=structure)
+    )
+
+    assert response.analysis.optimized_prompt
+    with pytest.raises(StructuredInputError, match="保留结构标记"):
+        StructuredPrompt.parse(protected)
 
 
 def test_service_restores_markers_before_returning_result(tmp_path: Path) -> None:

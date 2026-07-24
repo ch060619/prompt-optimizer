@@ -1,32 +1,27 @@
-# ADR-0012：标题栏方案待平台原型确认
+# ADR-0012：采用原生标题栏
 
 - RC ID: RC-121
-- Status: Proposed；pending Windows/Linux desktop prototypes
+- Status: Accepted
 - Date: 2026-07-18
 - Deciders: Rabbit Code engineering
 
 ## Decision Status
 
-No native or custom title-bar option is accepted yet. The repository currently contains only the
-desktop shell boundary and command allowlist; it does not contain a runnable Tauri/Rust shell or a
-Linux desktop prototype. Choosing an option without those fixtures would turn unobserved behavior
-into a false compatibility claim.
+Rabbit Code uses the operating system title bar through Tauri `decorations: true`. A custom title
+bar is rejected because it would add drag-region, resize, system-menu, scaling, high-contrast and
+assistive-technology responsibilities without improving the coding workflow.
 
-## Required Comparison Before Acceptance
+## Platform Evidence
 
-Both options must be exercised on supported Windows and Linux environments:
-
-- Native title bar: drag region, maximize/restore, double-click, system menu, scaling, high
-  contrast, keyboard navigation and screen-reader naming.
-- Custom title bar: the same matrix, plus proof that drag regions never cover buttons, links,
-  inputs, menu controls or the resize affordance.
-
-The selected option must record viewport sizes, DPI/scaling, theme, keyboard path, assistive
-technology result and known limitations. The test fixture must be runnable without Agent or
-Provider business logic in `apps/desktop`.
+- Windows native window: title `Rabbit Code`, initial 1551x1061, maximized 1721x1033, restored
+  1551x1061, graceful close with exit code 0.
+- Linux Docker/Xvfb/Openbox: initial 1534x999, resized 1200x800, EWMH-maximized 1536x1005,
+  graceful close with exit code 0.
+- Both Windows and Linux link the Tauri application from the same `tauri.conf.json` and React
+  `frontend/dist` without Agent or Provider business logic in the shell.
 
 ## Current Evidence
 
-`scripts/check_desktop_boundary.py` passes and confirms that `apps/desktop` contains only the
-allowlisted shell boundary. It cannot validate title-bar interaction. RC-121 therefore remains
-unchecked until the missing platform prototypes and interaction matrix exist.
+`scripts/check_desktop_boundary.py` and RC-060 tests pass. The Linux interaction is reproducible
+with `scripts/prototypes/rc121_linux_window_probe.sh`. Narrator/Orca reading remains a release-level
+manual matrix; native decorations deliberately keep title-bar accessibility owned by the OS.

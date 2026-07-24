@@ -1,0 +1,90 @@
+{
+  "schema_version": "rc222-v1",
+  "generated_at": "2026-07-19T16:22:30.181264+00:00",
+  "environment": {
+    "commit": "6aa609f2d347331e79c38910bf2cf73b432c734e",
+    "machine": "CH",
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 24,
+    "python": "3.12.10",
+    "node": "D:\\Node\\node-v24.15.0-win-x64\\node.EXE",
+    "hardware_probe": "Windows WMI values recorded in docs/performance/baseline.md"
+  },
+  "thresholds": {
+    "cli_first_response_p95_ms": 1000,
+    "offline_first_token_p95_ms": 1500,
+    "search_query_p95_ms": 50,
+    "diff_p95_ms": 50,
+    "frontend_dist_bytes": 2000000,
+    "gui_cold_start_p95_ms": 3000,
+    "gui_hot_start_p95_ms": 500,
+    "memory_rss_bytes": 512000000,
+    "backend_package_bytes": 5000000
+  },
+  "measurements": {
+    "cli_first_response": {
+      "status": "measured",
+      "iterations": 25,
+      "p50_ms": 562.487,
+      "p95_ms": 917.953,
+      "min_ms": 176.994,
+      "max_ms": 1001.223
+    },
+    "offline_first_token": {
+      "status": "measured",
+      "iterations": 25,
+      "p50_ms": 0.159,
+      "p95_ms": 0.192,
+      "min_ms": 0.148,
+      "max_ms": 0.234
+    },
+    "search_query": {
+      "status": "measured",
+      "iterations": 25,
+      "p50_ms": 0.027,
+      "p95_ms": 0.032,
+      "min_ms": 0.018,
+      "max_ms": 0.042
+    },
+    "diff": {
+      "status": "measured",
+      "iterations": 25,
+      "p50_ms": 0.015,
+      "p95_ms": 0.02,
+      "min_ms": 0.012,
+      "max_ms": 0.027
+    },
+    "frontend_dist": {
+      "status": "measured",
+      "bytes": 829010
+    },
+    "memory": {
+      "status": "measured",
+      "rss_bytes": 64110592
+    },
+    "gui_cold_start": {
+      "status": "measured",
+      "iterations": 25,
+      "p50_ms": 1225.139,
+      "p95_ms": 1794.78,
+      "min_ms": 678.948,
+      "max_ms": 2227.807,
+      "surface": "frontend-dist-http"
+    },
+    "gui_hot_start": {
+      "status": "measured",
+      "iterations": 25,
+      "p50_ms": 13.522,
+      "p95_ms": 23.926,
+      "min_ms": 1.099,
+      "max_ms": 24.237,
+      "surface": "frontend-dist-http"
+    },
+    "backend_package": {
+      "status": "measured",
+      "bytes": 290458,
+      "artifact": "rabbit_code-3.0.0-py3-none-any.whl"
+    }
+  }
+}

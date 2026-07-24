@@ -28,6 +28,10 @@ roles:
       - role register
       - clean-room specifications
       - provenance and audit reports
+    prohibited:
+      - accessing source-map repositories or reconstructed source during review
+      - introducing restricted material into approved specifications
+      - approving implementations without provenance verification
     responsibilities:
       - verify no restricted material entered the implementation path
       - record review date, scope, and unresolved questions

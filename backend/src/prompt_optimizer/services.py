@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Lock
 from time import perf_counter
-from typing import Literal
+from typing import Literal, cast
 from uuid import uuid4
 
 from prompt_optimizer.auth.service import AuthError, AuthService
@@ -16,6 +16,7 @@ from prompt_optimizer.core.analyzer import Analyzer
 from prompt_optimizer.core.language import LanguageProfile
 from prompt_optimizer.core.models import (
     AuthResponse,
+    ExecutionDestination,
     FallbackReason,
     OptimizationStrategy,
     OptimizationTargets,
@@ -31,6 +32,7 @@ from prompt_optimizer.core.optimizer import Optimizer
 from prompt_optimizer.core.output_validation import OutputValidator
 from prompt_optimizer.core.structure import StructuredPrompt
 from prompt_optimizer.export.service import ExportService
+from prompt_optimizer.metrics import LocalMetricsAggregator
 from prompt_optimizer.paths import app_data_dir
 from prompt_optimizer.prompts.system import SYSTEM_PROMPT, SYSTEM_PROMPT_VERSION
 from prompt_optimizer.providers import (
@@ -44,12 +46,16 @@ from prompt_optimizer.providers import (
 )
 from prompt_optimizer.providers.budget import BudgetEstimate, enforce_budget, estimate_request
 from prompt_optimizer.public import (
+    declared_execution_destination,
     error_category_for,
     error_code_for,
+    execution_destination,
     fallback_details_for,
     provider_public_metadata,
     sanitize_error_message,
 )
+from prompt_optimizer.retention import RetentionService
+from prompt_optimizer.storage.service import StorageService
 from prompt_optimizer.storage.version_service import VersionService
 from prompt_optimizer.tasks import TaskService
 from prompt_optimizer.templates.manager import TemplateManager
@@ -84,12 +90,14 @@ class PromptOptimizationService:
         providers: ProviderCatalog,
         versions: VersionService,
         output_validator: OutputValidator | None = None,
+        metrics: LocalMetricsAggregator | None = None,
     ) -> None:
         self.analyzer = analyzer
         self.optimizer = optimizer
         self.providers = providers
         self.versions = versions
         self.output_validator = output_validator or OutputValidator()
+        self.metrics = metrics or LocalMetricsAggregator()
         self._cancellations: dict[str, Event] = {}
         self._cancellation_lock = Lock()
 
@@ -110,13 +118,62 @@ class PromptOptimizationService:
         save_prompt_history: bool = True,
         max_tokens: int | None = None,
         max_cost: float | None = None,
+        request_id: str | None = None,
+    ) -> OptimizeResponse:
+        optimization_id = request_id or uuid4().hex
+        cancellation = Event()
+        with self._cancellation_lock:
+            self._cancellations[optimization_id] = cancellation
+        try:
+            return self._optimize(
+                original_prompt=original_prompt,
+                prompt=prompt,
+                template=template,
+                targets=targets,
+                strategy=strategy,
+                provider_name=provider_name,
+                model=model,
+                optimizer_provider=optimizer_provider,
+                optimizer_model=optimizer_model,
+                owner_id=owner_id,
+                project_id=project_id,
+                save_prompt_history=save_prompt_history,
+                max_tokens=max_tokens,
+                max_cost=max_cost,
+                request_id=optimization_id,
+                cancel_event=cancellation,
+            )
+        finally:
+            with self._cancellation_lock:
+                self._cancellations.pop(optimization_id, None)
+
+    def _optimize(
+        self,
+        *,
+        original_prompt: str,
+        prompt: str,
+        template: PromptTemplate | None,
+        targets: OptimizationTargets | None = None,
+        strategy: OptimizationStrategy = "combined",
+        provider_name: str = "offline",
+        model: str | None = None,
+        optimizer_provider: str | None = None,
+        optimizer_model: str | None = None,
+        owner_id: int | None = 1,
+        project_id: int | None = None,
+        save_prompt_history: bool = True,
+        max_tokens: int | None = None,
+        max_cost: float | None = None,
+        request_id: str,
+        cancel_event: Event,
     ) -> OptimizeResponse:
         structure, language_profile, request = self._protected_request(
             prompt,
             template,
             targets=targets,
             strategy=strategy,
-            request_id=uuid4().hex,
+            request_id=request_id,
+            cancel_event=cancel_event,
         )
         quality_score_before = self.analyzer.analyze(prompt).score.total_score
         fallback_used = False
@@ -135,9 +192,17 @@ class PromptOptimizationService:
         provider = selection.provider
         estimate = estimate_request(request, provider)
         enforce_budget(estimate, max_tokens=max_tokens, max_cost=max_cost)
+        provider_started = perf_counter()
         try:
             provider_response = provider.optimize(request)
+            if cancel_event.is_set():
+                raise ProviderCancelledError("优化请求已取消。") from None
         except (ModelProviderError, RuntimeError, ValueError) as exc:
+            self.metrics.record_request(
+                provider=selection.name,
+                latency_ms=int((perf_counter() - provider_started) * 1000),
+                success=False,
+            )
             if selection.name == "offline" or not _fallback_allowed(selection.name, exc):
                 raise
             fallback_used = True
@@ -148,6 +213,16 @@ class PromptOptimizationService:
             fallback_reason, recovery_action = fallback_details_for(exc)
             provider = self.providers.get("offline")
             provider_response = provider.optimize(request)
+            if cancel_event.is_set():
+                raise ProviderCancelledError("优化请求已取消。") from None
+        usage = provider_response.usage or {}
+        self.metrics.record_request(
+            provider=selection.name,
+            latency_ms=provider_response.latency_ms,
+            success=True,
+            input_tokens=_usage_int(usage, "prompt_tokens", "input_tokens"),
+            output_tokens=_usage_int(usage, "completion_tokens", "output_tokens"),
+        )
         optimized_prompt = self._validate_output(
             provider_response.analysis.optimized_prompt or request.prompt,
             structure=structure,
@@ -185,6 +260,23 @@ class PromptOptimizationService:
             quality_score_before=quality_score_before,
         )
 
+    def execution_destination(
+        self,
+        *,
+        provider_name: str,
+        model: str | None = None,
+        optimizer_provider: str | None = None,
+        optimizer_model: str | None = None,
+        strategy: OptimizationStrategy = "combined",
+    ) -> ExecutionDestination:
+        selection = self._resolve_selection(
+            provider_name="offline" if strategy == "rules" else provider_name,
+            model=model,
+            optimizer_provider=optimizer_provider,
+            optimizer_model=optimizer_model,
+        )
+        return execution_destination(selection.provider, selection.name, selection.model)
+
     def stream(
         self,
         *,
@@ -220,6 +312,7 @@ class PromptOptimizationService:
             yield OptimizationStreamEvent("analysis", self.analyzer.analyze(prompt))
             started = perf_counter()
             streamed_chunks: list[str] = []
+            first_token_recorded = False
             selection = self._resolve_selection(
                 provider_name="offline" if strategy == "rules" else provider_name,
                 model=model,
@@ -252,8 +345,18 @@ class PromptOptimizationService:
                     if cancellation.is_set():
                         return
                     if event.type is ProviderEventType.DELTA and event.text:
+                        if not first_token_recorded:
+                            self.metrics.record_first_token(
+                                int((perf_counter() - started) * 1000)
+                            )
+                            first_token_recorded = True
                         streamed_chunks.append(event.text)
             except (ModelProviderError, RuntimeError, ValueError) as exc:
+                self.metrics.record_request(
+                    provider=selection.name,
+                    latency_ms=int((perf_counter() - started) * 1000),
+                    success=False,
+                )
                 if selection.name == "offline" or not _fallback_allowed(selection.name, exc):
                     raise
                 error_summary = sanitize_error_message(exc)
@@ -275,6 +378,21 @@ class PromptOptimizationService:
                     structure=structure,
                     language_profile=language_profile,
                     targets=targets,
+                )
+                self.metrics.record_request(
+                    provider=fallback_response.provider_used,
+                    latency_ms=fallback_response.latency_ms,
+                    success=True,
+                    input_tokens=_usage_int(
+                        fallback_response.usage or {},
+                        "prompt_tokens",
+                        "input_tokens",
+                    ),
+                    output_tokens=_usage_int(
+                        fallback_response.usage or {},
+                        "completion_tokens",
+                        "output_tokens",
+                    ),
                 )
                 fallback = self.save_optimized_text(
                     original_prompt=original_prompt,
@@ -312,6 +430,8 @@ class PromptOptimizationService:
                     yield OptimizationStreamEvent("chunk", chunk)
                 yield OptimizationStreamEvent("completed", fallback)
                 return
+            if cancellation.is_set():
+                return
             optimized_prompt = self._validate_output(
                 "".join(streamed_chunks),
                 structure=structure,
@@ -341,6 +461,11 @@ class PromptOptimizationService:
                 estimate=estimate,
                 max_tokens=max_tokens,
                 max_cost=max_cost,
+            )
+            self.metrics.record_request(
+                provider=selection.name,
+                latency_ms=int((perf_counter() - started) * 1000),
+                success=True,
             )
             chunks = streamed_chunks if not structure.segments else list(_chunks(optimized_prompt))
             for chunk in chunks:
@@ -428,6 +553,12 @@ class PromptOptimizationService:
                 system_prompt_version=SYSTEM_PROMPT_VERSION,
                 model=model,
                 execution_location=execution_location,
+                destination=declared_execution_destination(
+                    provider_used,
+                    provider_display_name or provider_used,
+                    model,
+                    execution_location,
+                ),
                 credential_ref=credential_ref,
                 fallback_used=fallback_used,
                 latency_ms=latency_ms,
@@ -474,6 +605,7 @@ class PromptOptimizationService:
             language_profile,
             ModelRequest(
                 prompt=protected_prompt,
+                protected_structure=structure,
                 template=template,
                 targets=targets,
                 strategy=strategy,
@@ -565,6 +697,7 @@ class PromptOptimizationService:
                 system_prompt_version=SYSTEM_PROMPT_VERSION,
                 model=model,
                 execution_location=execution_location,
+                destination=execution_destination(provider, provider_used, model),
                 credential_ref=credential_ref,
                 fallback_used=fallback_used,
                 latency_ms=latency_ms,
@@ -626,6 +759,14 @@ def _chunks(text: str, size: int = 120) -> Iterator[str]:
         yield text[start : start + size]
 
 
+def _usage_int(usage: dict[str, int], *keys: str) -> int | None:
+    for key in keys:
+        value = usage.get(key)
+        if isinstance(value, int) and value >= 0:
+            return value
+    return None
+
+
 class AppServices:
     def __init__(
         self,
@@ -640,6 +781,8 @@ class AppServices:
         tasks: TaskService | None = None,
         config: ConfigService | None = None,
         cleanup: LocalDataCleanupService | None = None,
+        retention: RetentionService | None = None,
+        metrics: LocalMetricsAggregator | None = None,
     ) -> None:
         self.analyzer = analyzer or Analyzer()
         self.optimizer = optimizer or Optimizer(self.analyzer)
@@ -666,11 +809,14 @@ class AppServices:
             paths=cleanup_paths or (app_data_dir(),),
             config_paths=(self.config.user_path,),
         )
+        self.retention = retention or RetentionService(cast(StorageService, storage))
+        self.metrics = metrics or LocalMetricsAggregator()
         self._optimization = PromptOptimizationService(
             analyzer=self.analyzer,
             optimizer=self.optimizer,
             providers=self.providers,
             versions=self.versions,
+            metrics=self.metrics,
         )
 
     @property
@@ -679,6 +825,7 @@ class AppServices:
         self._optimization.optimizer = self.optimizer
         self._optimization.providers = self.providers
         self._optimization.versions = self.versions
+        self._optimization.metrics = self.metrics
         return self._optimization
 
     def register_user(self, username: str, password: str) -> AuthResponse:

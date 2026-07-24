@@ -1,10 +1,34 @@
-import { ArrowUpRight, Cpu, Download, GitCompare, History, Library, Search, Sparkles, Trash2 } from "lucide-react";
+import {
+  ArrowUpRight,
+  CheckSquare,
+  Command as CommandIcon,
+  ChevronDown,
+  Code2,
+  Download,
+  Folder,
+  FolderOpen,
+  GitCompare,
+  Hammer,
+  History,
+  Plus,
+  Puzzle,
+  Search,
+  Send,
+  Settings as SettingsIcon,
+  Sparkles,
+  Star as SkillStar,
+  TerminalSquare,
+  Trash2,
+  Wrench,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { api, providerErrorMessage, type Provider } from "./api";
 import { PRODUCT_NAME } from "./brand";
 import type {
   DiffResult,
+  ExecutionDestination,
   OptimizationTargets,
   OptimizeResponse,
   PromptAnalysis,
@@ -31,21 +55,13 @@ import { PromptOptimizeButton, type PromptOptimizationSnapshot } from "./compone
 import { PromptOptimizationDiff } from "./components/PromptOptimizationDiff";
 import { PromptOptimizationControls, type OptimizationStrength } from "./components/PromptOptimizationControls";
 import { sanitizePublicError } from "./publicOutput";
-import { LOCAL_MODEL_OPTIONS, localModelOption, localModelReady, readDefaultLocalModel, readSessionLocalModel, writeSessionLocalModel } from "./localModelSelection";
+import { LOCAL_MODEL_OPTIONS, localModelOption, localModelReady, readSessionLocalModel, writeSessionLocalModel } from "./localModelSelection";
+import { readPromptDraft, writePromptDraft } from "./promptDraft";
+import { AppLink, canonicalPath, NavigationProvider, useNavigation } from "./navigation";
 
 // RC ID: RC-050. Surface offline-rule identity and fallback reasons in the workspace.
 // RC ID: RC-054. Use Rabbit Code as the canonical workspace identity.
 // RC ID: RC-154. Map composer presets to the generated optimization-target contract.
-
-const categories = ["all", "tech", "creative", "business", "education", "general"];
-const categoryLabels: Record<string, string> = {
-  all: "全部",
-  tech: "技术",
-  creative: "创意",
-  business: "商务",
-  education: "教育",
-  general: "通用"
-};
 
 const fallbackReasonLabels: Record<string, string> = {
   not_installed: "未安装",
@@ -102,6 +118,38 @@ function readShortcutPreset(): "default" | "vim" {
   }
 }
 
+function CommandPalette({ inputRef, onClose, onFocusPrompt, onOptimize }: {
+  inputRef: { current: HTMLInputElement | null };
+  onClose: () => void;
+  onFocusPrompt: () => void;
+  onOptimize: () => void;
+}) {
+  return (
+    <div className="command-palette-backdrop">
+      <section className="command-palette" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div className="command-palette-heading">
+          <div><CommandIcon size={17} aria-hidden="true" /><h2>Command palette</h2></div>
+          <button type="button" className="icon-button" aria-label="Close command palette" title="Close command palette" onClick={onClose}>
+            <X size={16} aria-hidden="true" />
+          </button>
+        </div>
+        <input ref={inputRef} className="command-palette-search" aria-label="Search commands" placeholder="Search commands" />
+        <div className="command-palette-commands" role="list" aria-label="Available commands">
+          <button type="button" className="command-palette-command" onClick={onFocusPrompt}>
+            <span>Focus prompt</span>
+            <small>Composer</small>
+          </button>
+          <button type="button" className="command-palette-command" onClick={onOptimize}>
+            <Sparkles size={15} aria-hidden="true" />
+            <span>Optimize prompt</span>
+            <small>Star action</small>
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function readSavePromptHistory(): boolean {
   const scope = (new URLSearchParams(window.location.search).get("workspace") || "default").replace(/[^a-zA-Z0-9_-]/g, "-");
   try {
@@ -154,8 +202,38 @@ function readOptimizationRoute(): { provider: Provider; model?: string } {
   return { provider: "offline" };
 }
 
+function destinationForRoute(route: { provider: Provider; model?: string }): ExecutionDestination {
+  const local = route.provider === "offline"
+    || route.provider === "local"
+    || route.provider === "ollama"
+    || route.provider === "lmstudio";
+  const providerDisplayName = route.provider === "offline"
+    ? "离线规则"
+    : local
+      ? "本地运行器"
+      : route.provider;
+  return {
+    execution_location: local ? "local" : "cloud",
+    provider: route.provider,
+    provider_display_name: providerDisplayName,
+    model: route.model ?? null,
+    target_service: local ? "本机" : providerDisplayName,
+    target_host: null,
+    network_access: !local,
+  };
+}
+
 export function App() {
-  const pathname = window.location.pathname;
+  return (
+    <NavigationProvider>
+      <AppContent />
+    </NavigationProvider>
+  );
+}
+
+function AppContent() {
+  const { pathname: rawPathname, search, navigate } = useNavigation();
+  const pathname = canonicalPath(rawPathname);
   const isWorkspaceRoute = pathname === "/workspace";
   const isWorkspaceHomeRoute = pathname === "/workspace/home";
   const isTaskWorkspaceRoute = pathname === "/workspace/task";
@@ -169,12 +247,14 @@ export function App() {
   const isOnboardingRoute = pathname === "/onboarding";
   const authMode = pathname === "/register" ? "register" : pathname === "/login" ? "login" : null;
   const showSharedRabbit = !isWorkspaceRoute && !isWorkspaceHomeRoute && !isTaskWorkspaceRoute && !isChangeReviewRoute && !isTerminalProcessRoute && !isProviderModelsRoute && !isLocalModelsRoute && !isPromptAssetsRoute && !isSettingsRoute && !isDiagnosticsRoute && !isOnboardingRoute && pathname !== "/" && !authMode;
-  const [prompt, setPrompt] = useState("你是一名产品顾问，请帮我优化一个 SaaS 产品发布邮件。");
-  const [promptRevision, setPromptRevision] = useState(0);
-  const [promptCursor, setPromptCursor] = useState({ start: 0, end: 0 });
-  const promptRevisionRef = useRef(0);
+  const initialPromptDraft = readPromptDraft();
+  const [prompt, setPrompt] = useState(initialPromptDraft.text);
+  const [promptRevision, setPromptRevision] = useState(initialPromptDraft.revision);
+  const [promptCursor, setPromptCursor] = useState(initialPromptDraft.cursor);
+  const promptRevisionRef = useRef(initialPromptDraft.revision);
+  const promptInputRef = useRef<HTMLTextAreaElement>(null);
   const optimizeButtonRef = useRef<HTMLButtonElement>(null);
-  const [category, setCategory] = useState("all");
+  const category = "all";
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>();
   const [analysis, setAnalysis] = useState<PromptAnalysis | null>(null);
@@ -186,7 +266,9 @@ export function App() {
   const [streamStatus, setStreamStatus] = useState<string | null>(null);
   const [streamText, setStreamText] = useState("");
   const [providerMetadata, setProviderMetadata] = useState<OptimizeResponse["metadata"] | null>(null);
+  const [executionDestination, setExecutionDestination] = useState<ExecutionDestination | null>(null);
   const [user, setUser] = useState<UserPublic | null>(null);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [username, setUsername] = useState("demo-user");
   const [password, setPassword] = useState("demo-password");
   const [task, setTask] = useState<TaskRecord | null>(null);
@@ -204,6 +286,26 @@ export function App() {
     ? { provider: "local" as Provider, model: sessionLocalModel }
     : defaultOptimizationRoute;
   const optimizationReturnFocusRef = useRef<HTMLElement | null>(null);
+  const commandPaletteInputRef = useRef<HTMLInputElement>(null);
+  const commandPaletteReturnFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (rawPathname !== pathname) {
+      navigate(`${pathname}${search}`, { replace: true });
+    }
+  }, [navigate, pathname, rawPathname, search]);
+
+  useEffect(() => {
+    if (!isWorkspaceRoute) {
+      return;
+    }
+    writePromptDraft({
+      text: prompt,
+      revision: promptRevision,
+      cursor: promptCursor,
+      attachmentRefs: [],
+    });
+  }, [isWorkspaceRoute, prompt, promptRevision, promptCursor]);
 
   const visibleTemplates = useMemo(() => templates, [templates]);
 
@@ -213,9 +315,20 @@ export function App() {
     }
     function handleShortcut(event: KeyboardEvent) {
       const key = event.key.toLowerCase();
+      const commandPalette = !event.isComposing
+        && (event.ctrlKey || event.metaKey)
+        && !event.shiftKey
+        && !event.altKey
+        && key === "k";
       const matches = shortcutPreset === "vim"
         ? event.altKey && !event.ctrlKey && !event.metaKey && key === "o"
         : event.ctrlKey && event.shiftKey && !event.altKey && !event.metaKey && key === "o";
+      if (commandPalette) {
+        event.preventDefault();
+        commandPaletteReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        setCommandPaletteOpen(true);
+        return;
+      }
       if (!event.isComposing && matches) {
         event.preventDefault();
         optimizeButtonRef.current?.focus();
@@ -227,11 +340,28 @@ export function App() {
   }, [isWorkspaceRoute, shortcutPreset]);
 
   useEffect(() => {
+    if (!commandPaletteOpen) {
+      return;
+    }
+    commandPaletteInputRef.current?.focus();
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      setCommandPaletteOpen(false);
+      queueMicrotask(() => commandPaletteReturnFocusRef.current?.focus());
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [commandPaletteOpen]);
+
+  useEffect(() => {
     if (!isWorkspaceRoute) {
       return;
     }
     void withLoading(async () => {
-      if (api.getToken()) {
+      if (api.getToken() && !user) {
         setUser(await api.me());
       }
       await loadTemplates(category);
@@ -241,7 +371,7 @@ export function App() {
         setHistory([]);
       }
     });
-  }, [category, isWorkspaceRoute]);
+  }, [category, isWorkspaceRoute, user]);
 
   async function runAuth(mode: "login" | "register") {
     await withLoading(async () => {
@@ -250,11 +380,11 @@ export function App() {
           ? await api.login(username, password)
           : await api.register(username, password);
       api.setToken(result.access_token);
-      setUser(result.user);
       await loadHistory();
       if (authMode) {
-        window.location.assign("/workspace");
+        navigate("/workspace", { replace: true });
       }
+      setUser(result.user);
     });
   }
 
@@ -262,7 +392,7 @@ export function App() {
     api.setToken(null);
     setUser(null);
     setHistory([]);
-    window.location.assign("/");
+    navigate("/", { replace: true });
   }
 
   async function loadTemplates(nextCategory: string) {
@@ -348,8 +478,13 @@ export function App() {
   async function runOptimize(_requestId: string, signal: AbortSignal, snapshot: PromptOptimizationSnapshot): Promise<void> {
     setLoading(true);
     setError(null);
+    setExecutionDestination(destinationForRoute(optimizationRoute));
+    const cancelRequest = () => {
+      void api.cancelOptimize(_requestId).catch(() => undefined);
+    };
+    signal.addEventListener("abort", cancelRequest, { once: true });
     try {
-      const result = await api.optimize(buildOptimizationInput(snapshot.text), selectedTemplate, optimizationRoute.provider, signal, savePromptHistory, optimizationRoute.model, undefined, undefined, optimizationTargets());
+      const result = await api.optimize(buildOptimizationInput(snapshot.text), selectedTemplate, optimizationRoute.provider, signal, savePromptHistory, optimizationRoute.model, undefined, undefined, optimizationTargets(), _requestId);
       if (signal.aborted) {
         return;
       }
@@ -369,6 +504,7 @@ export function App() {
       setError(sanitizePublicError(providerErrorMessage(err)));
       throw err;
     } finally {
+      signal.removeEventListener("abort", cancelRequest);
       setLoading(false);
     }
   }
@@ -377,6 +513,7 @@ export function App() {
     await withLoading(async () => {
       setStreamText("");
       setProviderMetadata(null);
+      setExecutionDestination(destinationForRoute(optimizationRoute));
       setStreamStatus("准备优化");
       await api.streamOptimize(buildOptimizationInput(prompt), selectedTemplate, optimizationRoute.provider, (event) => {
         if (event.event === "started") {
@@ -425,6 +562,7 @@ export function App() {
 
   async function runOptimizeTask() {
     await withLoading(async () => {
+      setExecutionDestination(destinationForRoute(optimizationRoute));
       const created = await api.createOptimizeTask(buildOptimizationInput(prompt), selectedTemplate, optimizationRoute.provider, savePromptHistory, optimizationRoute.model, undefined, undefined, optimizationTargets());
       let current = await api.task(created.task_id);
       setTask(current);
@@ -454,11 +592,32 @@ export function App() {
     // RC ID: RC-062. Respect the optional version_id generated from OpenAPI.
     setActiveVersion(result.version_id ?? null);
     setProviderMetadata(result.metadata);
+    if (result.metadata.destination) {
+      setExecutionDestination(result.metadata.destination);
+    }
   }
 
   function closeOptimizationPreview() {
     setOptimizationPreview(null);
     queueMicrotask(() => optimizationReturnFocusRef.current?.focus());
+  }
+
+  function closeCommandPalette() {
+    setCommandPaletteOpen(false);
+    queueMicrotask(() => commandPaletteReturnFocusRef.current?.focus());
+  }
+
+  function focusPromptFromCommandPalette() {
+    setCommandPaletteOpen(false);
+    queueMicrotask(() => promptInputRef.current?.focus());
+  }
+
+  function optimizeFromCommandPalette() {
+    setCommandPaletteOpen(false);
+    queueMicrotask(() => {
+      optimizeButtonRef.current?.focus();
+      optimizeButtonRef.current?.click();
+    });
   }
 
   async function runDiff(targetId: number) {
@@ -538,6 +697,22 @@ export function App() {
     });
   }
 
+  function beginTask(text = "") {
+    setPrompt(text);
+    bumpPromptRevision();
+    setPromptCursor({ start: text.length, end: text.length });
+    setAnalysis(null);
+    setDiff(null);
+    setTask(null);
+    setStreamStatus(null);
+    setStreamText("");
+    setProviderMetadata(null);
+    setExecutionDestination(null);
+    setPendingOptimization(null);
+    setOptimizationPreview(null);
+    queueMicrotask(() => promptInputRef.current?.focus());
+  }
+
   if (isWorkspaceHomeRoute) {
     return (
       <SiteShell authenticated={Boolean(api.getToken())} isWorkspace rabbitVariant="empty">
@@ -573,7 +748,7 @@ export function App() {
   if (isProviderModelsRoute) {
     return (
       <SiteShell authenticated={Boolean(api.getToken())} isWorkspace rabbitVariant="mark">
-        <ProviderModels setupMode={new URLSearchParams(window.location.search).get("entry") === "api"} />
+        <ProviderModels setupMode={new URLSearchParams(search).get("entry") === "api"} />
       </SiteShell>
     );
   }
@@ -581,7 +756,7 @@ export function App() {
   if (isLocalModelsRoute) {
     return (
       <SiteShell authenticated={Boolean(api.getToken())} isWorkspace rabbitVariant="mark">
-        <LocalModels setupMode={new URLSearchParams(window.location.search).get("entry") === "local"} />
+        <LocalModels setupMode={new URLSearchParams(search).get("entry") === "local"} />
       </SiteShell>
     );
   }
@@ -636,128 +811,69 @@ export function App() {
   }
 
   return (
-    <SiteShell authenticated={Boolean(user)} isWorkspace onSignOut={() => void logout()}>
-      <main className="app-shell">
+    <SiteShell authenticated={Boolean(user)} isWorkspace hideHeader onSignOut={() => void logout()}>
+      {commandPaletteOpen ? (
+        <CommandPalette
+          inputRef={commandPaletteInputRef}
+          onClose={closeCommandPalette}
+          onFocusPrompt={focusPromptFromCommandPalette}
+          onOptimize={optimizeFromCommandPalette}
+        />
+      ) : null}
+      <main className="reference-workspace">
       <h1 className="sr-only">提示词工作区</h1>
-      <aside className="sidebar" aria-label="Template library">
-        <div className="brand">
-          <RabbitMark variant="mark" decorative size={22} />
+      <aside className="reference-sidebar" aria-label="工作区导航">
+        <AppLink className="reference-brand" href="/workspace/home" aria-label={`${PRODUCT_NAME} home`}>
+          <span className="reference-brand-rabbit" aria-hidden="true"><RabbitMark variant="desktop" decorative loading="eager" /></span>
           <span>{PRODUCT_NAME}</span>
-        </div>
-        <div className="workspace-rabbit">
-          <RabbitMark variant="full" alt="Rabbit Code 兔兔品牌插画" loading="eager" />
-        </div>
+        </AppLink>
+        <button className="reference-new-task" type="button" onClick={() => beginTask()}>
+          <Plus size={22} strokeWidth={1.5} aria-hidden="true" />
+          <span>新建任务</span>
+        </button>
+        <nav className="reference-primary-nav" aria-label="主要功能">
+          <AppLink href="/workspace/assets"><SkillStar size={22} strokeWidth={1.45} aria-hidden="true" /><span>技能</span></AppLink>
+          <AppLink href="/workspace/settings"><Puzzle size={22} strokeWidth={1.45} aria-hidden="true" /><span>插件</span></AppLink>
+          <AppLink href="/workspace/home"><Folder size={22} strokeWidth={1.45} aria-hidden="true" /><span>项目</span></AppLink>
+          <AppLink href="/workspace/task"><CheckSquare size={22} strokeWidth={1.45} aria-hidden="true" /><span>任务</span></AppLink>
+        </nav>
+        <AppLink className="reference-settings-link" href="/workspace/settings" aria-label="设置" title="设置">
+          <SettingsIcon size={23} strokeWidth={1.45} aria-hidden="true" />
+        </AppLink>
         {user ? (
-          <div className="workspace-account">
-            <strong>{user.username}</strong>
-            <span>ACCOUNT ACTIVE</span>
-          </div>
-        ) : (
-          <div className="workspace-account workspace-guest">
-            <strong>GUEST MODE</strong>
-            <span>HISTORY IS NOT SAVED</span>
-            <div className="guest-links">
-              <a href="/login">LOGIN</a>
-              <a href="/register">REGISTER</a>
-            </div>
-          </div>
-        )}
-        <div className="section-title">
-          <Library size={16} aria-hidden="true" />
-          <span>模板库</span>
-        </div>
-        <div className="category-tabs">
-          {categories.map((item) => (
-            <button
-              key={item}
-              className={item === category ? "active" : ""}
-              onClick={() => setCategory(item)}
-            >
-              {categoryLabels[item]}
-            </button>
-          ))}
-        </div>
-        <div className="template-list">
-          {visibleTemplates.map((template) => (
-            <button
-              className={selectedTemplate === template.id ? "template active" : "template"}
-              key={template.id}
-              onClick={() => selectTemplate(template.id)}
-            >
-              <strong>{template.name}</strong>
-              <span>{template.description}</span>
-            </button>
-          ))}
-        </div>
+          <>
+            <span className="sr-only">Signed in as {user.username}</span>
+            <span className="sr-only" aria-hidden="true">{user.username}</span>
+          </>
+        ) : null}
       </aside>
 
-      <section className="workspace">
-        <div className="toolbar">
-          <label className="workspace-session-model">
-            <Cpu size={15} aria-hidden="true" />
-            <span>SESSION MODEL</span>
-            <select
-              aria-label="Session local model"
-              value={sessionLocalModel || ""}
-              onChange={(event) => selectSessionLocalModel(event.target.value)}
-              disabled={loading}
-            >
-              <option value="">DEFAULT / {localModelOption(readDefaultLocalModel())?.label || "OFFLINE ROUTE"}</option>
-              {LOCAL_MODEL_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label} / {localModelReady(option.id) ? "READY" : "NOT READY"} / {option.contextLength} TOKENS
-                </option>
-              ))}
-            </select>
-          </label>
-          <button onClick={runAnalyze} title="分析提示词" disabled={loading}>
-            <Search size={15} aria-hidden="true" />
-            分析
-          </button>
-          <PromptOptimizeButton
-            icon={<Sparkles size={15} aria-hidden="true" />}
-            label={user && savePromptHistory ? "优化并保存" : "优化"}
-            ariaLabel="优化输入内容"
-            tooltip="优化输入内容"
-            disabled={loading}
-            input={prompt}
-            revision={promptRevision}
-            cursor={promptCursor}
-            buttonRef={optimizeButtonRef}
-            onValidationError={setError}
-            onOptimize={runOptimize}
-          />
-          <PromptOptimizationControls
-            templates={visibleTemplates}
-            selectedTemplate={selectedTemplate}
-            onTemplateChange={selectTemplate}
-            scenario={scenario}
-            onScenarioChange={setScenario}
-            role={optimizationRole}
-            onRoleChange={setOptimizationRole}
-            strength={optimizationStrength}
-            onStrengthChange={setOptimizationStrength}
-            scoreEnabled={scoreEnabled}
-            onScoreEnabledChange={setScoreEnabled}
-            history={history}
-            activeVersion={activeVersion}
-            onCompareVersion={(versionId) => void runDiff(versionId)}
-          />
-          <button onClick={() => void runStreamOptimize()} title="流式优化提示词" disabled={loading}>
-            <Sparkles size={15} aria-hidden="true" />
-            流式优化
-          </button>
-          <button onClick={() => void runOptimizeTask()} title="后台优化提示词" disabled={loading || !user}>
-            <Sparkles size={15} aria-hidden="true" />
-            后台优化
-          </button>
-          {["md", "json", "txt", "csv"].map((format) => (
-            <button key={format} onClick={() => void runExport(format)} title={`导出 ${format}`} disabled={loading || !user || !activeVersion}>
-              <Download size={15} aria-hidden="true" />
-              {format.toUpperCase()}
+      <section className="reference-workbench">
+        <div className="reference-hero">
+          <div className="reference-hero-rabbit">
+            <RabbitMark variant="desktop" alt="Rabbit Code 桌面端兔兔" loading="eager" />
+          </div>
+          <h2>我们该构建什么？</h2>
+          <div className="reference-quick-grid" aria-label="快捷任务">
+            <button type="button" title="分析提示词" onClick={() => beginTask("分析当前工作区的代码结构和关键实现。") }>
+              <Code2 size={42} strokeWidth={1.35} aria-hidden="true" />
+              <span><strong>探索代码</strong><small>理解代码库结构<br />和实现细节</small></span>
             </button>
-          ))}
+            <button type="button" onClick={() => beginTask("在当前项目中实现一个新功能。") }>
+              <Hammer size={42} strokeWidth={1.35} aria-hidden="true" />
+              <span><strong>构建功能</strong><small>实现新功能<br />和改进现有功能</small></span>
+            </button>
+            <button type="button" onClick={() => beginTask("审查当前改动，找出代码质量和潜在问题。") }>
+              <Search size={42} strokeWidth={1.35} aria-hidden="true" />
+              <span><strong>审查代码</strong><small>分析代码质量<br />和潜在问题</small></span>
+            </button>
+            <button type="button" onClick={() => { if (user && prompt.trim()) void runOptimizeTask(); else beginTask("定位并修复当前项目中的问题。"); }}>
+              <Wrench size={42} strokeWidth={1.35} aria-hidden="true" />
+              <span><strong>修复问题</strong><small>定位问题根源<br />并提供修复方案</small></span>
+            </button>
+          </div>
         </div>
+
         {error ? <ErrorState title={error} description="The operation did not complete. Check the local service and try again." /> : null}
         {pendingOptimization ? (
           <section className="prompt-optimization-compare" aria-label="Optimization result ready" role="status">
@@ -769,16 +885,90 @@ export function App() {
             </div>
           </section>
         ) : null}
-        <textarea
-          aria-label="提示词输入"
-          value={prompt}
-          onChange={(event) => {
-            setPrompt(event.target.value);
-            bumpPromptRevision();
-            setPromptCursor({ start: event.target.selectionStart, end: event.target.selectionEnd });
-          }}
-          onSelect={(event) => setPromptCursor({ start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd })}
-        />
+        <section className="reference-composer" aria-label="任务输入">
+          <div className="reference-composer-meta">
+            <AppLink href="/workspace/home"><FolderOpen size={18} strokeWidth={1.5} aria-hidden="true" /><span>当前工作区</span><b>·</b><strong>~/workspace</strong><ChevronDown size={15} aria-hidden="true" /></AppLink>
+            <label>
+              <TerminalSquare size={18} strokeWidth={1.5} aria-hidden="true" />
+              <span>执行环境</span>
+              <select
+                aria-label="Session local model"
+                value={sessionLocalModel || ""}
+                onChange={(event) => selectSessionLocalModel(event.target.value)}
+                disabled={loading}
+              >
+                <option value="">本地 (Local)</option>
+                {LOCAL_MODEL_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+              <ChevronDown size={15} aria-hidden="true" />
+            </label>
+            <div className="reference-execution-state" aria-label="执行状态">
+              <i data-active={loading ? "true" : "false"} aria-hidden="true" />
+              <span>执行状态</span>
+              <strong>{loading ? "执行中" : "空闲中"}</strong>
+              <ChevronDown size={15} aria-hidden="true" />
+            </div>
+          </div>
+          <div className="reference-composer-body">
+            <textarea
+              ref={promptInputRef}
+              aria-label="提示词输入"
+              placeholder="描述你想要完成的任务..."
+              value={prompt}
+              onChange={(event) => {
+                setPrompt(event.target.value);
+                bumpPromptRevision();
+                setPromptCursor({ start: event.target.selectionStart, end: event.target.selectionEnd });
+              }}
+              onSelect={(event) => setPromptCursor({ start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd })}
+            />
+            <div className="reference-composer-actions">
+              <PromptOptimizationControls
+                templates={visibleTemplates}
+                selectedTemplate={selectedTemplate}
+                onTemplateChange={selectTemplate}
+                scenario={scenario}
+                onScenarioChange={setScenario}
+                role={optimizationRole}
+                onRoleChange={setOptimizationRole}
+                strength={optimizationStrength}
+                onStrengthChange={setOptimizationStrength}
+                scoreEnabled={scoreEnabled}
+                onScoreEnabledChange={setScoreEnabled}
+                history={history}
+                activeVersion={activeVersion}
+                onCompareVersion={(versionId) => void runDiff(versionId)}
+              />
+              <PromptOptimizeButton
+                icon={<Sparkles size={29} strokeWidth={1.5} aria-hidden="true" />}
+                label=""
+                ariaLabel="优化输入内容"
+                tooltip="优化输入内容"
+                disabled={loading}
+                input={prompt}
+                revision={promptRevision}
+                cursor={promptCursor}
+                buttonRef={optimizeButtonRef}
+                onValidationError={setError}
+                onOptimize={runOptimize}
+              />
+              <button className="reference-send" type="button" onClick={() => void runStreamOptimize()} title="发送任务" disabled={loading || !prompt.trim()}>
+                <Send size={18} strokeWidth={1.5} aria-hidden="true" />
+                <span>发送</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div className="reference-compat-controls">
+          <button type="button" aria-label="分析" title="分析提示词" onClick={() => void runAnalyze()}><Search size={15} aria-hidden="true" />分析</button>
+          <button type="button" title="流式优化提示词" onClick={() => void runStreamOptimize()}><Sparkles size={15} aria-hidden="true" />流式优化</button>
+          <button type="button" title="后台优化提示词" disabled={loading || !user} onClick={() => void runOptimizeTask()}><Sparkles size={15} aria-hidden="true" />后台优化</button>
+        </div>
+
+        <div className="reference-results" aria-live="polite">
         {streamStatus ? (
           <section className="stream-panel" role="status" aria-live="polite" aria-atomic="true">
             <strong>{streamStatus}</strong>
@@ -789,6 +979,14 @@ export function App() {
           <section className="task-panel">
             <strong>后台任务</strong>
             <span>{task.kind} · {task.status}</span>
+          </section>
+        ) : null}
+        {executionDestination ? (
+          <section className="execution-destination" aria-label="Execution destination" role="region">
+            <strong>{executionDestination.execution_location === "local" ? "本地处理" : "云端请求"}</strong>
+            <span>{executionDestination.target_service}</span>
+            {executionDestination.target_host ? <span>{executionDestination.target_host}</span> : null}
+            {executionDestination.model ? <span>{executionDestination.model}</span> : null}
           </section>
         ) : null}
         {analysis ? (
@@ -812,7 +1010,7 @@ export function App() {
                 {providerMetadata.provider_request_id ? <span>Provider 请求 ID：{providerMetadata.provider_request_id}</span> : null}
                 {providerMetadata.fallback_reason ? <span>降级原因：{fallbackReasonLabels[providerMetadata.fallback_reason] || providerMetadata.fallback_reason}</span> : null}
                 {providerMetadata.error_summary ? <span>错误：{sanitizePublicError(providerMetadata.error_summary)}</span> : null}
-                {providerMetadata.recovery_action ? <a href={recoveryActionPaths[providerMetadata.recovery_action] || "/workspace"} aria-label={recoveryActionAriaLabels[providerMetadata.recovery_action] || recoveryActionLabels[providerMetadata.recovery_action] || "处理 Provider 错误"}>{recoveryActionLabels[providerMetadata.recovery_action] || "处理 Provider 错误"}<ArrowUpRight size={14} aria-hidden="true" /></a> : null}
+                    {providerMetadata.recovery_action ? <AppLink href={recoveryActionPaths[providerMetadata.recovery_action] || "/workspace"} aria-label={recoveryActionAriaLabels[providerMetadata.recovery_action] || recoveryActionLabels[providerMetadata.recovery_action] || "处理 Provider 错误"}>{recoveryActionLabels[providerMetadata.recovery_action] || "处理 Provider 错误"}<ArrowUpRight size={14} aria-hidden="true" /></AppLink> : null}
               </div>
             ) : null}
             <div className="score-head">
@@ -861,13 +1059,7 @@ export function App() {
             </div>
           </section>
         ) : null}
-      </section>
-
-      <aside className="inspector" aria-label="Version history">
-        <div className="section-title">
-          <History size={16} aria-hidden="true" />
-          <span>历史版本</span>
-        </div>
+        {analysis || history.length ? <section className="reference-history" aria-label="Version history"><div className="section-title"><History size={16} aria-hidden="true" /><span>历史版本</span></div>
         <div className="score-bars">
           {analysis?.score.dimensions.map((dimension) => (
             <div className="bar-row" key={dimension.name}>
@@ -899,7 +1091,7 @@ export function App() {
             </div>
           ))}
         </div>
-        {!user ? <div className="guest-note">GUEST MODE / HISTORY IS NOT SAVED <a href="/login">LOGIN TO SAVE</a></div> : null}
+          {!user ? <div className="guest-note">GUEST MODE / HISTORY IS NOT SAVED <AppLink href="/login">LOGIN TO SAVE</AppLink></div> : null}
         {diff ? (
           <section className="diff-panel">
             <div className="section-title">
@@ -910,7 +1102,15 @@ export function App() {
             <pre>{diff.diff_lines.join("\n")}</pre>
           </section>
         ) : null}
-      </aside>
+        <div className="reference-export-actions">
+          {["md", "json", "txt", "csv"].map((format) => (
+            <button key={format} onClick={() => void runExport(format)} title={`导出 ${format}`} disabled={loading || !user || !activeVersion}>
+              <Download size={15} aria-hidden="true" />{format.toUpperCase()}
+            </button>
+          ))}
+        </div></section> : null}
+        </div>
+      </section>
       </main>
     </SiteShell>
   );

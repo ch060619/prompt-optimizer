@@ -1,0 +1,56 @@
+{
+  "version": "1",
+  "channels": {
+    "stable": {
+      "version": "3.0.0",
+      "rollout_percentage": 100,
+      "min_required_version": "2.0.0",
+      "release_notes": "Initial stable release",
+      "breaking_changes": [],
+      "downloads": {
+        "windows-x64": {
+          "url": "https://github.com/rabbit-code/rabbit-code/releases/download/v3.0.0/rabbit-code-3.0.0-windows-x64.exe",
+          "sha256": "TBD"
+        },
+        "linux-x64": {
+          "url": "https://github.com/rabbit-code/rabbit-code/releases/download/v3.0.0/rabbit-code-3.0.0-linux-x64",
+          "sha256": "TBD"
+        }
+      }
+    },
+    "beta": {
+      "version": "3.1.0-beta.1",
+      "rollout_percentage": 25,
+      "min_required_version": "3.0.0",
+      "release_notes": "Beta channel for early testing",
+      "breaking_changes": [],
+      "downloads": {
+        "windows-x64": {
+          "url": "https://github.com/rabbit-code/rabbit-code/releases/download/v3.1.0-beta.1/rabbit-code-3.1.0-beta.1-windows-x64.exe",
+          "sha256": "TBD"
+        },
+        "linux-x64": {
+          "url": "https://github.com/rabbit-code/rabbit-code/releases/download/v3.1.0-beta.1/rabbit-code-3.1.0-beta.1-linux-x64",
+          "sha256": "TBD"
+        }
+      }
+    },
+    "nightly": {
+      "version": "3.2.0-dev.20260722",
+      "rollout_percentage": 10,
+      "min_required_version": "3.0.0",
+      "release_notes": "Nightly build for development testing",
+      "breaking_changes": ["API response format may change without notice"],
+      "downloads": {
+        "windows-x64": {
+          "url": "https://github.com/rabbit-code/rabbit-code/releases/download/nightly/rabbit-code-nightly-windows-x64.exe",
+          "sha256": "TBD"
+        },
+        "linux-x64": {
+          "url": "https://github.com/rabbit-code/rabbit-code/releases/download/nightly/rabbit-code-nightly-linux-x64",
+          "sha256": "TBD"
+        }
+      }
+    }
+  }
+}

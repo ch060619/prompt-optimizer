@@ -1,0 +1,63 @@
+# RC ID: RC-285. License risk policy for automated scanning.
+# Defines allow/review/deny categories for dependency licenses.
+
+schema_version: 1
+rc_id: RC-285
+
+# Licenses that are always allowed (permissive, compatible with MIT)
+allow:
+  - MIT
+  - ISC
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - 0BSD
+  - Apache-2.0
+  - MPL-2.0
+  - Unlicense
+  - Zlib
+  - Python-2.0
+
+# Licenses that require review before use
+review:
+  - UNKNOWN
+  - null
+  - ""
+  - custom
+  - Other
+  - LicenseRef-Gemma-Terms
+
+# Licenses that are denied (copyleft or restrictive)
+deny:
+  - GPL-2.0
+  - GPL-2.0-only
+  - GPL-2.0-or-later
+  - GPL-3.0
+  - GPL-3.0-only
+  - GPL-3.0-or-later
+  - AGPL-3.0
+  - AGPL-3.0-only
+  - AGPL-3.0-or-later
+  - LGPL-2.1
+  - LGPL-2.1-only
+  - LGPL-2.1-or-later
+  - LGPL-3.0
+  - LGPL-3.0-only
+  - LGPL-3.0-or-later
+  - SSPL
+  - BUSL-1.1
+  - CC-BY-SA-4.0
+  - CC-BY-NC-4.0
+
+# Exception list: packages with denied/review licenses that have been manually approved
+# Each exception must have: package, license, owner, scope, expires
+exceptions:
+  - package: gsap
+    license: "Standard 'no charge' license"
+    owner: frontend-team
+    scope: "Dev dependency only; not bundled in production build"
+    expires: "2026-12-31"
+  - package: google/gemma-3-1b-it
+    license: LicenseRef-Gemma-Terms
+    owner: model-team
+    scope: "On-demand download; user must accept license before download; not bundled"
+    expires: "2027-01-01"

@@ -223,15 +223,6 @@ from .sensitive_files import (
     SensitiveFilePolicy,
     SensitiveMatch,
 )
-from .trust import (
-    TrustApprovalRequired,
-    TrustError,
-    TrustExecutionContext,
-    TrustManifest,
-    TrustRecord,
-    TrustRegistry,
-    TrustReapprovalRequired,
-)
 from .session_database import (
     DatabaseCorruptionError,
     SessionDatabase,
@@ -297,6 +288,15 @@ from .tool_registry import (
     ToolUnavailable,
 )
 from .tool_results import BoundedOutput, OutputMetadata, ToolOutcome
+from .trust import (
+    TrustApprovalRequired,
+    TrustError,
+    TrustExecutionContext,
+    TrustManifest,
+    TrustReapprovalRequired,
+    TrustRecord,
+    TrustRegistry,
+)
 from .workspace_isolation import (
     WorkspaceAccessError,
     WorkspaceBinding,

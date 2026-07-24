@@ -28,4 +28,4 @@ The FastAPI contract test exercises directory check, version registration, migra
 
 ## Residual limits
 
-Real Ollama/llama.cpp processes, model weights, GPU hardware, and cross-process filesystem fault injection were not run. Existing path migration warnings and the frontend jsdom navigation warning remain non-blocking. A full `workspace.py verify` attempt was blocked by the pre-existing Ruff `I001` import-order issue at `backend/tests/test_rc153_system_prompt.py:1`; that unrelated file was left untouched.
+Real Ollama/llama.cpp processes, model weights, GPU hardware, and cross-process filesystem fault injection were not run. Existing path migration warnings remain non-blocking. The earlier Ruff import-order and frontend jsdom navigation issues have been fixed; full-workspace Ruff, frontend tests, and the production build now pass.

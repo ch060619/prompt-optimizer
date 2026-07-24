@@ -17,6 +17,7 @@ PACKAGE_ROOT = Path(__file__).resolve().parent
 BACKEND_ROOT = PACKAGE_ROOT.parents[1]
 PROJECT_ROOT = PACKAGE_ROOT.parents[2]
 DATA_ROOT = PROJECT_ROOT / "data"
+_WARNED_LEGACY_DATA_DIRS: set[Path] = set()
 
 
 def app_data_dir() -> Path:
@@ -60,11 +61,13 @@ def _default_data_dir(base: Path) -> Path:
     current = base / DISTRIBUTION_NAME
     legacy = base / LEGACY_DISTRIBUTION_NAME
     if not current.exists() and legacy.exists():
-        warnings.warn(
-            f"检测到旧数据目录 {legacy}，已自动兼容读取；请迁移到 {current}，"
-            f"兼容截止 Rabbit Code {LEGACY_COMPATIBILITY_CUTOFF}。",
-            DeprecationWarning,
-            stacklevel=2,
-        )
+        if legacy not in _WARNED_LEGACY_DATA_DIRS:
+            warnings.warn(
+                f"检测到旧数据目录 {legacy}，已自动兼容读取；请迁移到 {current}，"
+                f"兼容截止 Rabbit Code {LEGACY_COMPATIBILITY_CUTOFF}。",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            _WARNED_LEGACY_DATA_DIRS.add(legacy)
         return legacy
     return current

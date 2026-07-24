@@ -4,14 +4,16 @@ import hashlib
 import re
 from dataclasses import dataclass
 from typing import Any, Literal, cast
+from urllib.parse import urlsplit
 
-from prompt_optimizer.core.models import FallbackReason, RecoveryAction
+from prompt_optimizer.core.models import ExecutionDestination, FallbackReason, RecoveryAction
 from prompt_optimizer.providers.base import (
     ModelProviderError,
     ProviderBudgetExceededError,
     ProviderCancelledError,
     ProviderCircuitOpenError,
     ProviderErrorCategory,
+    ProviderProxyError,
     ProviderRateLimitError,
     ProviderServerError,
     ProviderTimeoutError,
@@ -21,6 +23,44 @@ from prompt_optimizer.providers.base import (
 # RC IDs: RC-141, RC-180. Keep optimization metadata useful without exposing secrets or prompts.
 
 ExecutionLocation = Literal["local", "cloud"]
+
+
+def execution_destination(
+    provider: Any,
+    provider_name: str,
+    model: str | None = None,
+) -> ExecutionDestination:
+    display_name, provider_model, location, _credential_ref = provider_public_metadata(
+        provider,
+        provider_name,
+    )
+    selected_model = model or provider_model
+    target_host = _target_host(provider) if location == "cloud" else None
+    return ExecutionDestination(
+        execution_location=location,
+        provider=provider_name,
+        provider_display_name=display_name,
+        model=selected_model,
+        target_service=display_name if location == "cloud" else "本机",
+        target_host=target_host,
+        network_access=location == "cloud",
+    )
+
+
+def declared_execution_destination(
+    provider_name: str,
+    provider_display_name: str,
+    model: str | None,
+    execution_location: ExecutionLocation,
+) -> ExecutionDestination:
+    return ExecutionDestination(
+        execution_location=execution_location,
+        provider=provider_name,
+        provider_display_name=provider_display_name,
+        model=model,
+        target_service=provider_display_name if execution_location == "cloud" else "本机",
+        network_access=execution_location == "cloud",
+    )
 
 
 @dataclass(frozen=True)
@@ -190,6 +230,8 @@ def error_code_for(error: BaseException) -> str:
         return "PROVIDER_TIMEOUT"
     if isinstance(error, ProviderRateLimitError):
         return "PROVIDER_RATE_LIMIT"
+    if isinstance(error, ProviderProxyError):
+        return "PROVIDER_PROXY"
     if isinstance(error, ProviderServerError):
         return "PROVIDER_SERVER"
     category = getattr(error, "category", None)
@@ -267,3 +309,15 @@ def provider_public_metadata(
     if not isinstance(credential_ref, str):
         credential_ref = None
     return display_name, model, execution_location, credential_ref
+
+
+def _target_host(provider: Any) -> str | None:
+    config = getattr(provider, "config", None)
+    base_url = getattr(config, "base_url", None)
+    if not isinstance(base_url, str):
+        return None
+    try:
+        host = urlsplit(base_url).hostname
+    except ValueError:
+        return None
+    return host

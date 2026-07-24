@@ -28,5 +28,5 @@
 - Ollama and LM Studio presets describe the local compatibility contract;
   model discovery and local service lifecycle are covered by RC-168 and later
   local-model work.
-- Full Vite build remains blocked by the existing sandbox ancestor-directory
-  permission issue.
+- The full frontend suite, ESLint, and the production Vite build pass in the
+  project workspace.

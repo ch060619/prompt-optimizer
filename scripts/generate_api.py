@@ -223,6 +223,8 @@ def generate_operation(
         args.append(f"body: Schema.{body_type}")
     if name in {"optimize", "optimizeStream"}:
         args.append("signal?: AbortSignal")
+    if name == "optimize":
+        args.append("requestId?: string")
     if name == "optimizeStream":
         args.extend(["requestId?: string", "afterSeq?: number"])
 
@@ -253,6 +255,14 @@ def generate_operation(
         call_lines.append("        body: JSON.stringify(body),")
     if name in {"optimize", "optimizeStream"}:
         call_lines.append("        ...(signal ? { signal } : {}),")
+    if name == "optimize":
+        call_lines.extend(
+            [
+                "        ...(requestId ? {",
+                "          headers: { \"X-Request-ID\": requestId },",
+                "        } : {}),",
+            ]
+        )
     if name == "optimizeStream":
         call_lines.extend(
             [

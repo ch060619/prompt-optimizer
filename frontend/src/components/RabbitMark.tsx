@@ -3,7 +3,7 @@ import type { ImgHTMLAttributes } from "react";
 // RC ID: RC-125. Route-facing brand slot with a closed internal asset boundary.
 // RC ID: RC-128. Keep small marks independent from the full raster artwork.
 
-export type RabbitVariant = "full" | "avatar" | "mark" | "empty" | "mono";
+export type RabbitVariant = "full" | "avatar" | "mark" | "empty" | "mono" | "desktop";
 
 const dimensions: Record<RabbitVariant, { width: number; height: number }> = {
   full: { width: 643, height: 684 },
@@ -11,6 +11,7 @@ const dimensions: Record<RabbitVariant, { width: number; height: number }> = {
   mark: { width: 64, height: 64 },
   empty: { width: 480, height: 320 },
   mono: { width: 64, height: 64 },
+  desktop: { width: 942, height: 959 },
 };
 
 type RabbitMarkProps = {
@@ -61,8 +62,8 @@ export function RabbitMark({ variant, alt, decorative = false, className, loadin
   return (
     <img
       className={classes}
-      src="/rabbit-artwork.png"
-      alt={decorative ? "" : alt || (variant === "full" ? "Rabbit Code 兔兔品牌插画" : "Rabbit Code 品牌标记")}
+      src={variant === "desktop" ? "/rabbit-desktop.png" : "/rabbit-artwork.png"}
+      alt={decorative ? "" : alt || (variant === "full" || variant === "desktop" ? "Rabbit Code 兔兔品牌插画" : "Rabbit Code 品牌标记")}
       aria-hidden={decorative ? "true" : undefined}
       width={rasterSize.width}
       height={rasterSize.height}

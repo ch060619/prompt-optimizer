@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from scripts.check_model_distribution import find_forbidden_weights
 
 from prompt_optimizer.local_install import LocalInstallCore, LocalInstallError
 from prompt_optimizer.model_manifest import (
@@ -88,3 +89,16 @@ def test_distribution_check_rejects_weight_suffix_and_repo_is_weight_free(tmp_pa
         check=False,
     )
     assert clean.returncode == 0, clean.stdout + clean.stderr
+
+
+def test_distribution_check_ignores_only_cargo_target_artifacts(tmp_path: Path) -> None:
+    cargo = tmp_path / "cargo"
+    (cargo / "target").mkdir(parents=True)
+    (cargo / "Cargo.toml").write_text("[package]\nname = \"fixture\"\n", encoding="utf-8")
+    (cargo / "target" / "dep-graph.bin").write_bytes(b"cargo cache")
+    unrelated = tmp_path / "target"
+    unrelated.mkdir()
+    forbidden = unrelated / "weights.bin"
+    forbidden.write_bytes(b"model weight")
+
+    assert find_forbidden_weights(tmp_path) == (forbidden.relative_to(tmp_path),)

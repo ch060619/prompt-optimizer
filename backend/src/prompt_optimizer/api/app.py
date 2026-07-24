@@ -2,13 +2,25 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Awaitable, Callable, Iterator
+import os
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from time import perf_counter
 from typing import Any
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, FastAPI, Header, HTTPException, Request, Response
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    FastAPI,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -22,6 +34,8 @@ from prompt_optimizer.core.models import (
     CleanupRequest,
     DiffResult,
     EvaluateTaskRequest,
+    ExecutionDestination,
+    ExecutionDestinationRequest,
     ExportRequest,
     LocalModelEventRequest,
     ModelCleanupRequest,
@@ -33,28 +47,35 @@ from prompt_optimizer.core.models import (
     OptimizeMetadata,
     OptimizeRequest,
     OptimizeResponse,
+    PerformanceMetricsSnapshot,
     ProjectSpace,
     PromptAnalysis,
     PromptTemplate,
     PromptVersion,
+    ProviderPrivacyNotice,
     RunnerGenerateRequest,
+    RunnerResourceConfigRequest,
     TaskCreateResponse,
     TaskRecord,
     UserPublic,
     VersionSummary,
 )
+from prompt_optimizer.hardware import HardwareDetector
 from prompt_optimizer.identity import PRODUCT_NAME
 from prompt_optimizer.local_model_state import (
     LocalModelState,
     LocalModelStateError,
     LocalModelStateMachine,
     recover_install_state,
+    recover_state,
 )
 from prompt_optimizer.model_lifecycle import ModelDirectoryError, ModelDirectoryService
 from prompt_optimizer.paths import PROJECT_ROOT, app_data_dir
-from prompt_optimizer.providers import ModelProviderError, ModelRequest
+from prompt_optimizer.providers import PRESETS, ModelProviderError, ModelRequest
 from prompt_optimizer.public import provider_error_presentation
+from prompt_optimizer.retention import RetentionError
 from prompt_optimizer.runner_gateway import LocalRunnerGateway, RunnerGatewayError
+from prompt_optimizer.runner_resources import RunnerResourceConfig
 from prompt_optimizer.services import AppServices
 from prompt_optimizer.streaming import (
     OptimizationStreamCursor,
@@ -64,6 +85,7 @@ from prompt_optimizer.streaming import (
     OptimizationStreamLog,
     encode_optimization_sse,
 )
+from prompt_optimizer.structured_logging import StructuredLogEmitter
 
 # RC ID: RC-048. Preserve the V2 API while exposing the versioned compatibility surface.
 # RC ID: RC-054. Expose Rabbit Code as the canonical API product identity.
@@ -93,14 +115,20 @@ def create_app(
     if strict_boundary and startup_token is None:
         raise ValueError("strict boundary requires a startup token")
     current_services = app_services or services
-    local_runner_gateway = runner_gateway or LocalRunnerGateway()
+    local_runner_gateway = runner_gateway or LocalRunnerGateway(metrics=current_services.metrics)
     model_directory = ModelDirectoryService(
         app_data_dir() / "model-registry.json",
         app_data_dir() / "local-models",
     )
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        application.state.recovered_tasks = current_services.tasks.recover_incomplete()
+        yield
+
     app = FastAPI(
         title=PRODUCT_NAME,
         version="2.0.0",
+        lifespan=lifespan,
         openapi_tags=[
             {"name": "legacy", "description": "V2 兼容入口，供现有客户端继续使用。"},
             {"name": "v1", "description": "新客户端使用的版本化 API 契约。"},
@@ -109,6 +137,9 @@ def create_app(
     app.state.startup_token = startup_token
     app.state.strict_boundary = strict_boundary
     app.state.max_body_bytes = max_body_bytes
+    app.state.recovered_tasks = 0
+
+    structured_logger = StructuredLogEmitter(lambda line: logger.info(line))
 
     @app.middleware("http")
     async def request_logging(
@@ -120,18 +151,15 @@ def create_app(
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         latency_ms = int((perf_counter() - started) * 1000)
-        logger.info(
-            json.dumps(
-                {
-                    "event": "http_request",
-                    "request_id": request_id,
-                    "method": request.method,
-                    "path": request.url.path,
-                    "status": response.status_code,
-                    "latency_ms": latency_ms,
-                },
-                ensure_ascii=False,
-            )
+        structured_logger.emit(
+            "http.request",
+            request_id=request_id,
+            status=str(response.status_code),
+            fields={
+                "component": "api",
+                "status": response.status_code,
+                "latency_ms": latency_ms,
+            },
         )
         return response
 
@@ -146,6 +174,9 @@ def create_app(
                 boundary_error = _strict_request_error(request, max_body_bytes)
                 if boundary_error is not None:
                     return boundary_error
+                stream_error = await _strict_stream_request_error(request, max_body_bytes)
+                if stream_error is not None:
+                    return stream_error
             is_health = request.url.path == "/api/v1/health"
             if request.url.path.startswith("/api/v1") and not is_health:
                 if request.headers.get("X-Rabbit-Code-Startup-Token") != startup_token:
@@ -204,6 +235,41 @@ def create_app(
     @api_router.get("/config", tags=["config"])
     def config() -> dict[str, dict[str, object]]:
         return current_services.config.resolve().display()
+
+    @api_router.get("/metrics", response_model=PerformanceMetricsSnapshot, tags=["metrics"])
+    def metrics() -> PerformanceMetricsSnapshot:
+        report = HardwareDetector(network_probe=lambda: False).detect()
+        ram = report.fields.get("ram")
+        gpu = report.fields.get("gpu")
+        ram_bytes = _hardware_int(ram.value, "total_bytes") if ram is not None else None
+        gpu_bytes = _gpu_memory_bytes(gpu.value) if gpu is not None else None
+        current_services.metrics.record_resources(
+            cpu_percent=_cpu_load_percent(),
+            ram_bytes=ram_bytes,
+            gpu_memory_bytes=gpu_bytes,
+        )
+        return current_services.metrics.snapshot()
+
+    @api_router.get(
+        "/provider-privacy",
+        response_model=list[ProviderPrivacyNotice],
+        tags=["providers"],
+    )
+    def provider_privacy() -> list[ProviderPrivacyNotice]:
+        return [
+            ProviderPrivacyNotice(
+                id=preset.id,
+                display_name=preset.display_name,
+                version=preset.privacy.version,
+                execution_location=preset.privacy.execution_location,
+                request_fields=list(preset.privacy.request_fields),
+                service_region=preset.privacy.service_region,
+                privacy_policy_url=preset.privacy.privacy_policy_url,
+                retention_risk=preset.privacy.retention_risk,
+            )
+            for preset in PRESETS.values()
+            if preset.privacy is not None
+        ]
 
     @api_router.get("/local-models/{model_id}/state", tags=["local-models"])
     def local_model_state(model_id: str) -> dict[str, object]:
@@ -332,6 +398,57 @@ def create_app(
                 "model_id": health.model_id,
                 "detail": health.detail,
                 "status": health.status,
+                "temperature_celsius": health.temperature_celsius,
+            }
+        except RunnerGatewayError as exc:
+            raise _runner_http_exception(exc) from exc
+
+    @api_router.get("/local-runners/{runner}/queue", tags=["local-runners"])
+    def local_runner_queue(runner: str) -> dict[str, object]:
+        return {"runner": runner, **local_runner_gateway.queue_status().to_dict()}
+
+    @api_router.get("/local-runners/{runner}/resources", tags=["local-runners"])
+    def local_runner_resources(runner: str) -> dict[str, object]:
+        return {
+            "runner": runner,
+            "config": local_runner_gateway.resource_config.to_dict(),
+            "signal": local_runner_gateway.resource_signal(runner),
+        }
+
+    @api_router.post("/local-runners/{runner}/resources", tags=["local-runners"])
+    def configure_local_runner_resources(
+        runner: str,
+        request: RunnerResourceConfigRequest,
+    ) -> dict[str, object]:
+        current = local_runner_gateway.resource_config
+        config = RunnerResourceConfig(
+            threads=request.threads if request.threads is not None else current.threads,
+            gpu_layers=(
+                request.gpu_layers if request.gpu_layers is not None else current.gpu_layers
+            ),
+            context_length=(
+                request.context_length
+                if request.context_length is not None
+                else current.context_length
+            ),
+            concurrency=(
+                request.concurrency if request.concurrency is not None else current.concurrency
+            ),
+            idle_timeout_seconds=(
+                request.idle_timeout_seconds
+                if request.idle_timeout_seconds is not None
+                else current.idle_timeout_seconds
+            ),
+            temperature_limit_celsius=(
+                request.temperature_limit_celsius
+                if request.temperature_limit_celsius is not None
+                else current.temperature_limit_celsius
+            ),
+        )
+        try:
+            return {
+                "runner": runner,
+                "config": local_runner_gateway.configure_resources(config).to_dict(),
             }
         except RunnerGatewayError as exc:
             raise _runner_http_exception(exc) from exc
@@ -405,6 +522,17 @@ def create_app(
         except CleanupError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
+    @api_router.get("/data/retention/preview", tags=["data"])
+    def retention_preview() -> dict[str, object]:
+        return current_services.retention.preview().display()
+
+    @api_router.post("/data/retention", tags=["data"])
+    def retention(request: CleanupRequest) -> dict[str, object]:
+        try:
+            return current_services.retention.apply(confirm=request.confirm).display()
+        except RetentionError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
     @api_router.post("/analyze", response_model=PromptAnalysis)
     def analyze(request: AnalyzeRequest) -> PromptAnalysis:
         try:
@@ -438,6 +566,7 @@ def create_app(
     @api_router.post("/optimize", response_model=OptimizeResponse)
     def optimize(
         request: OptimizeRequest,
+        request_id_header: str | None = Header(default=None, alias="X-Request-ID"),
         authorization: str | None = Header(default=None),
     ) -> OptimizeResponse:
         _validate_optimization_targets(request)
@@ -458,6 +587,7 @@ def create_app(
                 save_prompt_history=request.save_prompt_history,
                 max_tokens=request.max_tokens,
                 max_cost=request.max_cost,
+                request_id=request_id_header,
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -465,6 +595,18 @@ def create_app(
             raise _provider_http_exception(exc) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @api_router.post("/execution-destination", response_model=ExecutionDestination)
+    def execution_destination_preview(
+        request: ExecutionDestinationRequest,
+    ) -> ExecutionDestination:
+        return current_services.optimization.execution_destination(
+            provider_name=request.provider,
+            model=request.model,
+            optimizer_provider=request.optimizer_provider,
+            optimizer_model=request.optimizer_model,
+            strategy=request.strategy,
+        )
 
     @api_router.post("/optimize/stream", response_class=StreamingResponse)
     def optimize_stream(
@@ -587,6 +729,84 @@ def create_app(
 
         return StreamingResponse(events(), media_type="text/event-stream")
 
+    @api_router.websocket("/optimize/ws")
+    async def optimize_websocket(websocket: WebSocket) -> None:
+        startup_header = websocket.headers.get("x-rabbit-code-startup-token")
+        if startup_token is not None and startup_header != startup_token:
+            await websocket.close(code=4401)
+            return
+        if strict_boundary and websocket.headers.get("origin") not in {
+            None,
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://[::1]:5173",
+        }:
+            await websocket.close(code=4403)
+            return
+
+        await websocket.accept()
+        request_id = websocket.headers.get("x-request-id") or uuid4().hex
+        try:
+            request = OptimizeRequest.model_validate(await websocket.receive_json())
+            _validate_optimization_targets(request)
+            user = _optional_user(
+                current_services,
+                websocket.headers.get("authorization"),
+            )
+            prompt, template = _prepare_prompt(current_services, request)
+            await websocket.send_json(
+                {"event": "started", "data": {"provider": request.provider}}
+            )
+            for event in current_services.optimization.stream(
+                original_prompt=request.prompt,
+                prompt=prompt,
+                template=template,
+                targets=request.targets,
+                strategy=request.strategy,
+                provider_name=request.provider,
+                model=request.model,
+                optimizer_provider=request.optimizer_provider,
+                optimizer_model=request.optimizer_model,
+                owner_id=user.id if user else None,
+                save_prompt_history=request.save_prompt_history,
+                request_id=request_id,
+                max_tokens=request.max_tokens,
+                max_cost=request.max_cost,
+            ):
+                if event.event == "analysis" and isinstance(event.data, PromptAnalysis):
+                    await websocket.send_json(
+                        {"event": "analysis", "data": event.data.model_dump(mode="json")}
+                    )
+                elif event.event == "chunk":
+                    await websocket.send_json({"event": "chunk", "data": {"text": event.data}})
+                elif event.event == "fallback" and isinstance(event.data, OptimizeMetadata):
+                    await websocket.send_json(
+                        {"event": "fallback", "data": event.data.model_dump(mode="json")}
+                    )
+                elif event.event == "completed" and isinstance(event.data, OptimizeResponse):
+                    await websocket.send_json(
+                        {"event": "completed", "data": event.data.model_dump(mode="json")}
+                    )
+                    await websocket.close(code=1000)
+                    return
+        except WebSocketDisconnect:
+            return
+        except Exception as exc:
+            presentation = provider_error_presentation(exc)
+            await websocket.send_json(
+                {
+                    "event": "error",
+                    "data": {
+                        "code": presentation.code,
+                        "category": presentation.category,
+                        "detail": presentation.message,
+                        "retryable": presentation.retryable,
+                        "recovery_action": presentation.recovery_action,
+                    },
+                }
+            )
+            await websocket.close(code=1011)
+
     @api_router.post("/optimize/stream/{request_id}/cancel")
     def cancel_optimize_stream(request_id: str) -> dict[str, object]:
         existing = stream_log.replay(
@@ -609,6 +829,13 @@ def create_app(
         cancelled = current_services.optimization.cancel(request_id)
         event = stream_log.cancel(request_id)
         return {"request_id": request_id, "cancelled": cancelled, "seq": event.seq}
+
+    @api_router.post("/optimize/{request_id}/cancel")
+    def cancel_optimize(request_id: str) -> dict[str, object]:
+        return {
+            "request_id": request_id,
+            "cancelled": current_services.optimization.cancel(request_id),
+        }
 
     @api_router.post("/tasks/optimize", response_model=TaskCreateResponse)
     def create_optimize_task(
@@ -842,6 +1069,21 @@ def _strict_request_error(request: Request, max_body_bytes: int) -> JSONResponse
     return None
 
 
+async def _strict_stream_request_error(
+    request: Request,
+    max_body_bytes: int,
+) -> JSONResponse | None:
+    if request.headers.get("content-length") is not None:
+        return None
+    body = bytearray()
+    async for chunk in request.stream():
+        body.extend(chunk)
+        if len(body) > max_body_bytes:
+            return JSONResponse(status_code=413, content={"detail": "请求体超过上限。"})
+    request._body = bytes(body)  # type: ignore[attr-defined]
+    return None
+
+
 def _prepare_prompt(
     current_services: AppServices,
     request: OptimizeRequest,
@@ -857,6 +1099,42 @@ def _prepare_prompt(
 def _validate_optimization_targets(request: OptimizeRequest) -> None:
     if request.targets is not None and not request.targets.has_enabled_target():
         raise HTTPException(status_code=400, detail="至少选择一项优化目标。")
+
+
+def _hardware_int(value: object, key: str) -> int | None:
+    if isinstance(value, dict):
+        candidate = value.get(key)
+        if isinstance(candidate, int) and candidate >= 0:
+            return candidate
+    return None
+
+
+def _gpu_memory_bytes(value: object) -> int | None:
+    if not isinstance(value, dict):
+        return None
+    devices = value.get("devices")
+    if not isinstance(devices, list):
+        return None
+    memories = [
+        int(device["memory_mb"]) * 1024 * 1024
+        for device in devices
+        if isinstance(device, dict)
+        and isinstance(device.get("memory_mb"), int)
+        and device["memory_mb"] >= 0
+    ]
+    return sum(memories) if memories else None
+
+
+def _cpu_load_percent() -> float | None:
+    load_average = getattr(os, "getloadavg", None)
+    if not callable(load_average):
+        return None
+    try:
+        load = load_average()[0]
+        cores = max(1, os.cpu_count() or 1)
+    except (AttributeError, OSError):
+        return None
+    return round(min(100.0, max(0.0, load / cores * 100)), 2)
 
 
 def _provider_http_exception(error: ModelProviderError) -> HTTPException:
@@ -1017,7 +1295,7 @@ def _load_local_model_state(model_id: str) -> LocalModelState:
             status = payload.get("status")
             if status not in _LOCAL_MODEL_STATUSES:
                 raise ValueError("invalid lifecycle status")
-            return LocalModelState(
+            state = LocalModelState(
                 model_id=model_id,
                 runner=str(payload.get("runner") or "ollama"),
                 status=status,
@@ -1031,6 +1309,10 @@ def _load_local_model_state(model_id: str) -> LocalModelState:
                 error=payload.get("error") if isinstance(payload.get("error"), str) else None,
                 last_event=str(payload.get("last_event") or "recovered"),
             )
+            installed_path = Path(state.installed_path) if state.installed_path else None
+            if state.status in {"busy", "stopping", "loading"} and installed_path is not None:
+                return recover_state(state, installed_path=installed_path)
+            return state
         except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
             return LocalModelState(
                 model_id=model_id,

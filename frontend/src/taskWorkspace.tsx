@@ -13,6 +13,7 @@ import {
   SquareTerminal,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
+import { AppLink } from "./navigation";
 import { notifyWorkspace, readWindowPreferences, updateWindowPreferences, type WindowPanel } from "./windowPreferences";
 
 // RC ID: RC-111. Render the task conversation, session rail, inspector, and terminal drawer.
@@ -64,6 +65,8 @@ export function TaskWorkspace() {
     const nextSession = `session-${Date.now()}`;
     setSessionId(nextSession);
     setMessages(initialMessages);
+    setDraft("");
+    localStorage.removeItem("rabbit_code_task_draft");
     setNotice("NEW SESSION READY");
     notifyWorkspace("Rabbit Code", "A new workspace session is ready.");
   }
@@ -78,11 +81,11 @@ export function TaskWorkspace() {
               <ChevronLeft size={16} aria-hidden="true" />
             </button>
           </div>
-          <a className="task-project-link" href="/workspace/home">
+          <AppLink className="task-project-link" href="/workspace/home">
             <Folder size={16} aria-hidden="true" />
             <span>Recent projects</span>
             <ChevronRight size={14} aria-hidden="true" />
-          </a>
+          </AppLink>
           <div className="task-session-heading">
             <span>SESSIONS</span>
             <button type="button" aria-label="Add session" title="Add session" onClick={newSession}>

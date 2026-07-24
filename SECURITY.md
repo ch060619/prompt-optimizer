@@ -1,37 +1,44 @@
 # Security Policy
 
-## Supported Versions
+## Reporting a Vulnerability
 
-Security fixes target the latest `3.x` release and the default branch. Older
-versions may receive triage only unless a maintainer explicitly commits to a
-backport.
+**Do NOT open a public issue for security vulnerabilities.**
 
-## Private Reporting
+Use GitHub Security Advisories to report vulnerabilities privately:
 
-Please do not open a public issue for an undisclosed vulnerability. Use the
-private [GitHub Security Advisory form](https://github.com/ch060619/prompt-optimizer/security/advisories/new)
-for reproduction steps, affected version, impact, and a safe contact method.
-Do not attach API keys, prompts, source code, model weights, or personal data.
+1. Go to the repository's Security tab.
+2. Click "New security advisory".
+3. Provide a clear description, steps to reproduce, and potential impact.
 
-## Response Targets
+We acknowledge reports within 72 hours.
 
-Maintainers acknowledge a private report within 2 business days, provide an
-initial severity decision within 5 business days, and target a mitigation or
-workaround according to this SLA:
+## Response Timeline
 
-| Severity | Target mitigation |
-| --- | --- |
-| Critical | 72 hours |
-| High | 7 calendar days |
-| Medium | 30 calendar days |
-| Low | Next planned release |
+| Severity | Acknowledgment | Fix Release |
+| --- | --- | --- |
+| Critical | 24 hours | 7 days |
+| High | 48 hours | 14 days |
+| Medium | 72 hours | 30 days |
+| Low | 1 week | Next release |
 
-The reporter is credited unless anonymity is requested. Coordinated disclosure
-timing is agreed with the reporter and affected dependency maintainers.
+## Scope
 
-## Credential and Key Rotation
+This policy covers:
 
-Exposed credentials are revoked and rotated immediately. Logs, diagnostics,
-telemetry, and issue attachments are reviewed for the same credential before
-public disclosure. Never commit secrets; use the OS-backed SecretStore and
-redacted diagnostic preview paths.
+- Rabbit Code CLI (`pip install rabbit-code`)
+- Rabbit Code Desktop (Tauri installers)
+- Rabbit Code API (FastAPI backend)
+- Rabbit Code frontend (React/Vite)
+
+## Out of Scope
+
+- Third-party provider APIs (OpenAI, Anthropic, Google, etc.) — report to the respective provider.
+- Local model vulnerabilities — report to the model publisher (Google, Qwen team).
+- Operating system vulnerabilities — report to the OS vendor.
+
+## Security Best Practices for Users
+
+- Store API keys in environment variables or system keychain, not in plain text.
+- Use `rabbit config show` to verify no sensitive values are exposed.
+- Keep Rabbit Code updated to the latest stable release.
+- Run `rabbit doctor` to diagnose installation issues.

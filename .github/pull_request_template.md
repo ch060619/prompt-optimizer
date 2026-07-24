@@ -13,6 +13,13 @@
 
 <List commands and results.>
 
+## Compatibility and data boundary
+
+- Supported platforms affected:
+- CLI/API/UI/protocol compatibility impact:
+- Provider, model, network, credential, or local-data impact:
+- Migration or rollback requirement:
+
 ## Provenance
 
 - RC-024 external sources: <None, or fixed URL and commit SHA.>

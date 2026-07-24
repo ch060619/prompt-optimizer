@@ -1,6 +1,7 @@
 import { AlertTriangle, CircleHelp, Download, Inbox, WifiOff, X, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import type { ApprovalRequest } from "../approval";
+import { AppLink } from "../navigation";
 
 // RC ID: RC-119. Keep page states and modal semantics in one UI surface.
 
@@ -61,7 +62,7 @@ export function OfflineState(props: StateMessageProps) {
 function UiActionButton({ action, primary = false }: { action: UiAction; primary?: boolean }) {
   const className = primary ? "ui-state-action ui-state-action-primary" : "ui-state-action";
   if (action.href) {
-    return <a className={className} href={action.href}>{action.label}</a>;
+    return <AppLink className={className} href={action.href}>{action.label}</AppLink>;
   }
   return <button className={className} type="button" disabled={action.disabled} onClick={action.onClick}>{action.label}</button>;
 }

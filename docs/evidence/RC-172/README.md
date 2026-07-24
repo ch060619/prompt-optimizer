@@ -33,7 +33,7 @@
   incurred.
 - Estimates are deterministic preflight estimates; provider-native usage and
   persistent budget accounting remain future work.
-- The broader environment Mypy invocation still reports the existing untyped
-  `rabbit_code.cli` and `rabbit_code.maintenance` imports; this RC used the
-  targeted command above and did not change that unrelated boundary.
-- Existing migration and jsdom navigation warnings remain recorded elsewhere.
+- The `rabbit_code` package now ships its PEP 561 marker; full backend Mypy
+  passes for 138 source files without skipping that boundary.
+- Frontend navigation now uses history state for same-origin route changes, so
+  the prior jsdom navigation stderr is no longer emitted.

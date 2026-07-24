@@ -1,10 +1,11 @@
 {
   "schema_version": 1,
   "source": {
-    "status": "pending",
-    "path": "C:\\Users\\10735\\Desktop\\提示词\\兔兔素材.png",
-    "sha256": null,
-    "license": null
+    "status": "registered",
+    "path": "兔兔素材.png",
+    "sha256": "2C7EDC4488B81533F116B2A908415FCF2063C2F6A51DCDF76E0C59014A057A38",
+    "size": [1254, 1254],
+    "license": "user-authorized Rabbit Code project release; see docs/legal/rabbit-art-license.yml"
   },
   "policy": {
     "color_space": "sRGB",
@@ -20,5 +21,13 @@
     { "id": "empty", "themes": ["light", "dark"], "size_1x": [480, 320], "size_2x": [960, 640], "min_display_px": 160, "safe_zone": "10%-90%" },
     { "id": "mono", "themes": ["light", "dark"], "size_1x": [64, 64], "size_2x": [128, 128], "min_display_px": 16, "safe_zone": "轮廓8% inset" },
     { "id": "app-icon", "themes": ["light", "dark"], "sizes": [32, 64, 128, 256, 512], "min_display_px": 16, "safe_zone": "8% inset" }
+  ],
+  "outputs": [
+    { "id": "desktop-png", "path": "frontend/public/rabbit-desktop.png", "sha256": "F1361EDB361A26DBC7622D7D194FB383439AA4945256280CFBC52A704785A367", "size": [942, 959], "max_bytes": 921600 },
+    { "id": "desktop-webp", "path": "frontend/public/rabbit-desktop.webp", "sha256": "CD88EBCAEF6C42293BC578A0B232E5AC26EAD5FC007B545215196A7B97C92DFC", "size": [942, 959], "max_bytes": 512000 },
+    { "id": "terminal-png", "path": "frontend/public/rabbit-terminal.png", "sha256": "E35D6F7630B42232955D4F1D8F2F5295B6206F084FF8A3BB43476055477B819D", "size": [614, 655], "max_bytes": 409600 },
+    { "id": "terminal-webp", "path": "frontend/public/rabbit-terminal.webp", "sha256": "C4CCEB59BDEAB840454BE2C4445044BCA94B0E00C530D23D76ECB47DFC704B39", "size": [614, 655], "max_bytes": 245760 },
+    { "id": "app-icon-png", "path": "apps/desktop/src-tauri/icons/icon.png", "sha256": "41B7E1F1CAB9D04C998DA4A3815B3CACACFCC08D9D001CE9274A4BE424655092", "size": [512, 512], "max_bytes": 196608 },
+    { "id": "app-icon-ico", "path": "apps/desktop/src-tauri/icons/icon.ico", "sha256": "A66F84CCDFC249743303554DB9403F1F2E13967219C789C6869894E598906D2B", "size": [256, 256], "max_bytes": 98304 }
   ]
 }

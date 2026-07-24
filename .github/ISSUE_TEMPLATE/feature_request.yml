@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose a focused, verifiable improvement.
+title: "[Feature][RC-xxx] "
+labels:
+  - enhancement
+body:
+  - type: input
+    id: rc_id
+    attributes:
+      label: RC ID
+      description: Link the execution-plan requirement, or write RC-xxx for a new proposal.
+      placeholder: RC-xxx
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Measurable outcome
+      description: Describe the user-visible result and how it can be verified.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and tradeoffs
+      description: Describe affected platforms, data boundaries, compatibility impact, and the smallest useful implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Sources and provenance
+      description: Link public references and state whether the proposal includes third-party code, text, assets, or protocols.
+    validations:
+      required: true

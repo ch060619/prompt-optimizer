@@ -41,8 +41,33 @@ describe("settings", () => {
     const saved = JSON.parse(localStorage.getItem("rabbit_code_settings_project-a") || "{}");
     expect(saved.shell).toBe("WSL");
     expect(saved.telemetry).toBe(true);
+    expect(saved.telemetryConsentVersion).toBe("rc220-v1");
     expect(saved.mcp).toBe(true);
     expect(saved.plugins).toBe(true);
+  });
+
+  it("shows telemetry fields, stores versioned consent, and deletes pending local data", () => {
+    visitSettings("privacy");
+    localStorage.setItem("rabbit_code_telemetry_pending_privacy", "queued");
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Privacy/i }));
+    expect(screen.getByText("LOCAL EVENTS ONLY")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Share anonymous usage telemetry" }));
+    expect(JSON.parse(localStorage.getItem("rabbit_code_settings_privacy") || "{}")).toMatchObject({
+      telemetry: true,
+      telemetryConsentVersion: "rc220-v1",
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /DELETE PENDING TELEMETRY/i }));
+    expect(localStorage.getItem("rabbit_code_telemetry_pending_privacy")).toBeNull();
+    expect(screen.getByText("PENDING TELEMETRY DELETED")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Share anonymous usage telemetry" }));
+    expect(JSON.parse(localStorage.getItem("rabbit_code_settings_privacy") || "{}")).toMatchObject({
+      telemetry: false,
+      telemetryConsentVersion: null,
+    });
   });
 
   it("exposes workspace-scoped Provider and model CRUD from settings", () => {
@@ -95,6 +120,39 @@ describe("settings", () => {
     fireEvent.click(screen.getByRole("button", { name: /DELETE ALL LOCAL DATA/i }));
     await waitFor(() => expect(screen.getByText("ALL LOCAL DATA DELETED")).toBeInTheDocument());
     expect(localStorage.getItem("rabbit_code_settings_cleanup")).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it("previews retention cleanup and preserves workspace settings after confirmation", async () => {
+    visitSettings("retention");
+    localStorage.setItem("rabbit_code_settings_retention", JSON.stringify({ theme: "dark" }));
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      const payload = url.includes("/retention/preview")
+        ? {
+            rotate_log_paths: ["app.jsonl"],
+            delete_log_paths: ["old.jsonl"],
+            delete_cache_paths: ["cache.bin"],
+            delete_task_ids: ["task-1"],
+            delete_history_ids: [1],
+            estimated_bytes: 128,
+            policy: {},
+          }
+        : { cancelled: false };
+      return Promise.resolve(new Response(JSON.stringify(payload), { status: 200, headers: { "Content-Type": "application/json" } }));
+    }));
+
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /^Data/i }));
+    fireEvent.click(screen.getByRole("button", { name: /PREVIEW RETENTION CLEANUP/i }));
+    await waitFor(() => expect(screen.getByRole("alertdialog", { name: "Run retention cleanup" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /^CANCEL$/i }));
+    expect(localStorage.getItem("rabbit_code_settings_retention")).toContain("dark");
+    fireEvent.click(screen.getByRole("button", { name: /PREVIEW RETENTION CLEANUP/i }));
+    await waitFor(() => expect(screen.getByRole("alertdialog", { name: "Run retention cleanup" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /RUN RETENTION CLEANUP/i }));
+    await waitFor(() => expect(screen.getByText("RETENTION CLEANUP COMPLETE")).toBeInTheDocument());
+    expect(localStorage.getItem("rabbit_code_settings_retention")).toContain("dark");
     vi.unstubAllGlobals();
   });
 });

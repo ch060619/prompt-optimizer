@@ -37,8 +37,13 @@ IGNORED_DIRECTORIES = frozenset(
 def find_forbidden_weights(root: Path) -> tuple[Path, ...]:
     matches: list[Path] = []
     for current, directories, files in os.walk(root):
-        directories[:] = [name for name in directories if name not in IGNORED_DIRECTORIES]
         current_path = Path(current)
+        directories[:] = [
+            name
+            for name in directories
+            if name not in IGNORED_DIRECTORIES
+            and not (name == "target" and (current_path / "Cargo.toml").is_file())
+        ]
         for name in files:
             if Path(name).suffix.lower() in WEIGHT_SUFFIXES:
                 matches.append((current_path / name).relative_to(root))

@@ -1,9 +1,13 @@
+# RC ID: RC-280. Docker is for local development/testing of the API only.
+# Do NOT use this image for production deployment or as a desktop/CLI substitute.
 FROM node:20-alpine AS frontend
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci
-COPY frontend/ ./
-RUN npm run build
+WORKDIR /app
+COPY frontend/package*.json ./frontend/
+RUN npm ci --prefix frontend
+COPY frontend/ ./frontend/
+# styles.css imports the shared generated design-token contract.
+COPY packages/ui/ ./packages/ui/
+RUN npm run build --prefix frontend
 
 FROM python:3.12-slim AS runtime
 WORKDIR /app

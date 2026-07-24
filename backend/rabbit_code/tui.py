@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import base64
+import os
 import textwrap
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from packages.protocol.rabbit_code_protocol import ApprovalRequest
 
-from prompt_optimizer.providers.base import ModelRequest  # type: ignore[import-untyped]
+from prompt_optimizer.providers.base import ModelRequest
 
 from .agent import AgentEvent, AgentEventType
 from .runtime import AgentRuntime
@@ -69,10 +72,8 @@ class TuiRenderer:
             raise ValueError("TUI width must be at least 24")
         if height < 8:
             raise ValueError("TUI height must be at least 8")
-        lines = [
-            _fit(f"Rabbit Code | {state.status}", width),
-            _fit(f"Tool: {state.tool_status}", width),
-        ]
+        lines = _welcome_lines(width=width, height=height, status=state.status)
+        lines.append(_fit(f"Tool: {state.tool_status}", width))
         if state.permission_prompt:
             lines.append(_fit(f"Approval: {state.permission_prompt}", width))
         if state.approval_request:
@@ -95,6 +96,18 @@ class TuiRenderer:
         lines.append("-" * width)
         lines.append(_fit(f"> {state.prompt}", width))
         return "\n".join(lines)
+
+    @staticmethod
+    def inline_artwork(path: Path | None = None) -> str:
+        """Return a kitty-compatible image sequence only when explicitly enabled."""
+        if os.environ.get("RABBIT_CODE_INLINE_IMAGE") != "1":
+            return ""
+        artwork = path or Path(__file__).resolve().parents[2] / "终端兔兔素材.png"
+        try:
+            encoded = base64.b64encode(artwork.read_bytes()).decode("ascii")
+        except OSError:
+            return ""
+        return f"\x1b_Gf=100,t=t,a=T;{encoded}\x1b\\"
 
 
 class TuiSession:
@@ -122,3 +135,19 @@ def _wrapped(value: str, width: int) -> list[str]:
 
 def _fit(value: str, width: int) -> str:
     return value[:width]
+
+
+def _welcome_lines(*, width: int, height: int, status: str) -> list[str]:
+    """Keep the Claude Code-inspired frame readable on narrow TTYs."""
+    if height <= 10:
+        return [
+            _fit(f"Rabbit Code v3.0.0 | {status}", width),
+            _fit("Welcome back! | Tips: /init", width),
+        ]
+    return [
+        _fit(f"Rabbit Code v3.0.0 | {status}", width),
+        _fit("╭─ Welcome back! ── Tips for getting started ─╮", width),
+        _fit("│ Run /init to create a RABBIT.md file with instructions │", width),
+        _fit("│ What's new · /release-notes for more               │", width),
+        _fit("╰──────────────────────────────────────────────────────╯", width),
+    ]

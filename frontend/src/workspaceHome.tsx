@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "reac
 
 import { api } from "./api";
 import { EmptyState, ErrorState } from "./components/UiStates";
+import { AppLink } from "./navigation";
 import type { ProjectSpace } from "./types";
 import { writeDefaultLocalModel } from "./localModelSelection";
 import { readWorkspaceRoute, readWorkspaceRoutes, writeWorkspaceRoute } from "./workspaceRoute";
@@ -174,9 +175,9 @@ export function WorkspaceHome() {
             <button type="button" className="action-button action-button-primary" onClick={openProjectPicker}>
               <FolderOpen size={16} aria-hidden="true" /> OPEN PROJECT
             </button>
-            <a className="action-button" href="/workspace?new=1">
+            <AppLink className="action-button" href="/workspace?new=1">
               <Plus size={16} aria-hidden="true" /> NEW TASK
-            </a>
+            </AppLink>
             <input
               ref={inputRef}
               className="sr-only"
@@ -192,7 +193,7 @@ export function WorkspaceHome() {
         <div><span>MODEL</span><strong>{selectedModel.model}</strong></div>
         <div><span>STATUS</span><strong className="home-status-ready">{modelStatus}</strong></div>
         <div><span>ROUTE</span><strong>{selectedModel.source === "local" ? "LOCAL" : api.getToken() ? "ACCOUNT" : "GUEST"}</strong></div>
-        <a href="/onboarding">CONFIGURE <ArrowUpRight size={14} aria-hidden="true" /></a>
+        <AppLink href="/onboarding">CONFIGURE <ArrowUpRight size={14} aria-hidden="true" /></AppLink>
       </section>
 
       {error ? (
@@ -215,10 +216,10 @@ export function WorkspaceHome() {
             <div className="workspace-home-list">
               {projects.map((project) => (
                 <div className="workspace-home-item" key={project.id}>
-                  <a href={`/workspace?project=${project.id}`}>
+                  <AppLink href={`/workspace?project=${project.id}`}>
                     <strong>{project.name}</strong>
                     <small>Opened {formatDate(project.created_at)}</small>
-                  </a>
+                  </AppLink>
                   <button
                     type="button"
                     aria-label={`Remove ${project.name}`}
@@ -243,10 +244,10 @@ export function WorkspaceHome() {
           ) : (
             <div className="workspace-home-list">
               {tasks.map((task) => (
-                <a className="workspace-home-item workspace-home-task" href={`/workspace?task=${task.id}`} key={task.id}>
+                <AppLink className="workspace-home-item workspace-home-task" href={`/workspace?task=${task.id}`} key={task.id}>
                   <span><strong>{task.title}</strong><small>{formatDate(task.updated_at)}</small></span>
                   <b className={`task-status-${task.status}`}>{task.status}</b>
-                </a>
+                </AppLink>
               ))}
             </div>
           )}

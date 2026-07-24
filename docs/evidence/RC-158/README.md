@@ -19,12 +19,7 @@
 - Ruff and Mypy for the RC-158 evaluation service and test: PASS.
 - Baseline report: `docs/evaluation-report.md`.
 
-## Known Environment Limits
+## Current Validation
 
-- The bundled Python runtime did not include pytest, Ruff, Mypy, or PyYAML.
-  Direct `.venv/Scripts/python.exe` invocation was available for validation.
-- The installed CLI entry point could not import the repository's `rabbit_code`
-  source package, so the baseline report was generated through the same service
-  with `backend/src` and `backend` on the source path.
-- Full Vite build remains blocked by the existing sandbox directory permission
-  issue.
+- The project `.venv` supplies pytest, Ruff, Mypy, and PyYAML; the installed CLI
+  imports the repository packages and the production Vite build passes.

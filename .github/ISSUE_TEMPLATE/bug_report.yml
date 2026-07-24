@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible behavior problem in Rabbit Code.
+title: "[Bug][RC-xxx] "
+labels:
+  - bug
+body:
+  - type: input
+    id: rc_id
+    attributes:
+      label: RC ID
+      description: Link the requirement, or write RC-xxx if this is a new requirement.
+      placeholder: RC-xxx
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the smallest input, command, route, and expected/actual result. Remove secrets and personal data.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, architecture, Rabbit Code version, Provider/runner name (not credentials), and relevant logs after redaction.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: List tests or commands already run.
+    validations:
+      required: true

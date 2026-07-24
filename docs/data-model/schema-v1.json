@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "description": "Rabbit Code core data model draft for RC-213.",
+  "entities": [
+    {
+      "name": "workspace",
+      "table": "workspaces",
+      "python_name": "WorkspaceData",
+      "typescript_name": "WorkspaceData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "owner_id", "type": "integer"},
+        {"name": "name", "type": "string"},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "workspaces_owner_updated", "columns": ["owner_id", "updated_at"]}
+      ]
+    },
+    {
+      "name": "session",
+      "table": "sessions",
+      "python_name": "SessionData",
+      "typescript_name": "SessionData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "workspace_id", "type": "string", "foreign_key": {"table": "workspaces", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "owner_id", "type": "integer"},
+        {"name": "title", "type": "string", "nullable": true},
+        {"name": "status", "type": "string", "default": "active"},
+        {"name": "provider_reference_id", "type": "string", "nullable": true, "foreign_key": {"table": "provider_references", "column": "id", "on_delete": "SET NULL"}},
+        {"name": "model_manifest_id", "type": "string", "nullable": true, "foreign_key": {"table": "model_manifests", "column": "id", "on_delete": "SET NULL"}},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "sessions_workspace_updated", "columns": ["workspace_id", "updated_at"]}
+      ]
+    },
+    {
+      "name": "message",
+      "table": "messages",
+      "python_name": "MessageData",
+      "typescript_name": "MessageData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "session_id", "type": "string", "foreign_key": {"table": "sessions", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "role", "type": "string"},
+        {"name": "sequence", "type": "integer"},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "messages_session_sequence", "columns": ["session_id", "sequence"]}
+      ]
+    },
+    {
+      "name": "content_block",
+      "table": "content_blocks",
+      "python_name": "ContentBlockData",
+      "typescript_name": "ContentBlockData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "message_id", "type": "string", "foreign_key": {"table": "messages", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "ordinal", "type": "integer"},
+        {"name": "type", "type": "string"},
+        {"name": "payload_json", "type": "json"},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "content_blocks_message_ordinal", "columns": ["message_id", "ordinal"]}
+      ]
+    },
+    {
+      "name": "tool_call",
+      "table": "tool_calls",
+      "python_name": "ToolCallData",
+      "typescript_name": "ToolCallData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "message_id", "type": "string", "foreign_key": {"table": "messages", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "call_id", "type": "string"},
+        {"name": "name", "type": "string"},
+        {"name": "arguments_json", "type": "json", "default": {}},
+        {"name": "result_json", "type": "json", "nullable": true},
+        {"name": "status", "type": "string", "default": "requested"},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "tool_calls_message_created", "columns": ["message_id", "created_at"]}
+      ]
+    },
+    {
+      "name": "file_snapshot",
+      "table": "file_snapshots",
+      "python_name": "FileSnapshotData",
+      "typescript_name": "FileSnapshotData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "workspace_id", "type": "string", "foreign_key": {"table": "workspaces", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "session_id", "type": "string", "nullable": true, "foreign_key": {"table": "sessions", "column": "id", "on_delete": "SET NULL"}},
+        {"name": "path_ref", "type": "string", "description": "Opaque or redacted path reference; never an absolute path by default."},
+        {"name": "content_digest", "type": "string"},
+        {"name": "size_bytes", "type": "integer"},
+        {"name": "captured_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "file_snapshots_workspace_captured", "columns": ["workspace_id", "captured_at"]}
+      ]
+    },
+    {
+      "name": "prompt_version",
+      "table": "prompt_versions_v2",
+      "python_name": "PromptVersionData",
+      "typescript_name": "PromptVersionData",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "autoincrement": true},
+        {"name": "workspace_id", "type": "string", "foreign_key": {"table": "workspaces", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "session_id", "type": "string", "nullable": true, "foreign_key": {"table": "sessions", "column": "id", "on_delete": "SET NULL"}},
+        {"name": "owner_id", "type": "integer"},
+        {"name": "original_prompt", "type": "string"},
+        {"name": "optimized_prompt", "type": "string"},
+        {"name": "analysis_json", "type": "json"},
+        {"name": "provider_reference_id", "type": "string", "nullable": true, "foreign_key": {"table": "provider_references", "column": "id", "on_delete": "SET NULL"}},
+        {"name": "model_manifest_id", "type": "string", "nullable": true, "foreign_key": {"table": "model_manifests", "column": "id", "on_delete": "SET NULL"}},
+        {"name": "accepted", "type": "boolean", "default": false},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "prompt_versions_workspace_created", "columns": ["workspace_id", "created_at"]}
+      ]
+    },
+    {
+      "name": "provider_reference",
+      "table": "provider_references",
+      "python_name": "ProviderReferenceData",
+      "typescript_name": "ProviderReferenceData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "workspace_id", "type": "string", "foreign_key": {"table": "workspaces", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "provider_name", "type": "string"},
+        {"name": "credential_ref", "type": "string", "nullable": true, "description": "Opaque SecretStore reference; never a credential value."},
+        {"name": "base_url", "type": "string", "nullable": true},
+        {"name": "model_id", "type": "string", "nullable": true},
+        {"name": "enabled", "type": "boolean", "default": true},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "provider_references_workspace_name", "columns": ["workspace_id", "provider_name"]}
+      ]
+    },
+    {
+      "name": "model_manifest",
+      "table": "model_manifests",
+      "python_name": "ModelManifestData",
+      "typescript_name": "ModelManifestData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "workspace_id", "type": "string", "foreign_key": {"table": "workspaces", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "model_id", "type": "string"},
+        {"name": "revision", "type": "string"},
+        {"name": "sha256", "type": "string"},
+        {"name": "license_id", "type": "string"},
+        {"name": "distribution", "type": "string"},
+        {"name": "runner", "type": "string"},
+        {"name": "context_length", "type": "integer"},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "model_manifests_workspace_model", "columns": ["workspace_id", "model_id"]}
+      ]
+    },
+    {
+      "name": "setting",
+      "table": "settings",
+      "python_name": "SettingData",
+      "typescript_name": "SettingData",
+      "fields": [
+        {"name": "id", "type": "string", "primary_key": true},
+        {"name": "workspace_id", "type": "string", "nullable": true, "foreign_key": {"table": "workspaces", "column": "id", "on_delete": "CASCADE"}},
+        {"name": "owner_id", "type": "integer"},
+        {"name": "scope", "type": "string", "default": "workspace"},
+        {"name": "key", "type": "string"},
+        {"name": "value_json", "type": "json"},
+        {"name": "created_at", "type": "datetime"},
+        {"name": "updated_at", "type": "datetime"},
+        {"name": "deleted_at", "type": "datetime", "nullable": true},
+        {"name": "version", "type": "integer", "default": 1}
+      ],
+      "indexes": [
+        {"name": "settings_scope_key", "columns": ["scope", "owner_id", "workspace_id", "key"]}
+      ]
+    }
+  ]
+}

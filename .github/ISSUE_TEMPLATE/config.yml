@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security vulnerability report
+    url: https://github.com/ch060619/prompt-optimizer/security/advisories/new
+    about: Do not open a public Issue for an undisclosed vulnerability, credential, exploit, or personal data.
+  - name: Documentation and support
+    url: https://github.com/ch060619/prompt-optimizer/discussions
+    about: Ask usage questions and discuss documentation without posting secrets or private prompts.

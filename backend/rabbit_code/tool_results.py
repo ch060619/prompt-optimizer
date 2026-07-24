@@ -21,6 +21,8 @@ class OutputMetadata:
     sha256: str
     truncated: bool
     binary: bool
+    original_bytes: int = 0
+    next_cursor: int = 0
 
 
 @dataclass
@@ -60,4 +62,6 @@ class BoundedOutput:
             sha256=self._hasher.hexdigest(),  # type: ignore[attr-defined]
             truncated=self.truncated,
             binary=self.binary,
+            original_bytes=self.bytes_seen,
+            next_cursor=len(self._buffer) if self.truncated else self.bytes_seen,
         )

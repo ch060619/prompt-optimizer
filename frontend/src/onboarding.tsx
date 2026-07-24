@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { PRODUCT_NAME } from "./brand";
 import { RabbitMark } from "./components/RabbitMark";
+import { AppLink } from "./navigation";
 
 // RC IDs: RC-109, RC-159, RC-183. Provide explicit local/API configuration choices.
 
@@ -176,7 +177,7 @@ function SetupChoice({
   points: readonly string[];
 }) {
   return (
-    <a
+      <AppLink
       className="onboarding-choice"
       href={entry === "api" ? "/workspace/providers?entry=api" : "/workspace/models?entry=local"}
       onClick={() => localStorage.setItem("rabbit_code_onboarding_choice", entry)}
@@ -191,6 +192,6 @@ function SetupChoice({
         </ul>
       </span>
       <ArrowUpRight size={18} aria-hidden="true" />
-    </a>
+      </AppLink>
   );
 }

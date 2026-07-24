@@ -1,0 +1,11 @@
+{
+  "name": "example-read-plugin",
+  "version": "1.0.0",
+  "entrypoint": "handle",
+  "permissions": ["read"],
+  "source": "local",
+  "min_app_version": "3.0.0",
+  "max_app_version": null,
+  "artifact": "plugin.py",
+  "sha256": "95c8ee7effe261bf4ec7ec210a72ceffac29d90fbe9c907586abf182314e60ea"
+}

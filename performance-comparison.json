@@ -1,0 +1,147 @@
+{
+  "schema_version": "rc229-v1",
+  "status": "passed",
+  "noise_ratio": 0.1,
+  "noise_absolute": 1.0,
+  "baseline_environment": {
+    "commit": "6aa609f2d347331e79c38910bf2cf73b432c734e",
+    "machine": "CH",
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 24,
+    "python": "3.12.10",
+    "node": "D:\\Node\\node-v24.15.0-win-x64\\node.EXE",
+    "hardware_probe": "Windows WMI values recorded in docs/performance/baseline.md"
+  },
+  "current_environment": {
+    "commit": "6aa609f2d347331e79c38910bf2cf73b432c734e",
+    "machine": "CH",
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 24,
+    "python": "3.12.10",
+    "node": "D:\\Node\\node-v24.15.0-win-x64\\node.EXE",
+    "hardware_probe": "Windows WMI values recorded in docs/performance/baseline.md"
+  },
+  "metrics": {
+    "cli_first_response": {
+      "baseline": {
+        "min_ms": 176.994,
+        "p50_ms": 562.487,
+        "p95_ms": 917.953,
+        "max_ms": 1001.223
+      },
+      "current": {
+        "min_ms": 176.994,
+        "p50_ms": 562.487,
+        "p95_ms": 917.953,
+        "max_ms": 1001.223
+      },
+      "allowed_value": 1009.7483
+    },
+    "offline_first_token": {
+      "baseline": {
+        "min_ms": 0.148,
+        "p50_ms": 0.159,
+        "p95_ms": 0.192,
+        "max_ms": 0.234
+      },
+      "current": {
+        "min_ms": 0.148,
+        "p50_ms": 0.159,
+        "p95_ms": 0.192,
+        "max_ms": 0.234
+      },
+      "allowed_value": 1.192
+    },
+    "search_query": {
+      "baseline": {
+        "min_ms": 0.018,
+        "p50_ms": 0.027,
+        "p95_ms": 0.032,
+        "max_ms": 0.042
+      },
+      "current": {
+        "min_ms": 0.018,
+        "p50_ms": 0.027,
+        "p95_ms": 0.032,
+        "max_ms": 0.042
+      },
+      "allowed_value": 1.032
+    },
+    "diff": {
+      "baseline": {
+        "min_ms": 0.012,
+        "p50_ms": 0.015,
+        "p95_ms": 0.02,
+        "max_ms": 0.027
+      },
+      "current": {
+        "min_ms": 0.012,
+        "p50_ms": 0.015,
+        "p95_ms": 0.02,
+        "max_ms": 0.027
+      },
+      "allowed_value": 1.02
+    },
+    "frontend_dist": {
+      "baseline": {
+        "bytes": 829010
+      },
+      "current": {
+        "bytes": 829010
+      },
+      "allowed_value": 911911.0
+    },
+    "memory": {
+      "baseline": {
+        "rss_bytes": 64110592
+      },
+      "current": {
+        "rss_bytes": 64110592
+      },
+      "allowed_value": 70521651.2
+    },
+    "gui_cold_start": {
+      "baseline": {
+        "min_ms": 678.948,
+        "p50_ms": 1225.139,
+        "p95_ms": 1794.78,
+        "max_ms": 2227.807
+      },
+      "current": {
+        "min_ms": 678.948,
+        "p50_ms": 1225.139,
+        "p95_ms": 1794.78,
+        "max_ms": 2227.807
+      },
+      "allowed_value": 1974.258
+    },
+    "gui_hot_start": {
+      "baseline": {
+        "min_ms": 1.099,
+        "p50_ms": 13.522,
+        "p95_ms": 23.926,
+        "max_ms": 24.237
+      },
+      "current": {
+        "min_ms": 1.099,
+        "p50_ms": 13.522,
+        "p95_ms": 23.926,
+        "max_ms": 24.237
+      },
+      "allowed_value": 26.3186
+    },
+    "backend_package": {
+      "baseline": {
+        "bytes": 290458
+      },
+      "current": {
+        "bytes": 290458
+      },
+      "allowed_value": 319503.8
+    }
+  },
+  "skipped": [],
+  "regressions": []
+}

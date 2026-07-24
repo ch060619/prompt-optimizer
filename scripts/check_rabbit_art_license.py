@@ -11,7 +11,7 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 REGISTER_PATH = REPOSITORY_ROOT / "docs/legal/rabbit-art-license.yml"
-EXPECTED_HASH = "1DDE71742091C82D85EDB403449AF8DE843D5F61DCA8CBF65B59AEBD9B90E599"
+EXPECTED_HASH = "2C7EDC4488B81533F116B2A908415FCF2063C2F6A51DCDF76E0C59014A057A38"
 
 
 def file_sha256(path: Path) -> str:
@@ -32,8 +32,8 @@ def main() -> int:
     errors: list[str] = []
     if payload.get("schema_version") != 1 or payload.get("rc_id") != "RC-035":
         errors.append("invalid RC-035 license register schema")
-    if payload.get("status") != "pending-human-confirmation":
-        errors.append("status must remain pending-human-confirmation until authorization is verified")
+    if payload.get("status") != "user-authorized":
+        errors.append("status must record the user's explicit release authorization")
 
     source = payload.get("source", {})
     if source.get("present_at_capture") is not True or source.get("observed_status") != "user-confirmed-identity":
@@ -56,26 +56,42 @@ def main() -> int:
     if generation.get("provider") != "unknown" or generation.get("terms_url") is not None:
         errors.append("generation provider and terms must remain unverified")
     if generation.get("terms_review") != "pending" or generation.get("human_contribution_review") != "pending":
-        errors.append("generation terms and human contribution review must remain pending")
+        errors.append("unverified generation terms and human contribution review must remain pending")
 
     authorization = payload.get("authorization", {})
     permissions = authorization.get("permissions", {})
-    if authorization.get("rights_holder") != "unknown" or authorization.get("license") != "unknown":
-        errors.append("rights holder and license must remain unknown until evidence is supplied")
-    if authorization.get("written_statement") is not None or authorization.get("evidence_path") is not None:
-        errors.append("authorization evidence must not be invented")
-    if any(value != "pending" for value in permissions.values()):
-        errors.append("all material permissions must remain pending")
+    if authorization.get("rights_holder") != "user-asserted":
+        errors.append("rights holder must be recorded as user-asserted")
+    if authorization.get("license") != "rabbit-code-project-release-permission":
+        errors.append("license must remain scoped to the Rabbit Code project release")
+    if authorization.get("written_statement") != "我允许发布了":
+        errors.append("the user's release statement is missing")
+    evidence_path = REPOSITORY_ROOT / str(authorization.get("evidence_path", ""))
+    if not evidence_path.is_file():
+        errors.append("release authorization evidence is missing")
+    allowed_permissions = {
+        "open_source_use": "allowed-for-rabbit-code",
+        "modification": "allowed-for-rabbit-code",
+        "derivative_works": "allowed-for-rabbit-code",
+        "redistribution": "allowed-for-rabbit-code",
+        "attribution": "not-required",
+    }
+    if any(permissions.get(key) != value for key, value in allowed_permissions.items()):
+        errors.append("Rabbit Code release permissions do not match the user authorization")
+    if permissions.get("commercial_use") != "pending":
+        errors.append("general commercial use must remain pending unless separately authorized")
 
     release = payload.get("release", {})
-    if release.get("allowed") is not False or release.get("status") != "blocked":
-        errors.append("release must remain blocked until authorization is verified")
+    if release.get("allowed") is not True or release.get("status") != "approved-by-user":
+        errors.append("Rabbit Code release must remain approved by the user")
+    if release.get("block_reason") is not None:
+        errors.append("approved release must not retain a block reason")
 
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
-    print("Validated RC-035 rabbit-art license register: authorization missing, release blocked.")
+    print("Validated RC-035 rabbit-art license register: user-authorized Rabbit Code release allowed.")
     return 0
 
 

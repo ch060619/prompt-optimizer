@@ -1,10 +1,13 @@
 import { Check, ChevronRight, Keyboard, LockKeyhole, Palette, Plug, RotateCcw, Save, Server, Shield, SlidersHorizontal, Terminal, Trash2, Wrench } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "./api";
 import { PermissionDialog } from "./components/UiStates";
-import { useEffect } from "react";
+import { localeFromSetting, t, type Locale, type MessageKey } from "./i18n";
+import { AppLink } from "./navigation";
 
-// RC IDs: RC-117, RC-184. Render scoped settings and confirmed local-data cleanup.
+// RC IDs: RC-117, RC-184, RC-220. Render scoped settings and versioned local consent.
+
+const TELEMETRY_CONSENT_VERSION = "rc220-v1";
 
 type SectionId = "appearance" | "providers" | "language" | "terminal" | "permissions" | "sandbox" | "data" | "privacy" | "updates" | "shortcuts" | "mcp" | "plugins" | "advanced";
 type SettingsState = {
@@ -17,6 +20,7 @@ type SettingsState = {
   retainLogs: boolean;
   savePromptHistory: boolean;
   telemetry: boolean;
+  telemetryConsentVersion: string | null;
   autoUpdate: boolean;
   notifications: boolean;
   tray: boolean;
@@ -32,6 +36,15 @@ type CleanupPreview = {
   retain: string[];
 };
 
+type RetentionPreview = {
+  rotate_log_paths: string[];
+  delete_log_paths: string[];
+  delete_cache_paths: string[];
+  delete_task_ids: string[];
+  delete_history_ids: number[];
+  estimated_bytes: number;
+};
+
 const defaultSettings: SettingsState = {
   theme: "light",
   language: "English",
@@ -42,6 +55,7 @@ const defaultSettings: SettingsState = {
   retainLogs: true,
   savePromptHistory: true,
   telemetry: false,
+  telemetryConsentVersion: null,
   autoUpdate: true,
   notifications: true,
   tray: false,
@@ -86,15 +100,22 @@ export function Settings() {
   const storageKey = `rabbit_code_settings_${scope}`;
   const [activeSection, setActiveSection] = useState<SectionId>("appearance");
   const [settings, setSettings] = useState(() => readSettings(storageKey));
+  const locale = localeFromSetting(settings.language);
   const [resetOpen, setResetOpen] = useState(false);
   const [cleanupOpen, setCleanupOpen] = useState(false);
   const [cleanupPreview, setCleanupPreview] = useState<CleanupPreview | null>(null);
+  const [retentionOpen, setRetentionOpen] = useState(false);
+  const [retentionPreview, setRetentionPreview] = useState<RetentionPreview | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = settings.theme;
     return () => { delete document.documentElement.dataset.theme; };
   }, [settings.theme]);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   function updateSetting<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
     setSettings((current) => {
@@ -110,6 +131,24 @@ export function Settings() {
     localStorage.setItem(storageKey, JSON.stringify(defaultSettings));
     setResetOpen(false);
     setNotice("WORKSPACE SETTINGS RESET");
+  }
+
+  function updateTelemetry(enabled: boolean) {
+    setSettings((current) => {
+      const next = {
+        ...current,
+        telemetry: enabled,
+        telemetryConsentVersion: enabled ? TELEMETRY_CONSENT_VERSION : null,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+    setNotice(enabled ? "TELEMETRY CONSENT SAVED" : "TELEMETRY TURNED OFF");
+  }
+
+  function clearPendingTelemetry() {
+    localStorage.removeItem(`rabbit_code_telemetry_pending_${scope}`);
+    setNotice("PENDING TELEMETRY DELETED");
   }
 
   async function previewCleanup() {
@@ -145,21 +184,53 @@ export function Settings() {
     }
   }
 
+  async function previewRetention() {
+    try {
+      const payload = await api.retentionPreview() as Record<string, unknown>;
+      const list = (key: string) => Array.isArray(payload[key]) ? payload[key].filter((value): value is string => typeof value === "string") : [];
+      const historyIds = Array.isArray(payload.delete_history_ids)
+        ? payload.delete_history_ids.filter((value): value is number => typeof value === "number")
+        : [];
+      setRetentionPreview({
+        rotate_log_paths: list("rotate_log_paths"),
+        delete_log_paths: list("delete_log_paths"),
+        delete_cache_paths: list("delete_cache_paths"),
+        delete_task_ids: list("delete_task_ids"),
+        delete_history_ids: historyIds,
+        estimated_bytes: typeof payload.estimated_bytes === "number" ? payload.estimated_bytes : 0,
+      });
+      setRetentionOpen(true);
+    } catch {
+      setNotice("RETENTION PREVIEW UNAVAILABLE");
+    }
+  }
+
+  async function confirmRetention() {
+    try {
+      await api.retention(true);
+      setRetentionOpen(false);
+      setRetentionPreview(null);
+      setNotice("RETENTION CLEANUP COMPLETE");
+    } catch {
+      setNotice("RETENTION CLEANUP FAILED");
+    }
+  }
+
   return (
     <main className="settings-page">
       <header className="settings-header">
         <div><span className="eyebrow">SETTINGS / {scope.toUpperCase()}</span><h1>Make the workspace yours.</h1><p>Changes apply immediately to this workspace and remain separate from other projects.</p></div>
-        <div className="settings-scope"><Save size={15} aria-hidden="true" /> WORKSPACE SCOPE / {scope}</div>
+        <div className="settings-scope"><Save size={15} aria-hidden="true" /> {t(locale, "settings.scope", { workspace: scope })}</div>
       </header>
       <div className="settings-shell">
         <aside className="settings-nav" aria-label="Settings sections">
-          <div className="settings-nav-heading"><span className="eyebrow">CONFIGURE</span><span>{sections.length}</span></div>
-          <nav>{sections.map(({ id, label, icon: Icon }) => <button key={id} type="button" className={activeSection === id ? "active" : ""} onClick={() => setActiveSection(id)}><Icon size={15} aria-hidden="true" /><span>{label}</span><ChevronRight size={14} aria-hidden="true" /></button>)}</nav>
+          <div className="settings-nav-heading"><span className="eyebrow">{t(locale, "settings.configure")}</span><span>{sections.length}</span></div>
+          <nav>{sections.map(({ id, icon: Icon }) => <button key={id} type="button" className={activeSection === id ? "active" : ""} onClick={() => setActiveSection(id)}><Icon size={15} aria-hidden="true" /><span>{sectionLabel(locale, id)}</span><ChevronRight size={14} aria-hidden="true" /></button>)}</nav>
           <p className="settings-source-note">Every value below is marked with its scope and source.</p>
         </aside>
         <section className="settings-detail" aria-label="Settings detail">
-          <div className="settings-detail-heading"><div><span className="eyebrow">{sections.find((section) => section.id === activeSection)?.label}</span><h2>{sectionTitle(activeSection)}</h2></div><span className="settings-saved"><Check size={14} aria-hidden="true" /> SAVED LOCALLY</span></div>
-          <SettingsSection section={activeSection} settings={settings} updateSetting={updateSetting} onReset={() => setResetOpen(true)} onCleanupPreview={() => void previewCleanup()} workspace={scope} />
+          <div className="settings-detail-heading"><div><span className="eyebrow">{sectionLabel(locale, activeSection)}</span><h2>{sectionTitle(activeSection, locale)}</h2></div><span className="settings-saved"><Check size={14} aria-hidden="true" /> {t(locale, "settings.savedLocally")}</span></div>
+          <SettingsSection section={activeSection} settings={settings} updateSetting={updateSetting} onReset={() => setResetOpen(true)} onCleanupPreview={() => void previewCleanup()} onRetentionPreview={() => void previewRetention()} onTelemetryChange={updateTelemetry} onClearPendingTelemetry={clearPendingTelemetry} workspace={scope} />
         </section>
       </div>
       <PermissionDialog
@@ -180,39 +251,37 @@ export function Settings() {
         onConfirm={() => void confirmCleanup()}
         confirmLabel="DELETE ALL LOCAL DATA"
       />
+      <PermissionDialog
+        open={retentionOpen}
+        accessibleName="Run retention cleanup"
+        title="Run retention cleanup?"
+        description={retentionPreview ? `Rotate ${retentionPreview.rotate_log_paths.length} log file(s), delete ${retentionPreview.delete_log_paths.length + retentionPreview.delete_cache_paths.length} file(s), ${retentionPreview.delete_task_ids.length} finished task(s), and ${retentionPreview.delete_history_ids.length} prompt history item(s). Estimated file release: ${retentionPreview.estimated_bytes} bytes. Configuration, models, attachments, database, and running tasks are retained.` : "Review the retention preview before cleanup."}
+        onClose={() => setRetentionOpen(false)}
+        onConfirm={() => void confirmRetention()}
+        confirmLabel="RUN RETENTION CLEANUP"
+      />
       {notice ? <p className="settings-notice" role="status">{notice}</p> : null}
     </main>
   );
 }
 
-function sectionTitle(section: SectionId) {
-  const titles: Record<SectionId, string> = {
-    appearance: "Set the visual rhythm.",
-    providers: "Route the work safely.",
-    language: "Choose the language.",
-    terminal: "Shape the terminal session.",
-    permissions: "Decide what needs approval.",
-    sandbox: "Constrain tool access.",
-    data: "Keep local data under control.",
-    privacy: "Choose what leaves the machine.",
-    updates: "Keep the app current.",
-    shortcuts: "Tune the keyboard layer.",
-    mcp: "Connect Model Context Protocol.",
-    plugins: "Manage local extensions.",
-    advanced: "Expose the sharp edges carefully.",
-  };
-  return titles[section];
+function sectionLabel(locale: Locale, section: SectionId) {
+  return t(locale, `settings.section.${section}` as MessageKey);
 }
 
-function SettingsSection({ section, settings, updateSetting, onReset, onCleanupPreview, workspace }: { section: SectionId; settings: SettingsState; updateSetting: <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => void; onReset: () => void; onCleanupPreview: () => void; workspace: string }) {
+function sectionTitle(section: SectionId, locale: Locale) {
+  return t(locale, `settings.title.${section}` as MessageKey);
+}
+
+function SettingsSection({ section, settings, updateSetting, onReset, onCleanupPreview, onRetentionPreview, onTelemetryChange, onClearPendingTelemetry, workspace }: { section: SectionId; settings: SettingsState; updateSetting: <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => void; onReset: () => void; onCleanupPreview: () => void; onRetentionPreview: () => void; onTelemetryChange: (enabled: boolean) => void; onClearPendingTelemetry: () => void; workspace: string }) {
   if (section === "appearance") return <SettingRows><SettingSelect label="Theme" value={settings.theme} options={["light", "dark"]} onChange={(value) => updateSetting("theme", value as SettingsState["theme"])} /><SettingToggle label="Enable desktop notifications" checked={settings.notifications} onChange={(value) => updateSetting("notifications", value)} /><SettingToggle label="Show system tray icon when available" checked={settings.tray} onChange={(value) => updateSetting("tray", value)} /></SettingRows>;
-  if (section === "providers") return <SettingRows><SettingReadOnly label="Provider data" value="Workspace-scoped, secrets stay opaque" /><a className="settings-provider-link" href={`/workspace/providers?workspace=${encodeURIComponent(workspace)}`}><Server size={15} aria-hidden="true" /> MANAGE PROVIDERS &amp; MODELS</a></SettingRows>;
+  if (section === "providers") return <SettingRows><SettingReadOnly label="Provider data" value="Workspace-scoped, secrets stay opaque" /><AppLink className="settings-provider-link" href={`/workspace/providers?workspace=${encodeURIComponent(workspace)}`}><Server size={15} aria-hidden="true" /> MANAGE PROVIDERS &amp; MODELS</AppLink></SettingRows>;
   if (section === "language") return <SettingRows><SettingSelect label="Language" value={settings.language} options={["English", "简体中文"]} onChange={(value) => updateSetting("language", value as SettingsState["language"])} /><SettingReadOnly label="Scope" value="Workspace" /></SettingRows>;
   if (section === "terminal") return <SettingRows><SettingSelect label="Default shell" value={settings.shell} options={["PowerShell", "cmd", "WSL"]} onChange={(value) => updateSetting("shell", value as SettingsState["shell"])} /><SettingToggle label="Restore terminal tabs on launch" checked={settings.retainLogs} onChange={(value) => updateSetting("retainLogs", value)} /></SettingRows>;
   if (section === "permissions") return <SettingRows><SettingSelect label="Permission mode" value={settings.permissionMode} options={["ask", "high", "full"]} onChange={(value) => updateSetting("permissionMode", value as SettingsState["permissionMode"])} /><SettingToggle label="Confirm destructive edits" checked={settings.permissionMode !== "full"} onChange={(value) => updateSetting("permissionMode", value ? "ask" : "full")} /></SettingRows>;
   if (section === "sandbox") return <SettingRows><SettingToggle label="Enable workspace sandbox" checked={settings.sandbox} onChange={(value) => updateSetting("sandbox", value)} /><SettingSelect label="Network access" value={settings.network} options={["off", "workspace", "full"]} onChange={(value) => updateSetting("network", value as SettingsState["network"])} /></SettingRows>;
-  if (section === "data") return <SettingRows><SettingToggle label="Save prompt history" checked={settings.savePromptHistory} onChange={(value) => updateSetting("savePromptHistory", value)} /><SettingToggle label="Retain local logs" checked={settings.retainLogs} onChange={(value) => updateSetting("retainLogs", value)} /><SettingReadOnly label="Data location" value="Rabbit Code local data directory" /><button type="button" className="settings-danger-link" onClick={onReset}><Trash2 size={15} aria-hidden="true" /> RESET WORKSPACE SETTINGS</button><button type="button" className="settings-danger-link" onClick={onCleanupPreview}><Trash2 size={15} aria-hidden="true" /> PREVIEW ALL LOCAL DATA</button></SettingRows>;
-  if (section === "privacy") return <SettingRows><SettingToggle label="Share anonymous usage telemetry" checked={settings.telemetry} onChange={(value) => updateSetting("telemetry", value)} /><SettingReadOnly label="Credential handling" value="OS keychain boundary" /></SettingRows>;
+  if (section === "data") return <SettingRows><SettingToggle label="Save prompt history" checked={settings.savePromptHistory} onChange={(value) => updateSetting("savePromptHistory", value)} /><SettingToggle label="Retain local logs" checked={settings.retainLogs} onChange={(value) => updateSetting("retainLogs", value)} /><SettingReadOnly label="Data location" value="Rabbit Code local data directory" /><SettingReadOnly label="Retention defaults" value="Logs 5/50 MB; cache 100 MB; sessions 30 days; history 365 days / 500 entries" /><button type="button" className="settings-danger-link" onClick={onRetentionPreview}><Trash2 size={15} aria-hidden="true" /> PREVIEW RETENTION CLEANUP</button><button type="button" className="settings-danger-link" onClick={onReset}><Trash2 size={15} aria-hidden="true" /> RESET WORKSPACE SETTINGS</button><button type="button" className="settings-danger-link" onClick={onCleanupPreview}><Trash2 size={15} aria-hidden="true" /> PREVIEW ALL LOCAL DATA</button></SettingRows>;
+  if (section === "privacy") return <SettingRows><SettingToggle label="Share anonymous usage telemetry" checked={settings.telemetry} onChange={onTelemetryChange} /><SettingReadOnly label="Consent version" value={settings.telemetryConsentVersion || "OFF / NO CONSENT"} /><div className="settings-privacy-note" aria-label="Telemetry fields"><strong>LOCAL EVENTS ONLY</strong><p>Only anonymous technical metadata is eligible: app version, event name, duration, result, Provider/model ID, and resource counters. Prompt text, files, credentials, request bodies, and responses are excluded.</p><small>No telemetry server or account is required. Turning this off stops collection immediately.</small></div><button type="button" className="settings-danger-link" onClick={onClearPendingTelemetry}><Trash2 size={15} aria-hidden="true" /> DELETE PENDING TELEMETRY</button><SettingReadOnly label="Credential handling" value="OS keychain boundary" /></SettingRows>;
   if (section === "updates") return <SettingRows><SettingToggle label="Install updates automatically" checked={settings.autoUpdate} onChange={(value) => updateSetting("autoUpdate", value)} /><SettingReadOnly label="Update channel" value="Stable" /></SettingRows>;
   if (section === "shortcuts") return <SettingRows><SettingSelect label="Shortcut preset" value={settings.shortcutPreset} options={["default", "vim"]} onChange={(value) => updateSetting("shortcutPreset", value as SettingsState["shortcutPreset"])} /><SettingReadOnly label="Command palette" value="Ctrl+K" /></SettingRows>;
   if (section === "mcp") return <SettingRows><SettingToggle label="Enable MCP servers" checked={settings.mcp} onChange={(value) => updateSetting("mcp", value)} /><SettingReadOnly label="Server scope" value="Workspace only" /></SettingRows>;

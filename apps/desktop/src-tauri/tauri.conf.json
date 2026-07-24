@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Rabbit Code",
+  "version": "3.0.0",
+  "identifier": "com.rabbitcode.desktop",
+  "build": {
+    "frontendDist": "../../../frontend/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Rabbit Code",
+        "width": 1536,
+        "height": 1024,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true,
+        "decorations": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "publisher": "Rabbit Code Contributors",
+    "category": "DeveloperTool",
+    "license": "MIT",
+    "shortDescription": "Rabbit Code - open-source cross-platform coding agent",
+    "longDescription": "Rabbit Code is an open-source, cross-platform coding agent with terminal and desktop shared core capabilities, prompt optimization, and local model support.",
+    "windows": {
+      "wix": {
+        "language": "en-US"
+      },
+      "nsis": {
+        "displayLanguageSelector": false,
+        "languages": ["English"]
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  }
+}

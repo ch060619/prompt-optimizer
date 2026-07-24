@@ -1,0 +1,41 @@
+Rabbit Code
+Copyright (c) 2026 Prompt Optimizer Contributors
+
+This product includes software developed by the Prompt Optimizer Contributors.
+
+Licensed under the MIT License.
+
+---
+
+This product includes or references software from the following third parties.
+See THIRD_PARTY_NOTICES.md for the full machine-generated list.
+
+Python dependencies (runtime):
+- FastAPI — MIT License — https://pypi.org/project/fastapi/
+- Pydantic — MIT License — https://pypi.org/project/pydantic/
+- Typer — MIT License — https://pypi.org/project/typer/
+- Uvicorn — BSD-3-Clause License — https://pypi.org/project/uvicorn/
+- HTTPX — BSD-3-Clause License — https://pypi.org/project/httpx/
+- Rich — MIT License — https://pypi.org/project/rich/
+- PyYAML — MIT License — https://pypi.org/project/PyYAML/
+
+Node.js dependencies (build/dev):
+- React — MIT License — https://www.npmjs.com/package/react
+- Vite — MIT License — https://www.npmjs.com/package/vite
+- TypeScript — Apache-2.0 License — https://www.npmjs.com/package/typescript
+- Vitest — MIT License — https://www.npmjs.com/package/vitest
+- ESLint — MIT License — https://www.npmjs.com/package/eslint
+
+Local models (on-demand download, not bundled):
+- Gemma 3 1B IT — LicenseRef-Gemma-Terms — https://ai.google.dev/gemma/terms
+- Qwen2.5-Coder 1.5B Instruct — Apache-2.0 — https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct
+
+Research-derived components:
+- OpenCode research boundary documented in ADR-0003; no OpenCode source code
+  is approved as reused code (see THIRD_PARTY_NOTICES.md "Reused Source Code").
+
+---
+
+This NOTICE file is maintained alongside LICENSE and THIRD_PARTY_NOTICES.md.
+THIRD_PARTY_NOTICES.md is auto-generated from docs/research/third-party-register.yml
+by scripts/check_third_party_register.py.

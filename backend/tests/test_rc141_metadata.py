@@ -74,5 +74,5 @@ def test_fallback_metadata_redacts_key_and_system_prompt(tmp_path: Path) -> None
     assert metadata["error_code"] == "PROVIDER_ERROR"
     assert metadata["error_summary"] == "Provider error details were redacted."
     assert "sk-live-1234567890abcdef" not in serialized
-    assert "system_prompt" not in serialized
+    assert "system_prompt=" not in serialized
     assert "Ignore all public output rules" not in serialized

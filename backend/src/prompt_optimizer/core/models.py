@@ -51,6 +51,8 @@ RecoveryAction = Literal[
     "fix_parameters",
     "review_content",
     "check_network",
+    "free_disk",
+    "choose_port",
     "cancel",
 ]
 TaskStatus = Literal["queued", "running", "succeeded", "failed"]
@@ -96,6 +98,45 @@ class PromptTemplate(BaseModel):
     template: str
     variables: list[str]
     best_practices: list[str]
+
+
+class ProviderPrivacyNotice(BaseModel):
+    id: str
+    display_name: str
+    version: str
+    execution_location: Literal["local", "cloud"]
+    request_fields: list[str]
+    service_region: str
+    privacy_policy_url: str
+    retention_risk: str
+
+
+class PerformanceMetricsSnapshot(BaseModel):
+    schema_version: Literal["rc219-v1"]
+    window_started_at: datetime
+    requests_total: int = Field(ge=0)
+    requests_succeeded: int = Field(ge=0)
+    requests_failed: int = Field(ge=0)
+    failure_rate: float = Field(ge=0, le=1)
+    total_latency_ms: int = Field(ge=0)
+    average_latency_ms: float = Field(ge=0)
+    first_token_count: int = Field(ge=0)
+    first_token_total_ms: int = Field(ge=0)
+    average_first_token_ms: float = Field(ge=0)
+    input_tokens: int = Field(ge=0)
+    output_tokens: int = Field(ge=0)
+    tool_calls: int = Field(ge=0)
+    tool_successes: int = Field(ge=0)
+    tool_success_rate: float = Field(ge=0, le=1)
+    model_loads: int = Field(ge=0)
+    model_load_failures: int = Field(ge=0)
+    total_model_load_ms: int = Field(ge=0)
+    average_model_load_ms: float = Field(ge=0)
+    resource_samples: int = Field(ge=0)
+    max_cpu_percent: float | None = Field(default=None, ge=0, le=100)
+    max_ram_bytes: int | None = Field(default=None, ge=0)
+    max_gpu_memory_bytes: int | None = Field(default=None, ge=0)
+    provider_metrics: dict[str, dict[str, float | int]] = Field(default_factory=dict)
 
 
 # RC IDs: RC-154, RC-155. Keep optimization dimensions and composition strategy in the API contract.
@@ -165,6 +206,9 @@ class DiffResult(BaseModel):
     new_score: float
     score_delta: float
     diff_lines: list[str]
+    truncated: bool = False
+    original_bytes: int = 0
+    next_cursor: int = 0
 
 
 class ExportRequest(BaseModel):
@@ -242,6 +286,15 @@ class RunnerGenerateRequest(BaseModel):
     request_id: str | None = None
 
 
+class RunnerResourceConfigRequest(BaseModel):
+    threads: int | None = Field(default=None, gt=0)
+    gpu_layers: int | None = Field(default=None, ge=0)
+    context_length: int | None = Field(default=None, gt=0)
+    concurrency: int | None = Field(default=None, gt=0)
+    idle_timeout_seconds: float | None = Field(default=None, ge=0)
+    temperature_limit_celsius: float | None = Field(default=None, gt=0)
+
+
 class AnalyzeRequest(BaseModel):
     prompt: str
 
@@ -261,6 +314,24 @@ class OptimizeRequest(BaseModel):
     max_cost: float | None = Field(default=None, ge=0)
 
 
+class ExecutionDestination(BaseModel):
+    execution_location: Literal["local", "cloud"]
+    provider: str
+    provider_display_name: str
+    model: str | None = None
+    target_service: str
+    target_host: str | None = None
+    network_access: bool
+
+
+class ExecutionDestinationRequest(BaseModel):
+    provider: ModelProviderName = "offline"
+    model: str | None = None
+    optimizer_provider: ModelProviderName | None = None
+    optimizer_model: str | None = None
+    strategy: OptimizationStrategy = "combined"
+
+
 class OptimizeMetadata(BaseModel):
     # RC ID: RC-157. Record non-sensitive optimization quality metrics.
     provider_requested: str
@@ -269,6 +340,7 @@ class OptimizeMetadata(BaseModel):
     system_prompt_version: str
     model: str | None = None
     execution_location: Literal["local", "cloud"] = "local"
+    destination: ExecutionDestination | None = None
     credential_ref: str | None = None
     fallback_used: bool = False
     latency_ms: int

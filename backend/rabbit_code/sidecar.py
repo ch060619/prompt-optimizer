@@ -46,7 +46,7 @@ class SidecarConfig:
     host: str = HOST
     protocol_version: str = "v1"
     data_dir: Path | None = None
-    startup_timeout_seconds: float = 10.0
+    startup_timeout_seconds: float = 30.0
     shutdown_timeout_seconds: float = 5.0
     max_restarts: int = 2
     poll_interval_seconds: float = 0.05

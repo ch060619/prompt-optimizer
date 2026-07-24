@@ -1,0 +1,11 @@
+{
+  "name": "example-light",
+  "version": "1.0.0",
+  "scope": "workspace",
+  "tokens": {
+    "surface": "#ffffff",
+    "text": "#1f2933",
+    "accent": "#176b87",
+    "focus": "#b54a2b"
+  }
+}

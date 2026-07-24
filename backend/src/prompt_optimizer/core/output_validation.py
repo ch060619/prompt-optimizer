@@ -32,7 +32,11 @@ class OutputValidator:
             if preserve_language:
                 language_profile.validate(StructuredPrompt.parse(validated).language_text())
             return validated
-        except (LanguagePreservationError, StructuredInputError) as exc:
+        except LanguagePreservationError:
+            # Preserve the domain-specific error so callers can distinguish a
+            # language-preservation rejection from malformed structure.
+            raise
+        except StructuredInputError as exc:
             raise OutputValidationError(str(exc)) from exc
 
     @staticmethod

@@ -74,3 +74,25 @@ def test_strict_boundary_rejects_bad_host_origin_token_and_body(tmp_path: Path) 
                 "X-Rabbit-Code-Protocol": "v1",
             },
         ).status_code == 413
+
+
+def test_strict_boundary_limits_chunked_body_without_content_length(tmp_path: Path) -> None:
+    with _client(tmp_path) as client:
+        token = client.app.state.startup_token
+
+        def chunks():
+            yield b'{"prompt":"'
+            yield b"x" * 200
+            yield b'"}'
+
+        response = client.post(
+            "/api/v1/analyze",
+            content=chunks(),
+            headers={
+                "Content-Type": "application/json",
+                "X-Rabbit-Code-Startup-Token": token,
+                "X-Rabbit-Code-Protocol": "v1",
+            },
+        )
+
+    assert response.status_code == 413, response.text

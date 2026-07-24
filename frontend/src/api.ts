@@ -3,7 +3,7 @@ import type {
   ExportRequest,
   OptimizationTargets,
   OptimizeRequest,
-  OptimizeResponse
+  OptimizeResponse,
 } from "./types";
 import { sanitizePublicError, sanitizePublicText } from "./publicOutput";
 
@@ -75,17 +75,35 @@ export const api = {
   config() {
     return generatedClient.config();
   },
+  providerPrivacy() {
+    return generatedClient.providerPrivacy();
+  },
+  executionDestination(body: {
+    provider: Provider;
+    model?: string;
+    optimizer_provider?: Provider;
+    optimizer_model?: string;
+    strategy?: "rules" | "model" | "combined";
+  }) {
+    return generatedClient.executionDestinationPreview(body);
+  },
   cleanupPreview() {
     return generatedClient.cleanupPreview();
   },
   cleanup(confirm = false) {
     return generatedClient.cleanup({ confirm });
   },
+  retentionPreview() {
+    return generatedClient.retentionPreview();
+  },
+  retention(confirm = false) {
+    return generatedClient.retention({ confirm });
+  },
   analyze(prompt: string) {
     return generatedClient.analyze({ prompt });
   },
-  optimize(prompt: string, templateId?: string, provider: Provider = "offline", signal?: AbortSignal, savePromptHistory = true, model?: string, optimizerProvider?: Provider, optimizerModel?: string, targets?: OptimizationTargets) {
-    return generatedClient.optimize({ prompt, template_id: templateId, provider, model, optimizer_provider: optimizerProvider, optimizer_model: optimizerModel, save_prompt_history: savePromptHistory, targets }, signal);
+  optimize(prompt: string, templateId?: string, provider: Provider = "offline", signal?: AbortSignal, savePromptHistory = true, model?: string, optimizerProvider?: Provider, optimizerModel?: string, targets?: OptimizationTargets, requestId?: string) {
+    return generatedClient.optimize({ prompt, template_id: templateId, provider, model, optimizer_provider: optimizerProvider, optimizer_model: optimizerModel, save_prompt_history: savePromptHistory, targets }, signal, requestId);
   },
   async streamOptimize(
     prompt: string,
@@ -142,6 +160,9 @@ export const api = {
   },
   cancelStream(requestId: string) {
     return generatedClient.cancelOptimizeStream(requestId);
+  },
+  cancelOptimize(requestId: string) {
+    return generatedClient.cancelOptimize(requestId);
   },
   createOptimizeTask(prompt: string, templateId?: string, provider: Provider = "offline", savePromptHistory = true, model?: string, optimizerProvider?: Provider, optimizerModel?: string, targets?: OptimizationTargets) {
     return generatedClient.createOptimizeTask({ prompt, template_id: templateId, provider, model, optimizer_provider: optimizerProvider, optimizer_model: optimizerModel, save_prompt_history: savePromptHistory, targets });

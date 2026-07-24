@@ -34,7 +34,7 @@ def test_baseline_update_has_explicit_rc_approval_and_migration_note() -> None:
     baseline = _load_baseline()
     approval = baseline["approval"]
     assert isinstance(approval, dict)
-    assert approval["rc_id"] == "RC-148"
+    assert approval["rc_id"] == "RC-158"
     assert approval["reason"]
     assert re.fullmatch(r"[0-9a-f]{40}", approval["source_commit"])
 

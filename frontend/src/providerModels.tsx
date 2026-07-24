@@ -1,8 +1,10 @@
-import { ArrowLeft, ArrowRight, Check, CircleCheck, CircleX, Database, Pencil, Pin, Plus, Power, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleCheck, CircleX, Database, ExternalLink, Pencil, Pin, Plus, Power, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "./api";
 import { EmptyState, OfflineState, UiDialog } from "./components/UiStates";
+import { AppLink } from "./navigation";
 import { maskSecret, maskSecretTail, registerRuntimeSecret } from "./publicOutput";
+import type { ProviderPrivacyNotice } from "./types";
 import { readWorkspaceRoute, workspaceHomeHref, workspaceScope, writeWorkspaceRoute } from "./workspaceRoute";
 
 // RC IDs: RC-114, RC-159, RC-164, RC-167, RC-180, RC-181. Render only declared Provider capabilities.
@@ -55,6 +57,82 @@ const defaultApiWizardDraft: ApiWizardDraft = {
   model: "",
   step: 1,
 };
+
+const localPrivacyNotice: ProviderPrivacyNotice = {
+  id: "offline",
+  display_name: "Offline Rules",
+  version: "rc217-v1-local",
+  execution_location: "local",
+  request_fields: ["prompt text", "local rule inputs"],
+  service_region: "Local machine",
+  privacy_policy_url: "",
+  retention_risk: "Rabbit Code does not send this route to a cloud service; local storage and OS access remain the user's responsibility.",
+};
+
+function customPrivacyNotice(displayName: string): ProviderPrivacyNotice {
+  return {
+    id: "custom",
+    display_name: displayName,
+    version: "custom-endpoint-v1",
+    execution_location: "cloud",
+    request_fields: ["prompt/messages", "selected model", "generation parameters", "tools when enabled", "request metadata"],
+    service_region: "Unknown / configured endpoint",
+    privacy_policy_url: "",
+    retention_risk: "The configured endpoint controls retention and deletion; verify its current policy before sending sensitive data.",
+  };
+}
+
+function useProviderPrivacyNotices() {
+  const [notices, setNotices] = useState<ProviderPrivacyNotice[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    void api.providerPrivacy().then((payload) => {
+      if (active && Array.isArray(payload)) {
+        setNotices(payload);
+      }
+    }).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return notices;
+}
+
+function privacyNoticeFor(providerId: string, displayName: string, notices: ProviderPrivacyNotice[]) {
+  if (providerId === "offline") {
+    return localPrivacyNotice;
+  }
+  return notices.find((notice) => notice.id === providerId) ?? customPrivacyNotice(displayName);
+}
+
+function ProviderPrivacyPanel({ notice }: { notice: ProviderPrivacyNotice }) {
+  return (
+    <section className="provider-privacy" aria-label="Provider privacy information">
+      <div className="provider-section-heading">
+        <span className="eyebrow">DATA HANDLING / {notice.version}</span>
+        <span>{notice.execution_location === "local" ? "LOCAL" : "CLOUD"}</span>
+      </div>
+      <dl className="provider-privacy-meta">
+        <div><dt>DESTINATION</dt><dd>{notice.display_name}</dd></div>
+        <div><dt>SERVICE REGION</dt><dd>{notice.service_region}</dd></div>
+      </dl>
+      <div className="provider-privacy-fields">
+        <span className="eyebrow">FIELDS SENT</span>
+        <ul>{notice.request_fields.map((field) => <li key={field}>{field}</li>)}</ul>
+      </div>
+      <p className="provider-privacy-risk"><strong>RETENTION RISK</strong> {notice.retention_risk}</p>
+      {notice.privacy_policy_url ? (
+        <a className="provider-privacy-link" href={notice.privacy_policy_url} target="_blank" rel="noreferrer">
+          OFFICIAL DATA POLICY <ExternalLink size={14} aria-hidden="true" />
+        </a>
+      ) : (
+        <p className="provider-privacy-custom"><ShieldCheck size={14} aria-hidden="true" /> CUSTOM ENDPOINT / USER RESPONSIBILITY</p>
+      )}
+    </section>
+  );
+}
 
 function apiWizardDraftKey() {
   const scope = (new URLSearchParams(window.location.search).get("workspace") || "default").replace(/[^a-zA-Z0-9_-]/g, "-");
@@ -182,7 +260,9 @@ function ApiProviderWizard() {
   const [connection, setConnection] = useState<ConnectionStatus>("untested");
   const [notice, setNotice] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const privacyNotices = useProviderPrivacyNotices();
   const service = apiServices.find((item) => item.value === draft.service) ?? apiServices[0];
+  const privacyNotice = privacyNoticeFor(draft.service, service.label, privacyNotices);
 
   useEffect(() => {
     localStorage.setItem(
@@ -284,6 +364,8 @@ function ApiProviderWizard() {
           })}
         </ol>
 
+        <ProviderPrivacyPanel notice={privacyNotice} />
+
         <form className="api-wizard-form" onSubmit={(event) => { event.preventDefault(); nextStep(); }}>
           {draft.step === 1 ? (
             <fieldset>
@@ -338,14 +420,14 @@ function ApiProviderWizard() {
           ) : null}
 
           <div className="api-wizard-actions">
-            <a href="/onboarding"><ArrowLeft size={15} aria-hidden="true" /> BACK TO ROUTES</a>
+          <AppLink href="/onboarding"><ArrowLeft size={15} aria-hidden="true" /> BACK TO ROUTES</AppLink>
             <span>{notice ? <span className="api-wizard-notice" role="status">{notice}</span> : "DRAFT SAVED"}</span>
             <div>
               <button type="button" onClick={previousStep} disabled={draft.step === 1}><ArrowLeft size={15} aria-hidden="true" /> BACK</button>
               {draft.step < 4 ? <button type="submit" className="provider-action-primary">NEXT <ArrowRight size={15} aria-hidden="true" /></button> : <button type="button" className="provider-action-primary" onClick={saveDefault} disabled={connection !== "connected"}><Pin size={15} aria-hidden="true" /> SAVE AS DEFAULT</button>}
             </div>
           </div>
-          {saved ? <a className="api-wizard-workspace-link" href={workspaceHomeHref()}><ArrowRight size={15} aria-hidden="true" /> OPEN WORKSPACE HOME</a> : null}
+          {saved ? <AppLink className="api-wizard-workspace-link" href={workspaceHomeHref()}><ArrowRight size={15} aria-hidden="true" /> OPEN WORKSPACE HOME</AppLink> : null}
         </form>
       </section>
     </main>
@@ -384,6 +466,8 @@ export function ProviderModels({ setupMode = false }: { setupMode?: boolean }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteReplacementId, setDeleteReplacementId] = useState("");
   const selectedProvider = providers.find((provider) => provider.id === selectedId) ?? providers[0];
+  const privacyNotices = useProviderPrivacyNotices();
+  const privacyNotice = privacyNoticeFor(selectedProvider.id, selectedProvider.name, privacyNotices);
 
   useEffect(() => {
     localStorage.setItem(providerConfigStorageKey(), JSON.stringify(providers));
@@ -634,6 +718,7 @@ export function ProviderModels({ setupMode = false }: { setupMode?: boolean }) {
             <div><span>COST</span><strong>{selectedProvider.costLabel}</strong></div>
             <div><span>DEFAULT</span><strong>{selectedProvider.isDefault ? "CURRENT" : "AVAILABLE"}</strong></div>
           </div>
+          <ProviderPrivacyPanel notice={privacyNotice} />
           <section className="provider-capabilities" aria-label="Provider capabilities">
             <div className="provider-section-heading"><span className="eyebrow">CAPABILITIES</span><span>{selectedProvider.capabilities.length}</span></div>
             <div className="provider-capability-list">{selectedProvider.capabilities.map((capability) => <span key={capability}>{capability}</span>)}</div>

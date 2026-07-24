@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from io import StringIO
+from pathlib import Path
 
 from backend.rabbit_code.agent import AgentEvent, AgentEventType
 from backend.rabbit_code.cli import main
@@ -123,3 +124,20 @@ def test_tui_cli_entrypoint_is_machine_stable(tmp_path) -> None:  # type: ignore
 
     assert result == 0
     assert "Rabbit Code" in stdout.getvalue()
+
+
+def test_tui_welcome_frame_and_opt_in_artwork_keep_the_asset_bytes(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    rendered = TuiRenderer.render(TuiState(), width=80, height=24)
+    assert "Welcome back!" in rendered
+    assert "Tips for getting started" in rendered
+    assert "What's new" in rendered
+
+    artwork = tmp_path / "rabbit.png"
+    artwork.write_bytes(b"fixed-rabbit-png")
+    monkeypatch.setenv("RABBIT_CODE_INLINE_IMAGE", "1")  # type: ignore[attr-defined]
+    sequence = TuiRenderer.inline_artwork(artwork)
+    assert "Zml4ZWQtcmFiYml0LXBuZw==" in sequence
+    assert sequence.startswith("\x1b_Gf=100,t=t,a=T;")

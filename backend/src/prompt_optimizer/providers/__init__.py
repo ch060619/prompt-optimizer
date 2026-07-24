@@ -17,6 +17,7 @@ from prompt_optimizer.providers.base import (
     ProviderModelError,
     ProviderNetworkError,
     ProviderParameterError,
+    ProviderProxyError,
     ProviderRateLimitError,
     ProviderRegionError,
     ProviderServerError,
@@ -64,7 +65,7 @@ from prompt_optimizer.providers.local import (
     UnavailableLocalRunner,
 )
 from prompt_optimizer.providers.openai import OpenAICompatibleAdapter
-from prompt_optimizer.providers.presets import PRESETS, ProviderPreset, get_preset
+from prompt_optimizer.providers.presets import PRESETS, ProviderPreset, ProviderPrivacy, get_preset
 from prompt_optimizer.providers.registry import ProviderRegistry, ProviderSelection
 from prompt_optimizer.providers.responses import OpenAIResponsesAdapter
 from prompt_optimizer.providers.runners import (
@@ -105,6 +106,7 @@ __all__ = [
     "BedrockConverseAdapter",
     "PRESETS",
     "ProviderPreset",
+    "ProviderPrivacy",
     "get_preset",
     "ProviderCapabilities",
     "CAPABILITY_MATRIX",
@@ -129,6 +131,7 @@ __all__ = [
     "ProviderModelError",
     "ProviderNetworkError",
     "ProviderParameterError",
+    "ProviderProxyError",
     "ProviderRateLimitError",
     "ProviderRegionError",
     "ProviderServerError",

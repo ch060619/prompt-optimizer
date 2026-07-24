@@ -60,6 +60,37 @@ class AgentEvent:
     def __post_init__(self) -> None:
         object.__setattr__(self, "payload", MappingProxyType(dict(self.payload)))
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type.value,
+            "text": self.text,
+            "seq": self.sequence,
+            "payload": dict(self.payload),
+        }
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> AgentEvent:
+        raw_type = value.get("type")
+        try:
+            event_type = AgentEventType(str(raw_type))
+            payload = value.get("payload")
+            normalized_payload = dict(payload) if isinstance(payload, Mapping) else {}
+        except ValueError:
+            event_type = AgentEventType.TERMINAL
+            normalized_payload = {
+                "unknown_event_type": str(raw_type),
+                "original_payload": value.get("payload", {}),
+            }
+        raw_sequence = value.get("seq", value.get("sequence", 0))
+        sequence = raw_sequence if isinstance(raw_sequence, int) else 0
+        raw_text = value.get("text")
+        return cls(
+            event_type,
+            text=raw_text if isinstance(raw_text, str) else None,
+            sequence=sequence,
+            payload=normalized_payload,
+        )
+
 
 class AgentCore:
     def __init__(

@@ -49,7 +49,7 @@ def test_new_schema_is_versioned_and_reopen_is_idempotent(tmp_path: Path) -> Non
     before = _counts(database)
     StorageService(database)
 
-    assert SCHEMA_VERSION == 1
+    assert SCHEMA_VERSION == 2
     assert _user_version(database) == SCHEMA_VERSION
     assert _counts(database) == before
     assert not list((tmp_path / "backups").glob("*.sqlite3"))

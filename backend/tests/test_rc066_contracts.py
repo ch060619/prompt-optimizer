@@ -60,6 +60,9 @@ class MemoryStorage:
     def get_task(self, task_id: str, owner_id: int) -> Any:
         raise KeyError(task_id)
 
+    def recover_incomplete_tasks(self) -> int:
+        return 0
+
 
 class FakeProvider:
     name = "fake"

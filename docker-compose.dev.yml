@@ -1,0 +1,25 @@
+# RC ID: RC-280. Docker Compose for local development/testing only.
+# NOT for production deployment or desktop/CLI installation verification.
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - RABBIT_CODE_REAL_PROVIDER_TESTS=0
+    volumes:
+      - ./data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: "no"
+    profiles:
+      - dev
+      - test

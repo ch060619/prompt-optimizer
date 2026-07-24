@@ -16,7 +16,10 @@ def test_repository_security_documents_and_generated_sbom_are_current() -> None:
 def test_secret_scan_detects_high_confidence_values_in_product_paths(tmp_path: Path) -> None:
     source = tmp_path / "backend" / "src"
     source.mkdir(parents=True)
-    (source / "leak.py").write_text('api_key = "sk-proj-1234567890abcdefghijklmnop"\n', encoding="utf-8")
+    (source / "leak.py").write_text(
+        'api_key = "sk-proj-1234567890abcdefghijklmnop"\n',
+        encoding="utf-8",
+    )
     hits = find_secret_hits(tmp_path)
     assert hits == (("backend/src/leak.py", 1, "provider-key"),)
 

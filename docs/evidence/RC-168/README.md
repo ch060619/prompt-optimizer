@@ -33,5 +33,5 @@
   incurred.
 - Real connection testing, user confirmation, cost warning, and token limits
   remain in RC-169.
-- Full Vite build remains blocked by the existing sandbox ancestor-directory
-  permission issue.
+- The full frontend suite, ESLint, and the production Vite build pass in the
+  project workspace.

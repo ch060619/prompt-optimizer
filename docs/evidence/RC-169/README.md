@@ -30,5 +30,5 @@
   incurred.
 - Production wiring must supply the official Provider sender at the explicit
   manual-action boundary; CI never supplies one.
-- Full Vite build remains blocked by the existing sandbox ancestor-directory
-  permission issue.
+- The full frontend suite, ESLint, and the production Vite build pass in the
+  project workspace.

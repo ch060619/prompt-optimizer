@@ -1,9 +1,9 @@
 {
   "approval": {
-    "migration_note": "docs/evidence/RC-148/README.md",
-    "rc_id": "RC-148",
-    "reason": "Persist provider selection scope and health in PromptVersion exports as part of RC-148 routing.",
-    "source_commit": "5610c005c8317908357c8b89f97de792aa43dce0"
+    "migration_note": "docs/evidence/RC-158/README.md",
+    "rc_id": "RC-158",
+    "reason": "Align the approved V2 evaluation fixture with the RC-158 reproducibility protocol.",
+    "source_commit": "6aa609f2d347331e79c38910bf2cf73b432c734e"
   },
   "snapshot": {
     "analysis": {
@@ -273,11 +273,14 @@
       ],
       "new_id": 2,
       "new_score": 97.89,
+      "next_cursor": 1335,
       "old_id": 1,
       "old_score": 88.53,
-      "score_delta": 9.36
+      "original_bytes": 1335,
+      "score_delta": 9.36,
+      "truncated": false
     },
-    "evaluation": "# Prompt Optimizer 评测报告\n\n数据集：`backend/tests/fixtures/v2_evaluation.yml`\n样本数：2\n平均分数变化：62.54\n\n| ID | 分类 | 优化前 | 优化后 | 变化 | 人工标签 | Provider | 降级 | 耗时(ms) |\n| --- | --- | ---: | ---: | ---: | --- | --- | --- | ---: |\n| regression-tech-001 | tech | 35.62 | 91.9 | 56.28 | 可优化 | offline | False | <latency-ms> |\n| regression-business-001 | business | 21.4 | 90.2 | 68.8 | 较完整 | offline | False | <latency-ms> |\n\n## 误判与人工备注\n\n- `regression-tech-001` 代码任务、示例与测试；备注：固定的技术类回归样本。\n- `regression-business-001` 受众、结构与行动项；备注：固定的业务类回归样本。",
+    "evaluation": "# Prompt Optimizer 评测报告\n\n数据集：`backend/tests/fixtures/v2_evaluation.yml`\n数据集版本：`rc-158-v1`\n随机种子：158\n样本数：2\n分类分布：business=1, tech=1\n平均分数变化：62.54\n\n自动评分：analyzer.total_score，范围 0-100，聚合 mean。\n双人盲评：2 位评审，deterministic shuffled batches，量表 1-5。\n\n| ID | 分类 | 优化前 | 优化后 | 变化 | 人工标签 | Provider | 降级 | 耗时(ms) | 盲评批次 |\n| --- | --- | ---: | ---: | ---: | --- | --- | --- | ---: | --- |\n| regression-tech-001 | tech | 35.62 | 91.9 | 56.28 | 可优化 | offline | False | <latency-ms> | BR-002 |\n| regression-business-001 | business | 21.4 | 90.2 | 68.8 | 较完整 | offline | False | <latency-ms> | BR-001 |\n\n## 误判与人工备注\n\n- `regression-tech-001` 代码任务、示例与测试；备注：固定的技术类回归样本。\n- `regression-business-001` 受众、结构与行动项；备注：固定的业务类回归样本。",
     "exports": {
       "csv": "version_id,score,original_prompt,optimized_prompt\r\n1,88.53,帮我写一封邮件,\"请基于以下要求完成任务：\n\n目标：帮我写一封邮件\n\n上下文：说明任务背景、受众、使用场景和重要限制。\n\n输出要求：使用清晰标题、分点结构，并给出可执行结果。\n\n质量标准：内容准确、具体、可验证；必要时说明假设和风险。\n\n改进点 - 明确任务目标：目标：为产品经理生成一份面向研发团队的需求说明。\n\n改进点 - 增加具体约束：必须包含 3 个方案、优缺点对比和推荐结论。\n\n改进点 - 补充背景信息：背景：目标用户是没有编程经验的运营人员。\n\n改进点 - 指定输出格式：输出格式：使用 Markdown 表格，列为问题、原因、建议。\n\n改进点 - 添加限制条件：限制：不超过 800 字，不使用夸张营销语。\"\r\n\r\ndimension,score,reason\r\n清晰度,100.0,清晰度表现良好，已有明确线索。\r\n具体性,99.0,具体性表现良好，已有明确线索。\r\n上下文完整度,100.0,上下文完整度表现良好，已有明确线索。\r\n输出格式,100.0,输出格式表现良好，已有明确线索。\r\n约束条件,81.0,约束条件表现良好，已有明确线索。\r\n角色设定,45.0,未检测到足够的角色设定信息。\r\n示例质量,63.0,示例质量已有部分信息，但仍缺少可执行细节。\r\n可执行性,100.0,可执行性表现良好，已有明确线索。\r\n",
       "json": {

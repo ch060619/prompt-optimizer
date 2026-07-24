@@ -34,7 +34,7 @@ def _reserve_port() -> int:
 
 
 def _wait_ready(process: subprocess.Popen[str], url: str) -> None:
-    deadline = time.perf_counter() + 10
+    deadline = time.perf_counter() + 30
     while time.perf_counter() < deadline:
         if process.poll() is not None:
             raise RuntimeError("prototype App Server exited before readiness")

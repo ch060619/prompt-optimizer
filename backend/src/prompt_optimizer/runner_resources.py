@@ -14,11 +14,16 @@ class RunnerResourceConfig:
     context_length: int = 4096
     concurrency: int = 1
     idle_timeout_seconds: float = 900.0
+    temperature_limit_celsius: float = 90.0
 
     def __post_init__(self) -> None:
         if self.threads <= 0 or self.context_length <= 0 or self.concurrency <= 0:
             raise ValueError("runner resource counts must be positive")
-        if self.gpu_layers < 0 or self.idle_timeout_seconds < 0:
+        if (
+            self.gpu_layers < 0
+            or self.idle_timeout_seconds < 0
+            or self.temperature_limit_celsius <= 0
+        ):
             raise ValueError("runner resource limits must not be negative")
 
     def reduced_for_oom(self) -> RunnerResourceConfig:
@@ -28,7 +33,18 @@ class RunnerResourceConfig:
             context_length=max(1024, int(self.context_length * 0.75)),
             concurrency=1,
             idle_timeout_seconds=self.idle_timeout_seconds,
+            temperature_limit_celsius=self.temperature_limit_celsius,
         )
+
+    def to_dict(self) -> dict[str, int | float]:
+        return {
+            "threads": self.threads,
+            "gpu_layers": self.gpu_layers,
+            "context_length": self.context_length,
+            "concurrency": self.concurrency,
+            "idle_timeout_seconds": self.idle_timeout_seconds,
+            "temperature_limit_celsius": self.temperature_limit_celsius,
+        }
 
 
 def safe_runner_config(

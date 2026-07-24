@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+import json
 import os
 import shutil
 import signal
@@ -14,6 +15,8 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
+
+from prompt_optimizer.limits import DEFAULT_DATA_LIMITS, validate_limit
 
 from .permissions import CapabilityDomain, PermissionPolicy
 from .sandbox import SandboxController
@@ -33,6 +36,12 @@ class ProcessNotFound(ProcessToolError, KeyError):
 
 class PtyUnavailable(ProcessToolError):
     pass
+
+
+class PortConflictError(ProcessToolError):
+    code = "PORT_CONFLICT"
+    retryable = False
+    recovery_action = "choose_port"
 
 
 class ProcessStatus(StrEnum):
@@ -145,7 +154,7 @@ class ProcessManager:
         *,
         log_dir: Path | None = None,
         permission_policy: PermissionPolicy | None = None,
-        max_log_bytes: int = 10_000_000,
+        max_log_bytes: int = DEFAULT_DATA_LIMITS.log_bytes,
         sandbox: SandboxController | None = None,
     ) -> None:
         self.workspace_root = workspace_root.expanduser().resolve()
@@ -153,14 +162,21 @@ class ProcessManager:
             raise ValueError("workspace root must be a directory")
         self.permission_policy = permission_policy or PermissionPolicy(self.workspace_root)
         self.sandbox = sandbox
-        if max_log_bytes <= 0:
-            raise ValueError("max_log_bytes must be positive")
+        validate_limit(
+            max_log_bytes,
+            name="max_log_bytes",
+            maximum=DEFAULT_DATA_LIMITS.max_log_bytes,
+        )
         self.max_log_bytes = max_log_bytes
         self.log_dir = (
             log_dir or self.workspace_root / ".rabbit-code" / "process-logs"
         ).expanduser()
         self.log_dir = self.log_dir.resolve()
         self.log_dir.mkdir(parents=True, exist_ok=True)
+        self._registry_path = self.log_dir / "process-registry.json"
+        self._manifest_lock = threading.RLock()
+        self._recovery_error: str | None = None
+        self._recovered = self._load_recovered_records()
         self.registry = ProcessRegistry()
         self._job = _WindowsJob()
         self._closed = False
@@ -168,6 +184,14 @@ class ProcessManager:
     @property
     def processes(self) -> tuple[ProcessRecord, ...]:
         return tuple(self.track(item.record.process_id) for item in self.registry.values())
+
+    @property
+    def recovered_processes(self) -> tuple[ProcessRecord, ...]:
+        return tuple(self._recovered.values())
+
+    @property
+    def recovery_error(self) -> str | None:
+        return self._recovery_error
 
     def start(
         self,
@@ -228,6 +252,7 @@ class ProcessManager:
         )
         item = _ManagedProcess(record, process, log_handle, reader_fd)
         self.registry.add(item)
+        self._persist_registry()
         item.reader_thread = threading.Thread(
             target=self._read_output,
             args=(item, encoding),
@@ -269,7 +294,13 @@ class ProcessManager:
         )
 
     def track(self, process_id: str) -> ProcessRecord:
-        item = self.registry.get(process_id)
+        try:
+            item = self.registry.get(process_id)
+        except ProcessNotFound:
+            recovered = self._recovered.get(process_id)
+            if recovered is None:
+                raise
+            return recovered
         with item.lock:
             return item.record
 
@@ -294,18 +325,34 @@ class ProcessManager:
             raise ValueError("cursor must not be negative")
         if max_bytes <= 0:
             raise ValueError("max_bytes must be positive")
-        item = self.registry.get(process_id)
-        with item.lock:
-            size = item.record.log_path.stat().st_size
-            if cursor > size:
-                raise ValueError("cursor is beyond the end of the log")
-            with item.record.log_path.open("rb") as handle:
-                handle.seek(cursor)
-                data = handle.read(max_bytes)
-            next_cursor = cursor + len(data)
-            complete = item.done.is_set() and next_cursor >= size
-            truncated = item.log_truncated
-            binary = item.binary_output
+        try:
+            item = self.registry.get(process_id)
+        except ProcessNotFound:
+            item = None
+        if item is None:
+            record = self._recovered.get(process_id)
+            if record is None:
+                raise ProcessNotFound(process_id)
+            size = record.log_path.stat().st_size
+            complete = True
+            truncated = record.log_truncated
+            binary = record.binary_output
+            log_path = record.log_path
+        else:
+            with item.lock:
+                record = item.record
+                size = record.log_path.stat().st_size
+                complete = item.done.is_set()
+                truncated = item.log_truncated
+                binary = item.binary_output
+                log_path = record.log_path
+        if cursor > size:
+            raise ValueError("cursor is beyond the end of the log")
+        with log_path.open("rb") as handle:
+            handle.seek(cursor)
+            data = handle.read(max_bytes)
+        next_cursor = cursor + len(data)
+        complete = complete and next_cursor >= size
         return LogChunk(
             process_id=process_id,
             cursor=cursor,
@@ -348,6 +395,22 @@ class ProcessManager:
             except OSError:
                 continue
         return PortStatus(host, port, False)
+
+    def require_free_port(
+        self,
+        port: int,
+        *,
+        host: str = "127.0.0.1",
+        timeout_seconds: float = 0.2,
+    ) -> PortStatus:
+        status = self.probe_port(port, host=host, timeout_seconds=timeout_seconds)
+        if status.occupied:
+            raise PortConflictError(
+                f"port {port} is already in use; choose another port"
+            )
+        if status.error is not None:
+            raise PortConflictError(f"cannot probe port {port}: {status.error}")
+        return status
 
     def cleanup(self) -> tuple[ProcessRecord, ...]:
         results: list[ProcessRecord] = []
@@ -516,6 +579,50 @@ class ProcessManager:
         )
         item.log_handle.flush()
         item.log_handle.close()
+        self._persist_registry()
+
+    def _load_recovered_records(self) -> dict[str, ProcessRecord]:
+        if not self._registry_path.is_file():
+            return {}
+        try:
+            payload = json.loads(self._registry_path.read_text(encoding="utf-8"))
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            self._recovery_error = f"invalid process registry: {exc}"
+            return {}
+        if not isinstance(payload, list):
+            self._recovery_error = "invalid process registry: expected a list"
+            return {}
+        recovered: dict[str, ProcessRecord] = {}
+        for item in payload:
+            if not isinstance(item, dict):
+                continue
+            try:
+                record = _record_from_payload(item)
+            except (KeyError, TypeError, ValueError):
+                continue
+            if record.status in {ProcessStatus.STARTING, ProcessStatus.RUNNING}:
+                record = replace(
+                    record,
+                    status=ProcessStatus.FAILED,
+                    ended_at=time.time(),
+                    error="process manager restarted before process completed",
+                )
+            recovered[record.process_id] = record
+        return recovered
+
+    def _persist_registry(self) -> None:
+        records = dict(self._recovered)
+        for item in self.registry.values():
+            with item.lock:
+                records[item.record.process_id] = item.record
+        payload = [_record_to_payload(record) for record in records.values()]
+        temporary = self._registry_path.with_suffix(".tmp")
+        with self._manifest_lock:
+            temporary.write_text(
+                json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            temporary.replace(self._registry_path)
 
     def _cwd(self, cwd: str | Path) -> Path:
         raw = Path(cwd).expanduser()
@@ -558,6 +665,75 @@ class ProcessManager:
 
 def _args(args: Sequence[str]) -> tuple[str, ...]:
     return validate_argv(args)
+
+
+def _record_to_payload(record: ProcessRecord) -> dict[str, object]:
+    return {
+        "process_id": record.process_id,
+        "pid": record.pid,
+        "command": list(record.command),
+        "cwd": str(record.cwd),
+        "pty": record.pty,
+        "status": record.status.value,
+        "timeout_seconds": record.timeout_seconds,
+        "log_path": str(record.log_path),
+        "started_at": record.started_at,
+        "ended_at": record.ended_at,
+        "returncode": record.returncode,
+        "termination_signal": record.termination_signal,
+        "error": record.error,
+        "log_bytes": record.log_bytes,
+        "log_truncated": record.log_truncated,
+        "binary_output": record.binary_output,
+    }
+
+
+def _record_from_payload(payload: dict[str, object]) -> ProcessRecord:
+    command = payload["command"]
+    if not isinstance(command, list):
+        raise TypeError("process command must be a list")
+    return ProcessRecord(
+        process_id=str(payload["process_id"]),
+        pid=_int_value(payload["pid"]),
+        command=tuple(str(argument) for argument in command),
+        cwd=Path(str(payload["cwd"])),
+        pty=bool(payload["pty"]),
+        status=ProcessStatus(str(payload["status"])),
+        timeout_seconds=(
+            _float_value(payload["timeout_seconds"])
+            if payload["timeout_seconds"] is not None
+            else None
+        ),
+        log_path=Path(str(payload["log_path"])),
+        started_at=_float_value(payload["started_at"]),
+        ended_at=(
+            _float_value(payload["ended_at"]) if payload["ended_at"] is not None else None
+        ),
+        returncode=(
+            _int_value(payload["returncode"]) if payload["returncode"] is not None else None
+        ),
+        termination_signal=(
+            _int_value(payload["termination_signal"])
+            if payload["termination_signal"] is not None
+            else None
+        ),
+        error=str(payload["error"]) if payload["error"] is not None else None,
+        log_bytes=_int_value(payload["log_bytes"]),
+        log_truncated=bool(payload["log_truncated"]),
+        binary_output=bool(payload["binary_output"]),
+    )
+
+
+def _int_value(value: object) -> int:
+    if isinstance(value, (int, float, str)):
+        return int(value)
+    raise TypeError("expected an integer value")
+
+
+def _float_value(value: object) -> float:
+    if isinstance(value, (int, float, str)):
+        return float(value)
+    raise TypeError("expected a float value")
 
 
 def _pty_available() -> bool:

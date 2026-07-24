@@ -30,6 +30,7 @@ class LocalRunnerHealth:
     model_id: str | None = None
     detail: str = ""
     status: LocalRunnerStatus | None = None
+    temperature_celsius: float | None = None
 
 
 class LocalModelRunner(Protocol):

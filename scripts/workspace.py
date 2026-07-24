@@ -14,8 +14,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 NPM = "npm.cmd" if os.name == "nt" else "npm"
 
 
-def _run(*args: str) -> None:
-    subprocess.run(args, cwd=REPOSITORY_ROOT, check=True)
+def _run(*args: str, cwd: Path = REPOSITORY_ROOT) -> None:
+    subprocess.run(args, cwd=cwd, check=True)
 
 
 def install() -> None:
@@ -41,6 +41,10 @@ def check() -> None:
     _run(sys.executable, "scripts/generate_design_tokens.py", "--check")
     _run(sys.executable, "scripts/check_rabbit_coverage_matrix.py", "--check")
     _run(sys.executable, "scripts/check_delivery_plan.py")
+    _run(sys.executable, "scripts/generate_data_model.py", "--check")
+    _run(sys.executable, "scripts/check_structured_logging.py")
+    _run(sys.executable, "scripts/check_provider_privacy.py")
+    _run(sys.executable, "scripts/check_metrics.py")
 
 
 def test() -> None:
@@ -64,7 +68,13 @@ def typecheck() -> None:
         "mypy",
         "backend/src",
         "backend/rabbit_code",
-        "packages/protocol/rabbit_code_protocol",
+    )
+    _run(
+        sys.executable,
+        "-m",
+        "mypy",
+        "rabbit_code_protocol",
+        cwd=REPOSITORY_ROOT / "packages" / "protocol",
     )
 
 
