@@ -40,7 +40,7 @@ rabbit = "prompt_optimizer.cli.app:app"
 prompt-opt = "prompt_optimizer.cli.app:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/prompt_optimizer", "rabbit_code"]
+packages = ["src/prompt_optimizer", "rabbit_code", "packages"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

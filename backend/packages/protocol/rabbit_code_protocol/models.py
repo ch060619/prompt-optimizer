@@ -1,0 +1,222 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field, model_validator
+
+# RC ID: RC-061. Define versioned cross-surface request, event, task, and capability schemas.
+
+ProtocolVersion = Literal["v1"]
+
+
+class ProtocolModel(BaseModel):
+    protocol_version: ProtocolVersion = "v1"
+
+
+class TextBlock(ProtocolModel):
+    type: Literal["text"] = "text"
+    text: str
+
+
+class DiagnosticContentBlock(ProtocolModel):
+    type: Literal["diagnostic"] = "diagnostic"
+    diagnostics: list[dict[str, Any]]
+
+
+class DiffContentBlock(ProtocolModel):
+    type: Literal["diff"] = "diff"
+    diff: str
+
+
+class FileContentBlock(ProtocolModel):
+    type: Literal["file"] = "file"
+    path: str
+    content: str | None = None
+
+
+class ImageContentBlock(ProtocolModel):
+    type: Literal["image"] = "image"
+    mime_type: str
+    data: str
+
+
+class ProgressContentBlock(ProtocolModel):
+    type: Literal["progress"] = "progress"
+    message: str
+    fraction: float | None = Field(default=None, ge=0, le=1)
+
+
+class ErrorContentBlock(ProtocolModel):
+    type: Literal["error"] = "error"
+    code: str
+    message: str
+    retryable: bool = False
+
+
+ContentBlock = (
+    TextBlock
+    | DiagnosticContentBlock
+    | DiffContentBlock
+    | FileContentBlock
+    | ImageContentBlock
+    | ProgressContentBlock
+    | ErrorContentBlock
+)
+
+
+class ToolCallBlock(ProtocolModel):
+    type: Literal["tool_call"] = "tool_call"
+    call_id: str = Field(min_length=1)
+    name: str = Field(min_length=1)
+    arguments: dict[str, Any] = Field(default_factory=dict)
+
+
+class Message(ProtocolModel):
+    role: Literal["system", "user", "assistant", "tool"]
+    content: list[ContentBlock | ToolCallBlock] = Field(min_length=1)
+
+
+class Session(ProtocolModel):
+    session_id: str = Field(min_length=1)
+    title: str | None = None
+    status: Literal["active", "paused", "completed", "cancelled"] = "active"
+    provider: str | None = None
+    model: str | None = None
+
+
+class AgentRequest(ProtocolModel):
+    request_id: str = Field(min_length=1)
+    session_id: str = Field(min_length=1)
+    message: Message
+    provider: str | None = None
+    model: str | None = None
+
+
+JsonRpcId = int | str
+
+
+class JsonRpcRequest(ProtocolModel):
+    jsonrpc: Literal["2.0"] = "2.0"
+    id: JsonRpcId | None = None
+    method: str = Field(min_length=1)
+    params: dict[str, Any] | list[Any] | None = None
+
+
+class JsonRpcError(ProtocolModel):
+    code: int
+    message: str = Field(min_length=1)
+    data: Any | None = None
+
+
+class JsonRpcResponse(ProtocolModel):
+    jsonrpc: Literal["2.0"] = "2.0"
+    id: JsonRpcId | None = None
+    result: Any | None = None
+    error: JsonRpcError | None = None
+
+    @model_validator(mode="after")
+    def validate_result_or_error(self) -> "JsonRpcResponse":
+        if self.result is not None and self.error is not None:
+            raise ValueError("JSON-RPC 响应必须且只能包含 result 或 error。")
+        if self.result is None and self.error is None and not (
+            {"result", "error"} & self.model_fields_set
+        ):
+            raise ValueError("JSON-RPC 响应必须且只能包含 result 或 error。")
+        return self
+
+
+class ApprovalRequest(ProtocolModel):
+    approval_id: str = Field(min_length=1)
+    request_id: str = Field(min_length=1)
+    action: str = Field(min_length=1)
+    description: str
+    risk: Literal["low", "medium", "high"]
+    tool: str = ""
+    command: list[str] = Field(default_factory=list)
+    paths: list[str] = Field(default_factory=list)
+    workdir: str = ""
+    impact: str = ""
+    authorization_scope: str = "once"
+    arguments: dict[str, Any] = Field(default_factory=dict)
+    snapshot: str = ""
+    expires_at: datetime | None = None
+
+
+class StreamEventType(StrEnum):
+    STARTED = "started"
+    ANALYSIS = "analysis"
+    DELTA = "delta"
+    SAVED = "saved"
+    FALLBACK = "fallback"
+    PROGRESS = "progress"
+    TOOL_CALL = "tool_call"
+    APPROVAL_REQUIRED = "approval_required"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    ERROR = "error"
+
+
+class StreamEvent(ProtocolModel):
+    request_id: str = Field(min_length=1)
+    seq: int = Field(ge=0)
+    type: StreamEventType
+    payload: dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class StreamCursor(ProtocolModel):
+    request_id: str = Field(min_length=1)
+    after_seq: int = Field(default=-1, ge=-1)
+
+
+class DiffPayload(ProtocolModel):
+    old_revision: str = Field(min_length=1)
+    new_revision: str = Field(min_length=1)
+    lines: list[str]
+    score_delta: float | None = None
+
+
+class TaskStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class TaskEnvelope(ProtocolModel):
+    task_id: str = Field(min_length=1)
+    request_id: str = Field(min_length=1)
+    status: TaskStatus
+    result: dict[str, Any] | None = None
+    error: ProtocolError | None = None
+
+
+class ProtocolErrorCode(StrEnum):
+    INVALID_REQUEST = "invalid_request"
+    UNAUTHORIZED = "unauthorized"
+    NOT_FOUND = "not_found"
+    PROVIDER_ERROR = "provider_error"
+    CANCELLED = "cancelled"
+    INTERNAL = "internal"
+
+
+class ProtocolError(ProtocolModel):
+    code: ProtocolErrorCode
+    message: str
+    retryable: bool = False
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class ProviderCapabilities(ProtocolModel):
+    text: bool = True
+    streaming: bool = False
+    images: bool = False
+    tools: bool = False
+    structured_output: bool = False
+    context_length: int | None = Field(default=None, ge=1)
+    model_listing: bool = False
+    token_usage: bool = False
+    cost_info: bool = False
