@@ -163,7 +163,7 @@ jobs:
           sleep 5
       - name: API smoke test
         run: |
-          curl -sf http://127.0.0.1:8000/health || exit 1
+          curl -sf http://127.0.0.1:8000/api/v1/health || exit 1
           echo "API health check passed"
       - name: Container non-root check
         run: |

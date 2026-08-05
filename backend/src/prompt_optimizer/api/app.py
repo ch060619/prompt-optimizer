@@ -222,15 +222,13 @@ def create_app(
     api_router = APIRouter()
     stream_log = OptimizationStreamLog(max_events=512)
 
-    if startup_token is not None:
-
-        @api_router.get("/health", tags=["health"])
-        def health() -> dict[str, object]:
-            return {
-                "status": "ok",
-                "protocol_version": protocol_version,
-                "startup_token_required": True,
-            }
+    @api_router.get("/health", tags=["health"])
+    def health() -> dict[str, object]:
+        result: dict[str, object] = {"status": "ok"}
+        if startup_token is not None:
+            result["protocol_version"] = protocol_version
+            result["startup_token_required"] = True
+        return result
 
     @api_router.get("/config", tags=["config"])
     def config() -> dict[str, dict[str, object]]:
