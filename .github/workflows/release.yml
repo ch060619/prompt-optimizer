@@ -70,15 +70,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux system dependencies for Tauri
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
       - name: Install frontend deps
+        working-directory: frontend
         run: npm ci
       - name: Build frontend
+        working-directory: frontend
         run: npm run build
       - name: Build desktop (Tauri)
+        working-directory: apps/desktop
         run: npx @tauri-apps/cli@latest build
         env:
           SOURCE_DATE_EPOCH: "1700000000"
@@ -87,12 +97,12 @@ jobs:
         run: |
           mkdir -p artifacts
           if [ "${{ matrix.target }}" = "linux" ]; then
-            cp target/release/bundle/deb/*.deb artifacts/ 2>/dev/null || true
-            cp target/release/bundle/appimage/*.AppImage artifacts/ 2>/dev/null || true
-            cp target/release/bundle/rpm/*.rpm artifacts/ 2>/dev/null || true
+            cp apps/desktop/target/release/bundle/deb/*.deb artifacts/ 2>/dev/null || true
+            cp apps/desktop/target/release/bundle/appimage/*.AppImage artifacts/ 2>/dev/null || true
+            cp apps/desktop/target/release/bundle/rpm/*.rpm artifacts/ 2>/dev/null || true
           else
-            cp target/release/bundle/nsis/*.exe artifacts/ 2>/dev/null || true
-            cp target/release/bundle/msi/*.msi artifacts/ 2>/dev/null || true
+            cp apps/desktop/target/release/bundle/nsis/*.exe artifacts/ 2>/dev/null || true
+            cp apps/desktop/target/release/bundle/msi/*.msi artifacts/ 2>/dev/null || true
           fi
           cd artifacts
           sha256sum * > "SHA256SUMS-desktop-${{ matrix.target }}.txt"
